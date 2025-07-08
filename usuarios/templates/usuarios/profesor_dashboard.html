@@ -1,0 +1,15 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Profesor</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Panel del Profesor</h1>
+        <p>Bienvenido, {{ user.username }}.</p>
+    </div>
+</body>
+</html>

@@ -11,5 +11,12 @@
         <h1 class="text-center">Panel del Administrador</h1>
         <p>Bienvenido, {{ user.username }}.</p>
     </div>
+    <!-- Agrega este bloque dentro del <body> o debajo del saludo -->
+<form method="POST" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Cerrar sesión</button>
+</form>
+
+
 </body>
 </html>

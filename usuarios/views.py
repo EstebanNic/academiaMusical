@@ -26,6 +26,8 @@ def login_view(request):
 
 @login_required
 def admin_dashboard(request):
+    if request.user.rol != Usuario.Rol.ADMIN:
+        return redirect('login')  # o a otra página de acceso denegado
     return render(request, 'usuarios/admin_dashboard.html')
 
 @login_required

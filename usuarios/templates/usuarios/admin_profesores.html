@@ -1,0 +1,234 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Administrador</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <style>
+        .sidebar {
+            height: 100vh;
+            width: 240px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #0d6efd;
+            color: #fff;
+            padding-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        .sidebar .sidebar-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 0 1rem 1rem 1rem;
+        }
+        .sidebar .nav-link {
+            color: #fff;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: #0b5ed7;
+            color: #fff;
+        }
+        .sidebar .sidebar-footer {
+            margin-top: auto;
+            padding: 1rem;
+        }
+        .sidebar .dropdown-menu {
+            background: #fff;
+            color: #212529;
+        }
+        .main-content {
+            margin-left: 260px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Bootstrap -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            Panel Administrador
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'admin_dashboard' %}">Inicio</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'admin_profesores' %}">Profesores</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Estudiantes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Cursos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Horarios</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Pagos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Reportes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Configuración</a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="dropdown">
+                <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" href="#" id="sidebarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="me-2">{{ user.first_name }} {{ user.last_name }}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sidebarDropdown">
+                    <li>
+                        <form method="POST" action="{% url 'logout' %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item">Cerrar sesión</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="container mt-5">
+            <!-- Tabs de navegación -->
+            <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="profesores-tab" data-bs-toggle="tab" data-bs-target="#profesores" type="button" role="tab" aria-controls="profesores" aria-selected="true">Profesores</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="add-profesor-tab" data-bs-toggle="tab" data-bs-target="#add-profesor" type="button" role="tab" aria-controls="add-profesor" aria-selected="false">Añadir Profesor</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="adminTabsContent">
+                <div class="tab-pane fade show active" id="profesores" role="tabpanel" aria-labelledby="profesores-tab">
+                    <!-- Tabla de Profesores -->
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nombre completo</th>
+                                    <th>Cédula</th>
+                                    <th>Email</th>
+                                    <th>Teléfono</th>
+                                    <th>Instrumento</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="profesores-tbody">
+                                {% for profesor in profesores %}
+                                <tr>
+                                    <td>{{ profesor.first_name }} {{ profesor.last_name }}</td>
+                                    <td>{{ profesor.cedula }}</td>
+                                    <td>{{ profesor.email }}</td>
+                                    <td>{{ profesor.telefono }}</td>
+                                    <td>{{ profesor.instrumento }}</td>
+                                    <td>
+                                        <span class="badge {% if profesor.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {% if profesor.is_active %}Activo{% else %}Inactivo{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info me-1">Ver más</button>
+                                        <button class="btn btn-sm btn-warning me-1">Editar</button>
+                                        <button class="btn btn-sm btn-danger">Eliminar</button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No hay profesores registrados.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <nav>
+                        <ul class="pagination justify-content-center" id="profesores-pagination">
+                            <!-- Paginación generada por JS -->
+                        </ul>
+                    </nav>
+                </div>
+                <div class="tab-pane fade" id="add-profesor" role="tabpanel" aria-labelledby="add-profesor-tab">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Registrar Profesor</h5>
+                            <form id="add-profesor-form" method="POST" action="#">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="username" class="form-label">Usuario</label>
+                                        <input type="text" class="form-control" id="username" name="username" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cedula" class="form-label">Cédula</label>
+                                        <input type="text" class="form-control" id="cedula" name="cedula">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="first_name" class="form-label">Nombre</label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="last_name" class="form-label">Apellido</label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="especialidad" class="form-label">Especialidad</label>
+                                        <input type="text" class="form-control" id="especialidad" name="especialidad" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="telefono" class="form-label">Teléfono</label>
+                                        <input type="text" class="form-control" id="telefono" name="telefono">
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="direccion" class="form-label">Dirección</label>
+                                        <input type="text" class="form-control" id="direccion" name="direccion">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label">Contraseña</label>
+                                        <input type="password" class="form-control" id="password" name="password" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
+                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                        <div id="passwordHelp" class="form-text text-danger d-none">Las contraseñas no coinciden.</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="rol" value="PROFESOR">
+                                <button type="submit" class="btn btn-primary">Registrar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        // Validación de contraseñas
+        const form = document.getElementById('add-profesor-form');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirm_password');
+        const passwordHelp = document.getElementById('passwordHelp');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (password.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    passwordHelp.classList.remove('d-none');
+                } else {
+                    passwordHelp.classList.add('d-none');
+                }
+            });
+            confirmPassword.addEventListener('input', function() {
+                if (password.value !== confirmPassword.value) {
+                    passwordHelp.classList.remove('d-none');
+                } else {
+                    passwordHelp.classList.add('d-none');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

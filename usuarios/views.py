@@ -37,3 +37,8 @@ def profesor_dashboard(request):
 @login_required
 def estudiante_dashboard(request):
     return render(request, 'usuarios/estudiante_dashboard.html')
+
+@login_required
+def admin_profesores(request):
+    profesores = Usuario.objects.filter(rol=Usuario.Rol.PROFESOR)
+    return render(request, 'usuarios/admin_profesores.html', {'profesores': profesores})

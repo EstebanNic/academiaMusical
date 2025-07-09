@@ -5,18 +5,273 @@
     <meta charset="UTF-8">
     <title>Panel Administrador</title>
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <style>
+        .sidebar {
+            height: 100vh;
+            width: 240px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #0d6efd;
+            color: #fff;
+            padding-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        .sidebar .sidebar-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 0 1rem 1rem 1rem;
+        }
+        .sidebar .nav-link {
+            color: #fff;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: #0b5ed7;
+            color: #fff;
+        }
+        .sidebar .sidebar-footer {
+            margin-top: auto;
+            padding: 1rem;
+        }
+        .sidebar .dropdown-menu {
+            background: #fff;
+            color: #212529;
+        }
+        .main-content {
+            margin-left: 260px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center">Panel del Administrador</h1>
-        <p>Bienvenido, {{ user.username }}.</p>
+    <!-- Sidebar Bootstrap -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            Panel Administrador
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url 'admin_dashboard' %}">Inicio</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'admin_profesores' %}">Profesores</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Estudiantes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Cursos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Horarios</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Pagos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Reportes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Configuración</a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="dropdown">
+                <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" href="#" id="sidebarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="me-2">{{ user.first_name }} {{ user.last_name }}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sidebarDropdown">
+                    <li>
+                        <form method="POST" action="{% url 'logout' %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item">Cerrar sesión</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
-    <!-- Agrega este bloque dentro del <body> o debajo del saludo -->
-<form method="POST" action="{% url 'logout' %}">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-danger">Cerrar sesión</button>
-</form>
+    <div class="main-content">
+        <div class="container mt-5">
+            <!-- Tabs de navegación -->
+            <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="profesores-tab" data-bs-toggle="tab" data-bs-target="#profesores" type="button" role="tab" aria-controls="profesores" aria-selected="true">Profesores</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="estudiantes-tab" data-bs-toggle="tab" data-bs-target="#estudiantes" type="button" role="tab" aria-controls="estudiantes" aria-selected="false">Estudiantes</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="cursos-tab" data-bs-toggle="tab" data-bs-target="#cursos" type="button" role="tab" aria-controls="cursos" aria-selected="false">Cursos</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="adminTabsContent">
+                <div class="tab-pane fade show active" id="profesores" role="tabpanel" aria-labelledby="profesores-tab">
+                    <!-- Botón para añadir profesor -->
+                    <div class="mb-3">
+                        <button class="btn btn-success" id="add-profesor-btn" data-bs-toggle="modal" data-bs-target="#addProfesorModal">
+                            Añadir Profesor
+                        </button>
+                    </div>
+                    <!-- Tabla de Profesores -->
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nombre</th>
+                                    <th>Especialidad</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="profesores-tbody">
+                                <!-- Filas generadas por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <nav>
+                        <ul class="pagination justify-content-center" id="profesores-pagination">
+                            <!-- Paginación generada por JS -->
+                        </ul>
+                    </nav>
+                </div>
+                <div class="tab-pane fade" id="estudiantes" role="tabpanel" aria-labelledby="estudiantes-tab">
+                    <!-- Contenido de Estudiantes -->
+                    <p>Sección de Estudiantes.</p>
+                </div>
+                <div class="tab-pane fade" id="cursos" role="tabpanel" aria-labelledby="cursos-tab">
+                    <!-- Contenido de Cursos -->
+                    <p>Sección de Cursos.</p>
+                </div>
+            </div>
+            <p class="mt-4">Bienvenido, {{ user.username }}.</p>
+        </div>
+    </div>
 
+    <!-- Modal para añadir profesor -->
+    <div class="modal fade" id="addProfesorModal" tabindex="-1" aria-labelledby="addProfesorModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="add-profesor-form" method="POST" action="#">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addProfesorModalLabel">Registrar Profesor</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuario</label>
+                    <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Apellido</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="especialidad" class="form-label">Especialidad</label>
+                    <input type="text" class="form-control" id="especialidad" name="especialidad" required>
+                </div>
+                <div class="mb-3">
+                    <label for="cedula" class="form-label">Cédula</label>
+                    <input type="text" class="form-control" id="cedula" name="cedula">
+                </div>
+                <div class="mb-3">
+                    <label for="telefono" class="form-label">Teléfono</label>
+                    <input type="text" class="form-control" id="telefono" name="telefono">
+                </div>
+                <div class="mb-3">
+                    <label for="direccion" class="form-label">Dirección</label>
+                    <input type="text" class="form-control" id="direccion" name="direccion">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <input type="hidden" name="rol" value="PROFESOR">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Registrar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        // Datos quemados de profesores
+        const profesores = [
+            {id: 1, nombre: "Juan Pérez", especialidad: "Piano"},
+            {id: 2, nombre: "Ana Gómez", especialidad: "Guitarra"},
+            {id: 3, nombre: "Luis Martínez", especialidad: "Violín"},
+            {id: 4, nombre: "María López", especialidad: "Canto"},
+            {id: 5, nombre: "Carlos Ruiz", especialidad: "Batería"},
+            {id: 6, nombre: "Laura Torres", especialidad: "Saxofón"},
+            {id: 7, nombre: "Pedro Sánchez", especialidad: "Flauta"},
+            {id: 8, nombre: "Sofía Ramírez", especialidad: "Cello"},
+            {id: 9, nombre: "Miguel Díaz", especialidad: "Trompeta"},
+            {id: 10, nombre: "Lucía Fernández", especialidad: "Clarinete"}
+        ];
+
+        let profesoresPage = 1;
+        const profesoresRowsPerPage = 5;
+
+        function renderProfesoresTable(page) {
+            const tbody = document.getElementById('profesores-tbody');
+            tbody.innerHTML = '';
+            const start = (page - 1) * profesoresRowsPerPage;
+            const end = start + profesoresRowsPerPage;
+            profesores.slice(start, end).forEach(prof => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${prof.id}</td>
+                    <td>${prof.nombre}</td>
+                    <td>${prof.especialidad}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info me-1">Ver más</button>
+                        <button class="btn btn-sm btn-warning me-1">Editar</button>
+                        <button class="btn btn-sm btn-danger">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderProfesoresPagination(page) {
+            const totalPages = Math.ceil(profesores.length / profesoresRowsPerPage);
+            const pagination = document.getElementById('profesores-pagination');
+            pagination.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                let li = document.createElement('li');
+                li.className = 'page-item' + (i === page ? ' active' : '');
+                let btn = document.createElement('button');
+                btn.className = 'page-link';
+                btn.textContent = i;
+                btn.onclick = () => {
+                    profesoresPage = i;
+                    renderProfesoresTable(profesoresPage);
+                    renderProfesoresPagination(profesoresPage);
+                };
+                li.appendChild(btn);
+                pagination.appendChild(li);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProfesoresTable(profesoresPage);
+            renderProfesoresPagination(profesoresPage);
+
+            // Botón añadir profesor (abre el modal)
+            document.getElementById('add-profesor-btn').onclick = function() {
+                // Limpiar el formulario del modal
+                document.getElementById('add-profesor-form').reset();
+            };
+        });
+    </script>
 </body>
 </html>

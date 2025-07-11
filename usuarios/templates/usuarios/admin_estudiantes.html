@@ -8,15 +8,15 @@
             <!-- Tabs de navegación -->
             <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="profesores-tab" data-bs-toggle="tab" data-bs-target="#profesores" type="button" role="tab" aria-controls="profesores" aria-selected="true">Profesores</button>
+                    <button class="nav-link active" id="estudiantes-tab" data-bs-toggle="tab" data-bs-target="#estudiantes" type="button" role="tab" aria-controls="estudiantes" aria-selected="true">Estudiantes</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="add-profesor-tab" data-bs-toggle="tab" data-bs-target="#add-profesor" type="button" role="tab" aria-controls="add-profesor" aria-selected="false">Añadir Profesor</button>
+                    <button class="nav-link" id="add-estudiante-tab" data-bs-toggle="tab" data-bs-target="#add-estudiante" type="button" role="tab" aria-controls="add-estudiante" aria-selected="false">Añadir Estudiante</button>
                 </li>
             </ul>
             <div class="tab-content" id="adminTabsContent">
-                <div class="tab-pane fade show active" id="profesores" role="tabpanel" aria-labelledby="profesores-tab">
-                    <!-- Tabla de Profesores -->
+                <div class="tab-pane fade show active" id="estudiantes" role="tabpanel" aria-labelledby="estudiantes-tab">
+                    <!-- Tabla de Estudiantes -->
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
@@ -30,64 +30,64 @@
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="profesores-tbody">
-                                {% for profesor in profesores %}
+                            <tbody id="estudiantes-tbody">
+                                {% for estudiante in estudiantes %}
                                 <tr>
-                                    <td>{{ profesor.first_name }} {{ profesor.last_name }}</td>
-                                    <td>{{ profesor.cedula }}</td>
-                                    <td>{{ profesor.email }}</td>
-                                    <td>{{ profesor.telefono }}</td>
-                                    <td>{{ profesor.instrumento }}</td>
+                                    <td>{{ estudiante.first_name }} {{ estudiante.last_name }}</td>
+                                    <td>{{ estudiante.cedula }}</td>
+                                    <td>{{ estudiante.email }}</td>
+                                    <td>{{ estudiante.telefono }}</td>
+                                    <td>{{ estudiante.instrumento }}</td>
                                     <td>
-                                        <span class="badge {% if profesor.is_active %}bg-success{% else %}bg-secondary{% endif %}">
-                                            {% if profesor.is_active %}Activo{% else %}Inactivo{% endif %}
+                                        <span class="badge {% if estudiante.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {% if estudiante.is_active %}Activo{% else %}Inactivo{% endif %}
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-info me-1 btn-ver-mas-profesor"
-                                            data-profesor-nombre="{{ profesor.first_name }} {{ profesor.last_name }}"
-                                            data-profesor-cedula="{{ profesor.cedula }}"
-                                            data-profesor-email="{{ profesor.email }}"
-                                            data-profesor-telefono="{{ profesor.telefono }}"
-                                            data-profesor-instrumento="{{ profesor.instrumento }}"
-                                            data-profesor-direccion="{{ profesor.direccion }}"
-                                            data-profesor-estado="{% if profesor.is_active %}Activo{% else %}Inactivo{% endif %}"
+                                        <button class="btn btn-sm btn-info me-1 btn-ver-mas-estudiante"
+                                            data-estudiante-nombre="{{ estudiante.first_name }} {{ estudiante.last_name }}"
+                                            data-estudiante-cedula="{{ estudiante.cedula }}"
+                                            data-estudiante-email="{{ estudiante.email }}"
+                                            data-estudiante-telefono="{{ estudiante.telefono }}"
+                                            data-estudiante-instrumento="{{ estudiante.instrumento }}"
+                                            data-estudiante-direccion="{{ estudiante.direccion }}"
+                                            data-estudiante-estado="{% if estudiante.is_active %}Activo{% else %}Inactivo{% endif %}"
                                         >Ver más</button>
-                                        <button class="btn btn-sm btn-warning me-1 btn-editar-profesor"
-                                            data-profesor-id="{{ profesor.id }}"
-                                            data-profesor-cedula="{{ profesor.cedula }}"
-                                            data-profesor-nombre="{{ profesor.first_name }}"
-                                            data-profesor-apellido="{{ profesor.last_name }}"
-                                            data-profesor-email="{{ profesor.email }}"
-                                            data-profesor-instrumento="{{ profesor.instrumento }}"
-                                            data-profesor-telefono="{{ profesor.telefono }}"
-                                            data-profesor-direccion="{{ profesor.direccion }}"
+                                        <button class="btn btn-sm btn-warning me-1 btn-editar-estudiante"
+                                            data-estudiante-id="{{ estudiante.id }}"
+                                            data-estudiante-cedula="{{ estudiante.cedula }}"
+                                            data-estudiante-nombre="{{ estudiante.first_name }}"
+                                            data-estudiante-apellido="{{ estudiante.last_name }}"
+                                            data-estudiante-email="{{ estudiante.email }}"
+                                            data-estudiante-instrumento="{{ estudiante.instrumento }}"
+                                            data-estudiante-telefono="{{ estudiante.telefono }}"
+                                            data-estudiante-direccion="{{ estudiante.direccion }}"
                                         >Editar</button>
-                                        <button class="btn btn-sm btn-danger btn-eliminar-profesor"
-                                            data-profesor-id="{{ profesor.id }}"
-                                            data-profesor-nombre="{{ profesor.first_name }} {{ profesor.last_name }}"
+                                        <button class="btn btn-sm btn-danger btn-eliminar-estudiante"
+                                            data-estudiante-id="{{ estudiante.id }}"
+                                            data-estudiante-nombre="{{ estudiante.first_name }} {{ estudiante.last_name }}"
                                         >Eliminar</button>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="7" class="text-center">No hay profesores registrados.</td>
+                                    <td colspan="7" class="text-center">No hay estudiantes registrados.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                     <nav>
-                        <ul class="pagination justify-content-center" id="profesores-pagination">
+                        <ul class="pagination justify-content-center" id="estudiantes-pagination">
                             <!-- Paginación generada por JS -->
                         </ul>
                     </nav>
                 </div>
-                <div class="tab-pane fade" id="add-profesor" role="tabpanel" aria-labelledby="add-profesor-tab">
+                <div class="tab-pane fade" id="add-estudiante" role="tabpanel" aria-labelledby="add-estudiante-tab">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title mb-3">Registrar Profesor</h5>
-                            <form method="POST" action="{% url 'admin_profesores' %}">
+                            <h5 class="card-title mb-3">Registrar Estudiante</h5>
+                            <form method="POST" action="{% url 'admin_estudiantes' %}">
                                 {% csrf_token %}
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -140,7 +140,7 @@
                                         <div id="passwordHelp" class="form-text text-danger d-none">Las contraseñas no coinciden.</div>
                                     </div>
                                 </div>
-                                <input type="hidden" name="rol" value="PROFESOR">
+                                <input type="hidden" name="rol" value="ESTUDIANTE">
                                 <button type="submit" class="btn btn-primary">Registrar</button>
                             </form>
                         </div>
@@ -150,16 +150,16 @@
         </div>
     </div>
 
-    <!-- Modal Editar Profesor -->
-    <div class="modal fade" id="modalEditarProfesor" tabindex="-1" aria-labelledby="modalEditarProfesorLabel" aria-hidden="true">
+    <!-- Modal Editar Estudiante -->
+    <div class="modal fade" id="modalEditarEstudiante" tabindex="-1" aria-labelledby="modalEditarEstudianteLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="modalEditarProfesorLabel">Editar Profesor</h5>
+            <h5 class="modal-title" id="modalEditarEstudianteLabel">Editar Estudiante</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
-            <form id="form-editar-profesor" method="POST" action="#">
+            <form id="form-editar-estudiante" method="POST" action="#">
                 {% csrf_token %}
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -203,7 +203,7 @@
                         <input type="text" class="form-control" id="edit_direccion" name="direccion">
                     </div>
                 </div>
-                <input type="hidden" name="profesor_id" id="edit_profesor_id">
+                <input type="hidden" name="estudiante_id" id="edit_estudiante_id">
                 <button type="submit" class="btn btn-primary">Guardar cambios</button>
             </form>
           </div>
@@ -211,12 +211,12 @@
       </div>
     </div>
 
-    <!-- Modal Ver Más Profesor -->
-    <div class="modal fade" id="modalVerMasProfesor" tabindex="-1" aria-labelledby="modalVerMasProfesorLabel" aria-hidden="true">
+    <!-- Modal Ver Más Estudiante -->
+    <div class="modal fade" id="modalVerMasEstudiante" tabindex="-1" aria-labelledby="modalVerMasEstudianteLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="modalVerMasProfesorLabel">Detalles del Profesor</h5>
+            <h5 class="modal-title" id="modalVerMasEstudianteLabel">Detalles del Estudiante</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
@@ -246,13 +246,13 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
-            <p>¿Está seguro de que desea eliminar al profesor <span id="eliminar-nombre-profesor"></span>?</p>
+            <p>¿Está seguro de que desea eliminar al estudiante <span id="eliminar-nombre-estudiante"></span>?</p>
           </div>
           <div class="modal-footer">
-            <form id="form-eliminar-profesor" method="POST" action="{% url 'admin_profesores' %}">
+            <form id="form-eliminar-estudiante" method="POST" action="{% url 'admin_estudiantes' %}">
                 {% csrf_token %}
-                <input type="hidden" name="profesor_id" id="eliminar_profesor_id">
-                <input type="hidden" name="eliminar_profesor" value="1">
+                <input type="hidden" name="estudiante_id" id="eliminar_estudiante_id">
+                <input type="hidden" name="eliminar_estudiante" value="1">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="submit" class="btn btn-danger">Eliminar</button>
             </form>
@@ -263,7 +263,7 @@
 
     <script>
         // Validación de contraseñas
-        const form = document.getElementById('add-profesor-form');
+        const form = document.getElementById('add-estudiante-form');
         const password = document.getElementById('password');
         const confirmPassword = document.getElementById('confirm_password');
         const passwordHelp = document.getElementById('passwordHelp');
@@ -285,44 +285,44 @@
             });
         }
 
-        // Modal Editar Profesor
-        document.querySelectorAll('.btn-editar-profesor').forEach(function(btn) {
+        // Modal Editar Estudiante
+        document.querySelectorAll('.btn-editar-estudiante').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                document.getElementById('edit_profesor_id').value = btn.getAttribute('data-profesor-id') || '';
-                document.getElementById('edit_cedula').value = btn.getAttribute('data-profesor-cedula') || '';
-                document.getElementById('edit_first_name').value = btn.getAttribute('data-profesor-nombre') || '';
-                document.getElementById('edit_last_name').value = btn.getAttribute('data-profesor-apellido') || '';
-                document.getElementById('edit_email').value = btn.getAttribute('data-profesor-email') || '';
-                document.getElementById('edit_instrumento').value = btn.getAttribute('data-profesor-instrumento') || '';
-                document.getElementById('edit_telefono').value = btn.getAttribute('data-profesor-telefono') || '';
-                document.getElementById('edit_direccion').value = btn.getAttribute('data-profesor-direccion') || '';
-                var modal = new bootstrap.Modal(document.getElementById('modalEditarProfesor'));
+                document.getElementById('edit_estudiante_id').value = btn.getAttribute('data-estudiante-id') || '';
+                document.getElementById('edit_cedula').value = btn.getAttribute('data-estudiante-cedula') || '';
+                document.getElementById('edit_first_name').value = btn.getAttribute('data-estudiante-nombre') || '';
+                document.getElementById('edit_last_name').value = btn.getAttribute('data-estudiante-apellido') || '';
+                document.getElementById('edit_email').value = btn.getAttribute('data-estudiante-email') || '';
+                document.getElementById('edit_instrumento').value = btn.getAttribute('data-estudiante-instrumento') || '';
+                document.getElementById('edit_telefono').value = btn.getAttribute('data-estudiante-telefono') || '';
+                document.getElementById('edit_direccion').value = btn.getAttribute('data-estudiante-direccion') || '';
+                var modal = new bootstrap.Modal(document.getElementById('modalEditarEstudiante'));
                 modal.show();
             });
         });
 
-        // Modal Ver Más Profesor
-        document.querySelectorAll('.btn-ver-mas-profesor').forEach(function(btn) {
+        // Modal Ver Más Estudiante
+        document.querySelectorAll('.btn-ver-mas-estudiante').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                document.getElementById('vermas-nombre').textContent = btn.getAttribute('data-profesor-nombre') || '';
-                document.getElementById('vermas-cedula').textContent = btn.getAttribute('data-profesor-cedula') || '';
-                document.getElementById('vermas-email').textContent = btn.getAttribute('data-profesor-email') || '';
-                document.getElementById('vermas-telefono').textContent = btn.getAttribute('data-profesor-telefono') || '';
-                document.getElementById('vermas-instrumento').textContent = btn.getAttribute('data-profesor-instrumento') || '';
-                document.getElementById('vermas-direccion').textContent = btn.getAttribute('data-profesor-direccion') || '';
-                document.getElementById('vermas-estado').textContent = btn.getAttribute('data-profesor-estado') || '';
-                var modal = new bootstrap.Modal(document.getElementById('modalVerMasProfesor'));
+                document.getElementById('vermas-nombre').textContent = btn.getAttribute('data-estudiante-nombre') || '';
+                document.getElementById('vermas-cedula').textContent = btn.getAttribute('data-estudiante-cedula') || '';
+                document.getElementById('vermas-email').textContent = btn.getAttribute('data-estudiante-email') || '';
+                document.getElementById('vermas-telefono').textContent = btn.getAttribute('data-estudiante-telefono') || '';
+                document.getElementById('vermas-instrumento').textContent = btn.getAttribute('data-estudiante-instrumento') || '';
+                document.getElementById('vermas-direccion').textContent = btn.getAttribute('data-estudiante-direccion') || '';
+                document.getElementById('vermas-estado').textContent = btn.getAttribute('data-estudiante-estado') || '';
+                var modal = new bootstrap.Modal(document.getElementById('modalVerMasEstudiante'));
                 modal.show();
             });
         });
 
         // Modal Confirmar Eliminación
-        document.querySelectorAll('.btn-eliminar-profesor').forEach(function(btn) {
+        document.querySelectorAll('.btn-eliminar-estudiante').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 // Corrige el id del elemento
-                document.getElementById('eliminar-nombre-profesor').textContent = btn.getAttribute('data-profesor-nombre') || '';
-                document.getElementById('eliminar_profesor_id').value = btn.getAttribute('data-profesor-id') || '';
+                document.getElementById('eliminar-nombre-estudiante').textContent = btn.getAttribute('data-estudiante-nombre') || '';
+                document.getElementById('eliminar_estudiante_id').value = btn.getAttribute('data-estudiante-id') || '';
                 var modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminar'));
                 modal.show();
             });

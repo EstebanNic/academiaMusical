@@ -1,0 +1,507 @@
+{% extends 'usuarios/base.html' %} {% load static %} {% block title %}Panel
+Administrador - Horarios{% endblock %} {% block content %}
+
+<div class="main-content">
+  <div class="container mt-5">
+    <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link active"
+          id="clases-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#clases"
+          type="button"
+          role="tab"
+          aria-controls="clases"
+          aria-selected="true"
+        >
+          Clases
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          id="add-clase-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#add-clase"
+          type="button"
+          role="tab"
+          aria-controls="add-clase"
+          aria-selected="false"
+        >
+          Añadir Clase
+        </button>
+      </li>
+    </ul>
+    <div class="tab-content" id="adminTabsContent">
+      <div
+        class="tab-pane fade show active"
+        id="clases"
+        role="tabpanel"
+        aria-labelledby="clases-tab"
+      >
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Curso</th>
+                                <th>Profesor</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Hora Inicio</th>
+                                <th>Hora Fin</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clases-tbody">
+                            {% for clase in clases %}
+                            <tr>
+                                <td><span class="badge bg-secondary">{{ clase.codigo }}</span></td>
+                                <td>{{ clase.curso.nombre }}</td>
+                                <td>{% if clase.profesor %}{{ clase.profesor.first_name }} {{ clase.profesor.last_name }}{% else %}<span class="text-muted">Sin profesor</span>{% endif %}</td>
+                                <td>{{ clase.fecha_inicio }}</td>
+                                <td>{{ clase.fecha_fin }}</td>
+                                <td>{{ clase.hora_inicio }}</td>
+                                <td>{{ clase.hora_fin }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info me-1 btn-ver-mas-clase"
+                                        data-clase-codigo="{{ clase.codigo }}"
+                                        data-clase-curso="{{ clase.curso.nombre }}"
+                                        data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.first_name }} {{ clase.profesor.last_name }}{% endif %}"
+                                        data-clase-hora-inicio="{{ clase.hora_inicio }}"
+                                        data-clase-hora-fin="{{ clase.hora_fin }}"
+                                        data-clase-fecha-inicio="{{ clase.fecha_inicio }}"
+                                        data-clase-fecha-fin="{{ clase.fecha_fin }}"
+                                    >Ver más</button>
+                                    <button class="btn btn-sm btn-warning me-1 btn-editar-clase"
+                                        data-clase-id="{{ clase.id }}"
+                                        data-clase-curso="{{ clase.curso.id }}"
+                                        data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.id }}{% endif %}"
+                                        data-clase-hora-inicio="{{ clase.hora_inicio }}"
+                                        data-clase-hora-fin="{{ clase.hora_fin }}"
+                                        data-clase-fecha-inicio="{{ clase.fecha_inicio }}"
+                                        data-clase-fecha-fin="{{ clase.fecha_fin }}"
+                                    >Editar</button>
+                                    <button class="btn btn-sm btn-danger btn-eliminar-clase"
+                                        data-clase-id="{{ clase.id }}"
+                                        data-clase-codigo="{{ clase.codigo }}"
+                                    >Eliminar</button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center">No hay clases registradas.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+          </table>
+        </div>
+      </div>
+      <div
+        class="tab-pane fade"
+        id="add-clase"
+        role="tabpanel"
+        aria-labelledby="add-clase-tab"
+      >
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Registrar Clase</h5>
+            <form
+              method="POST"
+              action="{% url 'admin_clases' %}"
+              id="add-clase-form"
+            >
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="curso" class="form-label"
+                    >Curso <span class="text-danger">*</span></label
+                  >
+                  <select class="form-select" id="curso" name="curso" required>
+                    <option value="" selected disabled>
+                      Seleccione un curso
+                    </option>
+                    {% for curso in cursos %}
+                    <option value="{{ curso.id }}">
+                      {{ curso.nombre }} - {{ curso.get_nivel_display }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="profesor" class="form-label">Profesor</label>
+                  <select class="form-select" id="profesor" name="profesor">
+                    <option value="" selected>Sin profesor</option>
+                    {% for profesor in profesores %}
+                    <option value="{{ profesor.id }}">
+                      {{ profesor.first_name }} {{ profesor.last_name }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="fecha_inicio" class="form-label"
+                    >Fecha Inicio <span class="text-danger">*</span></label
+                  >
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="fecha_inicio"
+                    name="fecha_inicio"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="fecha_fin" class="form-label"
+                    >Fecha Fin <span class="text-danger">*</span></label
+                  >
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="fecha_fin"
+                    name="fecha_fin"
+                    required
+                  />
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label for="hora_inicio" class="form-label"
+                    >Hora Inicio <span class="text-danger">*</span></label
+                  >
+                  <select
+                    class="form-select"
+                    id="hora_inicio"
+                    name="hora_inicio"
+                    required
+                  ></select>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label for="hora_fin" class="form-label"
+                    >Hora Fin <span class="text-danger">*</span></label
+                  >
+                  <select
+                    class="form-select"
+                    id="hora_fin"
+                    name="hora_fin"
+                    required
+                  ></select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">Registrar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Clase -->
+<div
+  class="modal fade"
+  id="modalEditarClase"
+  tabindex="-1"
+  aria-labelledby="modalEditarClaseLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalEditarClaseLabel">Editar Clase</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-editar-clase" method="POST" action="#">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit_curso" class="form-label">Curso</label>
+              <select class="form-select" id="edit_curso" name="curso" required>
+                <option value="" disabled>Seleccione un curso</option>
+                {% for curso in cursos %}
+                <option value="{{ curso.id }}">{{ curso.nombre }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_profesor" class="form-label">Profesor</label>
+              <select class="form-select" id="edit_profesor" name="profesor">
+                <option value="">Sin profesor</option>
+                {% for profesor in profesores %}
+                <option value="{{ profesor.id }}">
+                  {{ profesor.first_name }} {{ profesor.last_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_fecha_inicio" class="form-label"
+                >Fecha Inicio</label
+              >
+              <input
+                type="date"
+                class="form-control"
+                id="edit_fecha_inicio"
+                name="fecha_inicio"
+                required
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_fecha_fin" class="form-label">Fecha Fin</label>
+              <input
+                type="date"
+                class="form-control"
+                id="edit_fecha_fin"
+                name="fecha_fin"
+                required
+              />
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="edit_hora_inicio" class="form-label">Hora Inicio</label>
+              <select class="form-select" id="edit_hora_inicio" name="hora_inicio" required></select>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="edit_hora_fin" class="form-label">Hora Fin</label>
+              <select class="form-select" id="edit_hora_fin" name="hora_fin" required></select>
+            </div>
+          </div>
+          <input type="hidden" name="clase_id" id="edit_clase_id" />
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ver Más Clase -->
+<div
+  class="modal fade"
+  id="modalVerMasClase"
+  tabindex="-1"
+  aria-labelledby="modalVerMasClaseLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalVerMasClaseLabel">
+          Detalles de la Clase
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <ul class="list-group">
+          <li class="list-group-item"><strong>Código:</strong> <span id="vermas-codigo"></span></li>
+          <li class="list-group-item"><strong>Curso:</strong> <span id="vermas-curso"></span></li>
+          <li class="list-group-item"><strong>Profesor:</strong> <span id="vermas-profesor"></span></li>
+          <li class="list-group-item"><strong>Fecha Inicio:</strong> <span id="vermas-fecha-inicio"></span></li>
+          <li class="list-group-item"><strong>Fecha Fin:</strong> <span id="vermas-fecha-fin"></span></li>
+          <li class="list-group-item"><strong>Hora Inicio:</strong> <span id="vermas-hora-inicio"></span></li>
+          <li class="list-group-item"><strong>Hora Fin:</strong> <span id="vermas-hora-fin"></span></li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmar Eliminación -->
+<div
+  class="modal fade"
+  id="modalConfirmarEliminarClase"
+  tabindex="-1"
+  aria-labelledby="modalConfirmarEliminarClaseLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalConfirmarEliminarClaseLabel">
+          Confirmar eliminación
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          ¿Está seguro de que desea eliminar la clase
+          <span id="eliminar-codigo-clase"></span>?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <form
+          id="form-eliminar-clase"
+          method="POST"
+          action="{% url 'admin_clases' %}"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="clase_id" id="eliminar_clase_id" />
+          <input type="hidden" name="eliminar_clase" value="1" />
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Modal Editar Clase
+  document.querySelectorAll('.btn-editar-clase').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+          document.getElementById('edit_clase_id').value = btn.getAttribute('data-clase-id') || '';
+          document.getElementById('edit_curso').value = btn.getAttribute('data-clase-curso') || '';
+          document.getElementById('edit_profesor').value = btn.getAttribute('data-clase-profesor') || '';
+          document.getElementById('edit_fecha_inicio').value = btn.getAttribute('data-clase-fecha-inicio') || '';
+          document.getElementById('edit_fecha_fin').value = btn.getAttribute('data-clase-fecha-fin') || '';
+          generarOpcionesHoras('edit_hora_inicio', btn.getAttribute('data-clase-hora-inicio'));
+          generarOpcionesHoras('edit_hora_fin', btn.getAttribute('data-clase-hora-fin'));
+          var modal = new bootstrap.Modal(document.getElementById('modalEditarClase'));
+          modal.show();
+      });
+  });
+
+  // Modal Ver Más Clase
+  document.querySelectorAll('.btn-ver-mas-clase').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+          document.getElementById('vermas-codigo').textContent = btn.getAttribute('data-clase-codigo') || '';
+          document.getElementById('vermas-curso').textContent = btn.getAttribute('data-clase-curso') || '';
+          document.getElementById('vermas-profesor').textContent = btn.getAttribute('data-clase-profesor') || 'Sin profesor';
+          document.getElementById('vermas-hora-inicio').textContent = btn.getAttribute('data-clase-hora-inicio') || '';
+          document.getElementById('vermas-hora-fin').textContent = btn.getAttribute('data-clase-hora-fin') || '';
+          document.getElementById('vermas-fecha-inicio').textContent = btn.getAttribute('data-clase-fecha-inicio') || '';
+          document.getElementById('vermas-fecha-fin').textContent = btn.getAttribute('data-clase-fecha-fin') || '';
+          var modal = new bootstrap.Modal(document.getElementById('modalVerMasClase'));
+          modal.show();
+      });
+  });
+
+  // Modal Confirmar Eliminación
+  document.querySelectorAll('.btn-eliminar-clase').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.getElementById('eliminar-codigo-clase').textContent = btn.getAttribute('data-clase-codigo') || '';
+          document.getElementById('eliminar_clase_id').value = btn.getAttribute('data-clase-id') || '';
+          var modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminarClase'));
+          modal.show();
+      });
+  });
+
+  // Horario laboral: 08:00 a 20:00, intervalos de 30 minutos
+  function generarOpcionesHoras(selectId, valorSeleccionado) {
+    var select = document.getElementById(selectId);
+    if (!select) return;
+    select.innerHTML = "";
+    var startHour = 8;
+    var endHour = 20;
+    for (var h = startHour; h <= endHour; h++) {
+      for (var m = 0; m < 60; m += 30) {
+        var hour = String(h).padStart(2, "0");
+        var min = String(m).padStart(2, "0");
+        var value = hour + ":" + min;
+        var option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        if (valorSeleccionado && valorSeleccionado === value) {
+          option.selected = true;
+        }
+        select.appendChild(option);
+      }
+    }
+  }
+
+  // Inicializar selects de hora en formulario de añadir clase
+  document.addEventListener("DOMContentLoaded", function () {
+    generarOpcionesHoras("hora_inicio");
+    generarOpcionesHoras("hora_fin");
+    generarOpcionesHoras("edit_hora_inicio");
+    generarOpcionesHoras("edit_hora_fin");
+
+    // Set min date for "fecha_inicio" input to today (Añadir Clase)
+    var fechaInicioAdd = document.getElementById("fecha_inicio");
+    var fechaFinAdd = document.getElementById("fecha_fin");
+    if (fechaInicioAdd) {
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, "0");
+      var dd = String(today.getDate()).padStart(2, "0");
+      var minDate = yyyy + "-" + mm + "-" + dd;
+      fechaInicioAdd.setAttribute("min", minDate);
+
+      // Cuando cambia fecha_inicio, actualizar min de fecha_fin
+      fechaInicioAdd.addEventListener("change", function () {
+        fechaFinAdd.setAttribute("min", fechaInicioAdd.value);
+      });
+    }
+    if (fechaFinAdd && fechaInicioAdd) {
+      // Al cargar, asegurar que min de fecha_fin sea igual a fecha_inicio
+      fechaFinAdd.setAttribute(
+        "min",
+        fechaInicioAdd.value || fechaFinAdd.getAttribute("min")
+      );
+    }
+
+    // Set min date for "edit_fecha_inicio" input to today (Editar Clase)
+    var fechaInicioEdit = document.getElementById("edit_fecha_inicio");
+    var fechaFinEdit = document.getElementById("edit_fecha_fin");
+    if (fechaInicioEdit) {
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, "0");
+      var dd = String(today.getDate()).padStart(2, "0");
+      var minDate = yyyy + "-" + mm + "-" + dd;
+      fechaInicioEdit.setAttribute("min", minDate);
+
+      // Cuando cambia fecha_inicio, actualizar min de fecha_fin
+      fechaInicioEdit.addEventListener("change", function () {
+        fechaFinEdit.setAttribute("min", fechaInicioEdit.value);
+      });
+    }
+    if (fechaFinEdit && fechaInicioEdit) {
+      // Al cargar, asegurar que min de fecha_fin sea igual a fecha_inicio
+      fechaFinEdit.setAttribute(
+        "min",
+        fechaInicioEdit.value || fechaFinEdit.getAttribute("min")
+      );
+    }
+  });
+
+  // Set min date for "fecha" input to today
+  document.addEventListener("DOMContentLoaded", function () {
+    var fechaInput = document.getElementById("fecha");
+    if (fechaInput) {
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, "0");
+      var dd = String(today.getDate()).padStart(2, "0");
+      var minDate = yyyy + "-" + mm + "-" + dd;
+      fechaInput.setAttribute("min", minDate);
+    }
+  });
+</script>
+
+{% endblock %}

@@ -62,19 +62,22 @@
                 <a class="nav-link {% if active_tab == 'estudiantes' %}active{% endif %}" href="{% url 'admin_estudiantes' %}">Estudiantes</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'cursos' %}active{% endif %}" href="#">Cursos</a>
+                <a class="nav-link {% if active_tab == 'cursos' %}active{% endif %}" href="{% url 'admin_cursos' %}">Cursos</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'horarios' %}active{% endif %}" href="#">Horarios</a>
+                <a class="nav-link {% if active_tab == 'horarios' %}active{% endif %}" href="{% url 'admin_clases' %}">Clases</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'pagos' %}active{% endif %}" href="#">Pagos</a>
+                <a class="nav-link {% if active_tab == 'matriculas' %}active{% endif %}" href="{% url 'admin_matriculas' %}">Matrículas</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'reportes' %}active{% endif %}" href="#">Reportes</a>
+                <a class="nav-link {% if active_tab == 'pagos' %}active{% endif %}" href="{% url 'admin_pagos' %}">Pagos</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'configuracion' %}active{% endif %}" href="#">Configuración</a>
+                <a class="nav-link {% if active_tab == 'asistencias' %}active{% endif %}" href="{% url 'admin_asistencias' %}">Asistencias</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'reportes' %}active{% endif %}" href="{% url 'admin_reportes' %}">Reportes</a>
             </li>
         </ul>
         <div class="sidebar-footer">

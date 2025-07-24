@@ -4,184 +4,245 @@
 {% block content %}
     <div class="main-content">
         <div class="container mt-5">
-            <!-- Tabs de navegación -->
-            <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="profesores-tab" data-bs-toggle="tab" data-bs-target="#profesores" type="button" role="tab" aria-controls="profesores" aria-selected="true">Profesores</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="estudiantes-tab" data-bs-toggle="tab" data-bs-target="#estudiantes" type="button" role="tab" aria-controls="estudiantes" aria-selected="false">Estudiantes</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="cursos-tab" data-bs-toggle="tab" data-bs-target="#cursos" type="button" role="tab" aria-controls="cursos" aria-selected="false">Cursos</button>
-                </li>
-            </ul>
-            <div class="tab-content" id="adminTabsContent">
-                <div class="tab-pane fade show active" id="profesores" role="tabpanel" aria-labelledby="profesores-tab">
-                    <!-- Botón para añadir profesor -->
-                    <div class="mb-3">
-                        <button class="btn btn-success" id="add-profesor-btn" data-bs-toggle="modal" data-bs-target="#addProfesorModal">
-                            Añadir Profesor
-                        </button>
+            <h1 class="mb-4">Dashboard - Academia Musical</h1>
+            
+            <!-- Tarjetas de métricas principales -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Estudiantes
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_estudiantes|default:0 }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-users fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <!-- Tabla de Profesores -->
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Nombre</th>
-                                    <th>Especialidad</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="profesores-tbody">
-                                <!-- Filas generadas por JS -->
-                            </tbody>
-                        </table>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Total Profesores
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_profesores|default:0 }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <nav>
-                        <ul class="pagination justify-content-center" id="profesores-pagination">
-                            <!-- Paginación generada por JS -->
-                        </ul>
-                    </nav>
                 </div>
-                <div class="tab-pane fade" id="estudiantes" role="tabpanel" aria-labelledby="estudiantes-tab">
-                    <!-- Contenido de Estudiantes -->
-                    <p>Sección de Estudiantes.</p>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Cursos Activos
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_cursos|default:0 }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-music fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="tab-pane fade" id="cursos" role="tabpanel" aria-labelledby="cursos-tab">
-                    <!-- Contenido de Cursos -->
-                    <p>Sección de Cursos.</p>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Matrículas Activas
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_matriculas|default:0 }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <p class="mt-4">Bienvenido, {{ user.username }}.</p>
+
+            <!-- Sección de accesos rápidos -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Accesos Rápidos</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2 col-sm-4 mb-3 text-center">
+                                    <a href="{% url 'admin_estudiantes' %}" class="btn btn-outline-primary btn-lg w-100">
+                                        <i class="fas fa-user-graduate fa-2x mb-2"></i><br>
+                                        <small>Estudiantes</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-2 col-sm-4 mb-3 text-center">
+                                    <a href="{% url 'admin_profesores' %}" class="btn btn-outline-success btn-lg w-100">
+                                        <i class="fas fa-chalkboard-teacher fa-2x mb-2"></i><br>
+                                        <small>Profesores</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-2 col-sm-4 mb-3 text-center">
+                                    <a href="{% url 'admin_cursos' %}" class="btn btn-outline-info btn-lg w-100">
+                                        <i class="fas fa-book-open fa-2x mb-2"></i><br>
+                                        <small>Cursos</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-2 col-sm-4 mb-3 text-center">
+                                    <a href="{% url 'admin_clases' %}" class="btn btn-outline-warning btn-lg w-100">
+                                        <i class="fas fa-calendar-alt fa-2x mb-2"></i><br>
+                                        <small>Horarios</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-2 col-sm-4 mb-3 text-center">
+                                    <a href="{% url 'admin_matriculas' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                        <i class="fas fa-user-plus fa-2x mb-2"></i><br>
+                                        <small>Matrículas</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-2 col-sm-4 mb-3 text-center">
+                                    <a href="{% url 'admin_asistencias' %}" class="btn btn-outline-dark btn-lg w-100">
+                                        <i class="fas fa-clipboard-check fa-2x mb-2"></i><br>
+                                        <small>Asistencias</small>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de resumen de actividad reciente -->
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Pagos Pendientes</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if pagos_pendientes %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Estudiante</th>
+                                                <th>Curso</th>
+                                                <th>Monto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for pago in pagos_pendientes|slice:":5" %}
+                                            <tr>
+                                                <td>{{ pago.matricula.estudiante.get_full_name }}</td>
+                                                <td>{{ pago.matricula.clase.curso.nombre }}</td>
+                                                <td>${{ pago.monto }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="text-center">
+                                    <a href="{% url 'admin_pagos' %}" class="btn btn-sm btn-primary">Ver todos los pagos</a>
+                                </div>
+                            {% else %}
+                                <p class="text-muted text-center">No hay pagos pendientes</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Clases de Hoy</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if clases_hoy %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Curso</th>
+                                                <th>Hora</th>
+                                                <th>Aula</th>
+                                                <th>Profesor</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for clase in clases_hoy %}
+                                            <tr>
+                                                <td>{{ clase.curso.nombre }}</td>
+                                                <td>{{ clase.hora_inicio }}</td>
+                                                <td>{{ clase.aula }}</td>
+                                                <td>{{ clase.profesor.get_full_name }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="text-center">
+                                    <a href="{% url 'admin_clases' %}" class="btn btn-sm btn-primary">Ver todos los horarios</a>
+                                </div>
+                            {% else %}
+                                <p class="text-muted text-center">No hay clases programadas para hoy</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <p class="text-muted text-center mt-4">
+                        Bienvenido, {{ user.get_full_name|default:user.username }}. 
+                        Última conexión: {{ user.last_login|date:"d/m/Y H:i" }}
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Modal para añadir profesor -->
-    <div class="modal fade" id="addProfesorModal" tabindex="-1" aria-labelledby="addProfesorModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form id="add-profesor-form" method="POST" action="#">
-            <div class="modal-header">
-              <h5 class="modal-title" id="addProfesorModalLabel">Registrar Profesor</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Usuario</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
-                </div>
-                <div class="mb-3">
-                    <label for="first_name" class="form-label">Nombre</label>
-                    <input type="text" class="form-control" id="first_name" name="first_name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="last_name" class="form-label">Apellido</label>
-                    <input type="text" class="form-control" id="last_name" name="last_name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="especialidad" class="form-label">Especialidad</label>
-                    <input type="text" class="form-control" id="especialidad" name="especialidad" required>
-                </div>
-                <div class="mb-3">
-                    <label for="cedula" class="form-label">Cédula</label>
-                    <input type="text" class="form-control" id="cedula" name="cedula">
-                </div>
-                <div class="mb-3">
-                    <label for="telefono" class="form-label">Teléfono</label>
-                    <input type="text" class="form-control" id="telefono" name="telefono">
-                </div>
-                <div class="mb-3">
-                    <label for="direccion" class="form-label">Dirección</label>
-                    <input type="text" class="form-control" id="direccion" name="direccion">
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
-                <input type="hidden" name="rol" value="PROFESOR">
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-              <button type="submit" class="btn btn-primary">Registrar</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    <script>
-        // Datos quemados de profesores
-        const profesores = [
-            {id: 1, nombre: "Juan Pérez", especialidad: "Piano"},
-            {id: 2, nombre: "Ana Gómez", especialidad: "Guitarra"},
-            {id: 3, nombre: "Luis Martínez", especialidad: "Violín"},
-            {id: 4, nombre: "María López", especialidad: "Canto"},
-            {id: 5, nombre: "Carlos Ruiz", especialidad: "Batería"},
-            {id: 6, nombre: "Laura Torres", especialidad: "Saxofón"},
-            {id: 7, nombre: "Pedro Sánchez", especialidad: "Flauta"},
-            {id: 8, nombre: "Sofía Ramírez", especialidad: "Cello"},
-            {id: 9, nombre: "Miguel Díaz", especialidad: "Trompeta"},
-            {id: 10, nombre: "Lucía Fernández", especialidad: "Clarinete"}
-        ];
-
-        let profesoresPage = 1;
-        const profesoresRowsPerPage = 5;
-
-        function renderProfesoresTable(page) {
-            const tbody = document.getElementById('profesores-tbody');
-            tbody.innerHTML = '';
-            const start = (page - 1) * profesoresRowsPerPage;
-            const end = start + profesoresRowsPerPage;
-            profesores.slice(start, end).forEach(prof => {
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${prof.id}</td>
-                    <td>${prof.nombre}</td>
-                    <td>${prof.especialidad}</td>
-                    <td>
-                        <button class="btn btn-sm btn-info me-1">Ver más</button>
-                        <button class="btn btn-sm btn-warning me-1">Editar</button>
-                        <button class="btn btn-sm btn-danger">Eliminar</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        .border-left-primary {
+            border-left: 0.25rem solid #4e73df !important;
         }
-
-        function renderProfesoresPagination(page) {
-            const totalPages = Math.ceil(profesores.length / profesoresRowsPerPage);
-            const pagination = document.getElementById('profesores-pagination');
-            pagination.innerHTML = '';
-            for (let i = 1; i <= totalPages; i++) {
-                let li = document.createElement('li');
-                li.className = 'page-item' + (i === page ? ' active' : '');
-                let btn = document.createElement('button');
-                btn.className = 'page-link';
-                btn.textContent = i;
-                btn.onclick = () => {
-                    profesoresPage = i;
-                    renderProfesoresTable(profesoresPage);
-                    renderProfesoresPagination(profesoresPage);
-                };
-                li.appendChild(btn);
-                pagination.appendChild(li);
-            }
+        .border-left-success {
+            border-left: 0.25rem solid #1cc88a !important;
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            renderProfesoresTable(profesoresPage);
-            renderProfesoresPagination(profesoresPage);
-
-            // Botón añadir profesor (abre el modal)
-            document.getElementById('add-profesor-btn').onclick = function() {
-                // Limpiar el formulario del modal
-                document.getElementById('add-profesor-form').reset();
-            };
-        });
-    </script>
-
+        .border-left-info {
+            border-left: 0.25rem solid #36b9cc !important;
+        }
+        .border-left-warning {
+            border-left: 0.25rem solid #f6c23e !important;
+        }
+        .text-gray-800 {
+            color: #5a5c69 !important;
+        }
+        .text-gray-300 {
+            color: #dddfeb !important;
+        }
+    </style>
 {% endblock %}

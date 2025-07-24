@@ -1,0 +1,149 @@
+{% extends 'usuarios/base.html' %}
+{% load static %}
+{% block title %}Panel Administrador - Pagos{% endblock %}
+{% block content %}
+
+<div class="main-content">
+    <div class="container mt-5">
+        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pagos-tab" data-bs-toggle="tab" data-bs-target="#pagos" type="button" role="tab" aria-controls="pagos" aria-selected="true">Pagos</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="add-pago-tab" data-bs-toggle="tab" data-bs-target="#add-pago" type="button" role="tab" aria-controls="add-pago" aria-selected="false">Procesar Pago</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="adminTabsContent">
+            <div class="tab-pane fade show active" id="pagos" role="tabpanel" aria-labelledby="pagos-tab">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Estudiante</th>
+                                <th>Curso</th>
+                                <th>Fecha Matrícula</th>
+                                <th>Monto</th>
+                                <th>Fecha Pago</th>
+                                <th>Estado</th>
+                                <th>Observaciones</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pago in pagos %}
+                            <tr>
+                                <td>{{ pago.matricula.estudiante.get_full_name }}</td>
+                                <td>{{ pago.matricula.clase.curso.nombre }}</td>
+                                <td>{{ pago.matricula.fecha_matricula }}</td>
+                                <td>${{ pago.monto }}</td>
+                                <td>{{ pago.fecha_pago }}</td>
+                                <td>
+                                    <span class="badge {% if pago.estado == 'PAGADO' %}bg-success{% elif pago.estado == 'CANCELADO' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                        {{ pago.get_estado_display }}
+                                    </span>
+                                </td>
+                                <td>{{ pago.observaciones }}</td>
+                                <td>
+                                    {% if pago.estado == 'PENDIENTE' %}
+                                        <button class="btn btn-sm btn-success btn-procesar-pago"
+                                                data-matricula-id="{{ pago.matricula.id }}"
+                                                data-monto-pendiente="{{ pago.monto }}"
+                                                data-estudiante="{{ pago.matricula.estudiante.get_full_name }}"
+                                                data-curso="{{ pago.matricula.clase.curso.nombre }}">
+                                            Procesar
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center">No hay pagos registrados.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="add-pago" role="tabpanel" aria-labelledby="add-pago-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Procesar Pago</h5>
+                        <form method="POST" action="{% url 'admin_pagos' %}" id="form-procesar-pago">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="matricula" class="form-label">Matrícula</label>
+                                    <select class="form-select" id="matricula" name="matricula" required>
+                                        <option value="" selected disabled>Seleccione una matrícula</option>
+                                        {% for matricula in matriculas %}
+                                            <option value="{{ matricula.id }}" data-precio="{{ matricula.clase.curso.precio }}">
+                                                {{ matricula.estudiante.get_full_name }} - {{ matricula.clase.curso.nombre }} (${{ matricula.clase.curso.precio }}) ({{ matricula.fecha_matricula }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="monto" class="form-label">Monto del Pago</label>
+                                    <input type="number" class="form-control" id="monto" name="monto" min="0" step="0.01" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="estado" class="form-label">Estado</label>
+                                    <select class="form-select" id="estado" name="estado" required>
+                                        <option value="PAGADO">Pagado</option>
+                                        <option value="PENDIENTE">Pendiente</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="observaciones" class="form-label">Observaciones</label>
+                                    <textarea class="form-control" id="observaciones" name="observaciones"></textarea>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <div class="alert alert-info" id="info-pago" style="display: none;">
+                                        <strong>Información:</strong> <span id="texto-info"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Procesar Pago</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Procesar pago desde la tabla
+    document.querySelectorAll('.btn-procesar-pago').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const matriculaId = btn.getAttribute('data-matricula-id');
+            const montoPendiente = btn.getAttribute('data-monto-pendiente');
+            const estudiante = btn.getAttribute('data-estudiante');
+            const curso = btn.getAttribute('data-curso');
+            
+            // Cambiar a la pestaña de procesar pago
+            const addPagoTab = new bootstrap.Tab(document.getElementById('add-pago-tab'));
+            addPagoTab.show();
+            
+            // Precargar los datos
+            document.getElementById('matricula').value = matriculaId;
+            document.getElementById('monto').value = montoPendiente;
+            document.getElementById('estado').value = 'PAGADO';
+            
+            // Mostrar información
+            document.getElementById('texto-info').textContent = `Procesando pago para ${estudiante} del curso ${curso}. Monto pendiente: $${montoPendiente}`;
+            document.getElementById('info-pago').style.display = 'block';
+        });
+    });
+
+    // Auto-completar monto al seleccionar matrícula
+    document.getElementById('matricula').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const precio = selectedOption.getAttribute('data-precio');
+        if (precio) {
+            document.getElementById('monto').value = precio;
+        }
+    });
+</script>
+
+{% endblock %}

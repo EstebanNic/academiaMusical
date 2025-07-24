@@ -1,0 +1,150 @@
+{% extends 'usuarios/base.html' %}
+{% load static %}
+{% block title %}Panel Administrador{% endblock %}
+{% block content %}
+
+<div class="main-content">
+    <div class="container mt-5">
+        <!-- Tabs de navegación -->
+        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="matriculas-tab" data-bs-toggle="tab" data-bs-target="#matriculas" type="button" role="tab" aria-controls="matriculas" aria-selected="true">Matrículas</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="add-matricula-tab" data-bs-toggle="tab" data-bs-target="#add-matricula" type="button" role="tab" aria-controls="add-matricula" aria-selected="false">Añadir Matrícula</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="adminTabsContent">
+            <!-- Vista general de matrículas -->
+            <div class="tab-pane fade show active" id="matriculas" role="tabpanel" aria-labelledby="matriculas-tab">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Estudiante</th>
+                                <th>Clase</th>
+                                <th>Curso</th>
+                                <th>Profesor</th>
+                                <th>Fecha Matrícula</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matriculas-tbody">
+                            {% for matricula in matriculas %}
+                            <tr>
+                                <td>{{ matricula.estudiante.first_name }} {{ matricula.estudiante.last_name }}</td>
+                                <td>
+                                    {{ matricula.clase.curso.nombre }}<br>
+                                    {{ matricula.clase.fecha_inicio }} {{ matricula.clase.hora_inicio }}-{{ matricula.clase.hora_fin }}<br>
+                                    Aula: {{ matricula.clase.aula }}
+                                </td>
+                                <td>{{ matricula.clase.curso.nombre }}</td>
+                                <td>
+                                    {% if matricula.clase.profesor %}
+                                        {{ matricula.clase.profesor.first_name }} {{ matricula.clase.profesor.last_name }}
+                                    {% else %}
+                                        Sin profesor
+                                    {% endif %}
+                                </td>
+                                <td>{{ matricula.fecha_matricula }}</td>
+                                <td>{{ matricula.get_estado_display }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger btn-eliminar-matricula"
+                                            data-matricula-id="{{ matricula.id }}"
+                                            data-estudiante-nombre="{{ matricula.estudiante.get_full_name }}">
+                                        Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">No hay matrículas registradas.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Formulario para registrar matrícula -->
+            <div class="tab-pane fade" id="add-matricula" role="tabpanel" aria-labelledby="add-matricula-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Registrar Matrícula</h5>
+                        <form method="POST" action="{% url 'admin_matriculas' %}">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="estudiante" class="form-label">Estudiante</label>
+                                    <select class="form-select" id="estudiante" name="estudiante" required>
+                                        <option value="" selected disabled>Seleccione un estudiante</option>
+                                        {% for estudiante in estudiantes %}
+                                            <option value="{{ estudiante.id }}">{{ estudiante.first_name }} {{ estudiante.last_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="clase" class="form-label">Clase</label>
+                                    <select class="form-select" id="clase" name="clase" required>
+                                        <option value="" selected disabled>Seleccione una clase</option>
+                                        {% for clase in clases %}
+                                            <option value="{{ clase.id }}">
+                                                {{ clase.curso.nombre }} | ${{ clase.curso.precio }} | {{ clase.fecha_inicio }} {{ clase.hora_inicio }}-{{ clase.hora_fin }} | Aula: {{ clase.aula }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="observaciones" class="form-label">Observaciones</label>
+                                    <textarea class="form-control" id="observaciones" name="observaciones" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Registrar Matrícula</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Eliminación (futuro) -->
+<div class="modal fade" id="modalConfirmarEliminarMatricula" tabindex="-1" aria-labelledby="modalConfirmarEliminarMatriculaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalConfirmarEliminarMatriculaLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Está seguro de que desea eliminar la matrícula de <span id="eliminar-nombre-estudiante"></span>?</p>
+      </div>
+      <div class="modal-footer">
+        <form id="form-eliminar-matricula" method="POST" action="{% url 'admin_matriculas' %}">
+            {% csrf_token %}
+            <input type="hidden" name="matricula_id" id="eliminar_matricula_id">
+            <input type="hidden" name="eliminar_matricula" value="1">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    // Modal Confirmar Eliminación
+    document.querySelectorAll('.btn-eliminar-matricula').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('eliminar-nombre-estudiante').textContent = btn.getAttribute('data-estudiante-nombre') || '';
+            document.getElementById('eliminar_matricula_id').value = btn.getAttribute('data-matricula-id') || '';
+            var modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminarMatricula'));
+            modal.show();
+        });
+    });
+</script>
+
+{% endblock %}

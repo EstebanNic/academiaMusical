@@ -16,28 +16,45 @@
             </ul>
             <div class="tab-content" id="adminTabsContent">
                 <div class="tab-pane fade show active" id="estudiantes" role="tabpanel" aria-labelledby="estudiantes-tab">
+                    <!-- Barra de búsqueda -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="buscarEstudiante" placeholder="Buscar estudiante por cédula...">
+                                <button class="btn btn-outline-secondary" type="button" id="limpiarBusqueda">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">Ingrese el número de cédula para buscar un estudiante específico</small>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-center">
+                            <span id="resultadosBusqueda" class="text-muted"></span>
+                        </div>
+                    </div>
+
                     <!-- Tabla de Estudiantes -->
                     <div class="table-responsive">
-                        <table class="table table-striped">
+                        <table class="table table-striped" id="tablaEstudiantes">
                             <thead>
                                 <tr>
                                     <th>Nombre completo</th>
                                     <th>Cédula</th>
                                     <th>Email</th>
                                     <th>Teléfono</th>
-                                    <th>Instrumento</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="estudiantes-tbody">
                                 {% for estudiante in estudiantes %}
-                                <tr>
+                                <tr class="estudiante-row" data-cedula="{{ estudiante.cedula|default:'' }}">
                                     <td>{{ estudiante.first_name }} {{ estudiante.last_name }}</td>
-                                    <td>{{ estudiante.cedula }}</td>
+                                    <td class="cedula-cell">{{ estudiante.cedula }}</td>
                                     <td>{{ estudiante.email }}</td>
                                     <td>{{ estudiante.telefono }}</td>
-                                    <td>{{ estudiante.instrumento }}</td>
                                     <td>
                                         <span class="badge {% if estudiante.is_active %}bg-success{% else %}bg-secondary{% endif %}">
                                             {% if estudiante.is_active %}Activo{% else %}Inactivo{% endif %}
@@ -49,7 +66,6 @@
                                             data-estudiante-cedula="{{ estudiante.cedula }}"
                                             data-estudiante-email="{{ estudiante.email }}"
                                             data-estudiante-telefono="{{ estudiante.telefono }}"
-                                            data-estudiante-instrumento="{{ estudiante.instrumento }}"
                                             data-estudiante-direccion="{{ estudiante.direccion }}"
                                             data-estudiante-estado="{% if estudiante.is_active %}Activo{% else %}Inactivo{% endif %}"
                                         >Ver más</button>
@@ -59,7 +75,6 @@
                                             data-estudiante-nombre="{{ estudiante.first_name }}"
                                             data-estudiante-apellido="{{ estudiante.last_name }}"
                                             data-estudiante-email="{{ estudiante.email }}"
-                                            data-estudiante-instrumento="{{ estudiante.instrumento }}"
                                             data-estudiante-telefono="{{ estudiante.telefono }}"
                                             data-estudiante-direccion="{{ estudiante.direccion }}"
                                         >Editar</button>
@@ -70,13 +85,20 @@
                                     </td>
                                 </tr>
                                 {% empty %}
-                                <tr>
-                                    <td colspan="7" class="text-center">No hay estudiantes registrados.</td>
+                                <tr id="no-estudiantes-row">
+                                    <td colspan="6" class="text-center">No hay estudiantes registrados.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Mensaje cuando no hay resultados de búsqueda -->
+                    <div id="sin-resultados" class="alert alert-info text-center d-none">
+                        <i class="fas fa-search me-2"></i>
+                        No se encontraron estudiantes con la cédula especificada.
+                    </div>
+
                     <nav>
                         <ul class="pagination justify-content-center" id="estudiantes-pagination">
                             <!-- Paginación generada por JS -->
@@ -87,58 +109,57 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title mb-3">Registrar Estudiante</h5>
-                            <form method="POST" action="{% url 'admin_estudiantes' %}">
+                            <form method="POST" action="{% url 'admin_estudiantes' %}" id="form-add-estudiante">
                                 {% csrf_token %}
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="cedula" class="form-label">Cédula</label>
-                                        <input type="text" class="form-control" id="cedula" name="cedula">
+                                        <label for="cedula" class="form-label">Cédula <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="cedula" name="cedula" required>
+                                        <div class="invalid-feedback">
+                                            La cédula es requerida y debe ser única.
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="first_name" class="form-label">Nombre</label>
+                                        <label for="first_name" class="form-label">Nombre <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="first_name" name="first_name" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="last_name" class="form-label">Apellido</label>
+                                        <label for="last_name" class="form-label">Apellido <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="last_name" name="last_name" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="email" class="form-label">Email</label>
+                                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                                         <input type="email" class="form-control" id="email" name="email" required>
+                                        <div class="invalid-feedback">
+                                            El email es requerido y debe ser único.
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="instrumento" class="form-label">Instrumento</label>
-                                        <select class="form-select" id="instrumento" name="instrumento" required>
-                                            <option value="" selected disabled>Seleccione un instrumento</option>
-                                            <option value="Piano">Piano</option>
-                                            <option value="Guitarra">Guitarra</option>
-                                            <option value="Violín">Violín</option>
-                                            <option value="Canto">Canto</option>
-                                            <option value="Batería">Batería</option>
-                                            <option value="Saxofón">Saxofón</option>
-                                            <option value="Flauta">Flauta</option>
-                                            <option value="Cello">Cello</option>
-                                            <option value="Trompeta">Trompeta</option>
-                                            <option value="Clarinete">Clarinete</option>
-                                        </select>
+                                        <label for="telefono" class="form-label">Teléfono <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="telefono" name="telefono" required>
+                                        <div class="invalid-feedback">
+                                            El teléfono es requerido y debe ser único.
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="telefono" class="form-label">Teléfono</label>
-                                        <input type="text" class="form-control" id="telefono" name="telefono">
-                                    </div>
-                                    <div class="col-md-12 mb-3">
                                         <label for="direccion" class="form-label">Dirección</label>
                                         <input type="text" class="form-control" id="direccion" name="direccion">
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="password" class="form-label">Contraseña</label>
+                                        <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
                                         <input type="password" class="form-control" id="password" name="password" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
+                                        <label for="confirm_password" class="form-label">Confirmar Contraseña <span class="text-danger">*</span></label>
                                         <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
                                         <div id="passwordHelp" class="form-text text-danger d-none">Las contraseñas no coinciden.</div>
                                     </div>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <span class="text-danger">*</span> Campos obligatorios. 
+                                        La cédula, email y teléfono deben ser únicos en el sistema.
+                                    </small>
                                 </div>
                                 <input type="hidden" name="rol" value="ESTUDIANTE">
                                 <button type="submit" class="btn btn-primary">Registrar</button>
@@ -179,26 +200,10 @@
                         <input type="email" class="form-control" id="edit_email" name="email" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="edit_instrumento" class="form-label">Instrumento</label>
-                        <select class="form-select" id="edit_instrumento" name="instrumento" required>
-                            <option value="" disabled>Seleccione un instrumento</option>
-                            <option value="Piano">Piano</option>
-                            <option value="Guitarra">Guitarra</option>
-                            <option value="Violín">Violín</option>
-                            <option value="Canto">Canto</option>
-                            <option value="Batería">Batería</option>
-                            <option value="Saxofón">Saxofón</option>
-                            <option value="Flauta">Flauta</option>
-                            <option value="Cello">Cello</option>
-                            <option value="Trompeta">Trompeta</option>
-                            <option value="Clarinete">Clarinete</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
                         <label for="edit_telefono" class="form-label">Teléfono</label>
                         <input type="text" class="form-control" id="edit_telefono" name="telefono">
                     </div>
-                    <div class="col-md-12 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="edit_direccion" class="form-label">Dirección</label>
                         <input type="text" class="form-control" id="edit_direccion" name="direccion">
                     </div>
@@ -225,7 +230,6 @@
               <li class="list-group-item"><strong>Cédula:</strong> <span id="vermas-cedula"></span></li>
               <li class="list-group-item"><strong>Email:</strong> <span id="vermas-email"></span></li>
               <li class="list-group-item"><strong>Teléfono:</strong> <span id="vermas-telefono"></span></li>
-              <li class="list-group-item"><strong>Instrumento:</strong> <span id="vermas-instrumento"></span></li>
               <li class="list-group-item"><strong>Dirección:</strong> <span id="vermas-direccion"></span></li>
               <li class="list-group-item"><strong>Estado:</strong> <span id="vermas-estado"></span></li>
             </ul>
@@ -261,21 +265,227 @@
       </div>
     </div>
 
+    <!-- Modal Estudiante Duplicado -->
+    <div class="modal fade" id="modalEstudianteDuplicado" tabindex="-1" aria-labelledby="modalEstudianteDuplicadoLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalEstudianteDuplicadoLabel">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                Estudiante ya registrado
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-warning mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Los datos ingresados ya pertenecen a un estudiante registrado.</strong>
+                <br><br>
+                Por favor, verifique la información antes de continuar:
+                <ul class="mt-2 mb-0">
+                    <li>La <strong>cédula</strong> debe ser única para cada estudiante</li>
+                    <li>El <strong>email</strong> debe ser único para cada estudiante</li>
+                    <li>El <strong>teléfono</strong> debe ser único para cada estudiante</li>
+                </ul>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                <i class="fas fa-check me-1"></i>
+                Entendido
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Estudiante Duplicado (para edición) -->
+    <div class="modal fade" id="modalEstudianteDuplicadoEdicion" tabindex="-1" aria-labelledby="modalEstudianteDuplicadoEdicionLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalEstudianteDuplicadoEdicionLabel">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                Error al editar estudiante
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-danger mb-0">
+                <i class="fas fa-times-circle me-2"></i>
+                <strong>No se puede actualizar el estudiante con los datos proporcionados.</strong>
+                <br><br>
+                Los siguientes datos ya están siendo utilizados por otro usuario:
+                <ul class="mt-2 mb-2">
+                    <li>Verifique que la <strong>cédula</strong> no esté duplicada</li>
+                    <li>Verifique que el <strong>email</strong> no esté duplicado</li>
+                    <li>Verifique que el <strong>teléfono</strong> no esté duplicado</li>
+                </ul>
+                <small class="text-muted">
+                    <strong>Nota:</strong> Cada estudiante debe tener datos únicos en el sistema.
+                </small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                <i class="fas fa-edit me-1"></i>
+                Corregir datos
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
+        // Verificar si hay que mostrar los modales
+        document.addEventListener('DOMContentLoaded', function() {
+            //{% if mostrar_modal_duplicado %}
+                var modalDuplicado = new bootstrap.Modal(document.getElementById('modalEstudianteDuplicado'));
+                modalDuplicado.show();
+            //{% endif %}
+
+            //{% if mostrar_modal_duplicado_edicion %}
+                var modalDuplicadoEdicion = new bootstrap.Modal(document.getElementById('modalEstudianteDuplicadoEdicion'));
+                modalDuplicadoEdicion.show();
+            //{% endif %}
+
+            // Inicializar búsqueda de estudiantes
+            inicializarBusquedaEstudiantes();
+        });
+
+        // Función para inicializar la búsqueda de estudiantes
+        function inicializarBusquedaEstudiantes() {
+            const buscarInput = document.getElementById('buscarEstudiante');
+            const limpiarBtn = document.getElementById('limpiarBusqueda');
+            const resultadosSpan = document.getElementById('resultadosBusqueda');
+            const sinResultadosDiv = document.getElementById('sin-resultados');
+            const estudianteRows = document.querySelectorAll('.estudiante-row');
+            const totalEstudiantes = estudianteRows.length;
+
+            // Actualizar contador inicial
+            actualizarContador(totalEstudiantes, totalEstudiantes);
+
+            // Función para filtrar estudiantes
+            function filtrarEstudiantes() {
+                const terminoBusqueda = buscarInput.value.trim().toLowerCase();
+                let estudiantesVisibles = 0;
+
+                if (terminoBusqueda === '') {
+                    // Mostrar todos los estudiantes
+                    estudianteRows.forEach(row => {
+                        row.style.display = '';
+                        row.querySelector('.cedula-cell').innerHTML = row.getAttribute('data-cedula');
+                    });
+                    estudiantesVisibles = totalEstudiantes;
+                    sinResultadosDiv.classList.add('d-none');
+                } else {
+                    // Filtrar por cédula
+                    estudianteRows.forEach(row => {
+                        const cedula = row.getAttribute('data-cedula').toLowerCase();
+                        const cedulaCell = row.querySelector('.cedula-cell');
+                        
+                        if (cedula.includes(terminoBusqueda)) {
+                            row.style.display = '';
+                            estudiantesVisibles++;
+                            
+                            // Resaltar el texto coincidente
+                            const cedulaOriginal = row.getAttribute('data-cedula');
+                            const regex = new RegExp(`(${terminoBusqueda})`, 'gi');
+                            const cedulaResaltada = cedulaOriginal.replace(regex, '<mark class="bg-warning">$1</mark>');
+                            cedulaCell.innerHTML = cedulaResaltada;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Mostrar mensaje si no hay resultados
+                    if (estudiantesVisibles === 0) {
+                        sinResultadosDiv.classList.remove('d-none');
+                    } else {
+                        sinResultadosDiv.classList.add('d-none');
+                    }
+                }
+
+                actualizarContador(estudiantesVisibles, totalEstudiantes);
+            }
+
+            // Función para actualizar contador de resultados
+            function actualizarContador(visibles, total) {
+                if (visibles === total) {
+                    resultadosSpan.textContent = `Mostrando ${total} estudiante${total !== 1 ? 's' : ''}`;
+                } else {
+                    resultadosSpan.textContent = `Mostrando ${visibles} de ${total} estudiante${total !== 1 ? 's' : ''}`;
+                }
+            }
+
+            // Función para limpiar búsqueda
+            function limpiarBusqueda() {
+                buscarInput.value = '';
+                filtrarEstudiantes();
+                buscarInput.focus();
+            }
+
+            // Event listeners
+            buscarInput.addEventListener('input', filtrarEstudiantes);
+            buscarInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    limpiarBusqueda();
+                }
+            });
+            
+            limpiarBtn.addEventListener('click', limpiarBusqueda);
+        }
+
         // Validación de contraseñas
-        const form = document.getElementById('add-estudiante-form');
+        const form = document.getElementById('form-add-estudiante');
         const password = document.getElementById('password');
         const confirmPassword = document.getElementById('confirm_password');
         const passwordHelp = document.getElementById('passwordHelp');
+        
         if (form) {
             form.addEventListener('submit', function(e) {
+                let isValid = true;
+                
+                // Validar contraseñas
                 if (password.value !== confirmPassword.value) {
                     e.preventDefault();
                     passwordHelp.classList.remove('d-none');
+                    isValid = false;
                 } else {
                     passwordHelp.classList.add('d-none');
                 }
+                
+                // Validar campos requeridos únicos
+                const cedula = document.getElementById('cedula');
+                const email = document.getElementById('email');
+                const telefono = document.getElementById('telefono');
+                
+                if (!cedula.value.trim()) {
+                    cedula.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    cedula.classList.remove('is-invalid');
+                }
+                
+                if (!email.value.trim()) {
+                    email.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    email.classList.remove('is-invalid');
+                }
+                
+                if (!telefono.value.trim()) {
+                    telefono.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    telefono.classList.remove('is-invalid');
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                }
             });
+            
             confirmPassword.addEventListener('input', function() {
                 if (password.value !== confirmPassword.value) {
                     passwordHelp.classList.remove('d-none');
@@ -293,7 +503,6 @@
                 document.getElementById('edit_first_name').value = btn.getAttribute('data-estudiante-nombre') || '';
                 document.getElementById('edit_last_name').value = btn.getAttribute('data-estudiante-apellido') || '';
                 document.getElementById('edit_email').value = btn.getAttribute('data-estudiante-email') || '';
-                document.getElementById('edit_instrumento').value = btn.getAttribute('data-estudiante-instrumento') || '';
                 document.getElementById('edit_telefono').value = btn.getAttribute('data-estudiante-telefono') || '';
                 document.getElementById('edit_direccion').value = btn.getAttribute('data-estudiante-direccion') || '';
                 var modal = new bootstrap.Modal(document.getElementById('modalEditarEstudiante'));
@@ -308,7 +517,6 @@
                 document.getElementById('vermas-cedula').textContent = btn.getAttribute('data-estudiante-cedula') || '';
                 document.getElementById('vermas-email').textContent = btn.getAttribute('data-estudiante-email') || '';
                 document.getElementById('vermas-telefono').textContent = btn.getAttribute('data-estudiante-telefono') || '';
-                document.getElementById('vermas-instrumento').textContent = btn.getAttribute('data-estudiante-instrumento') || '';
                 document.getElementById('vermas-direccion').textContent = btn.getAttribute('data-estudiante-direccion') || '';
                 document.getElementById('vermas-estado').textContent = btn.getAttribute('data-estudiante-estado') || '';
                 var modal = new bootstrap.Modal(document.getElementById('modalVerMasEstudiante'));
@@ -331,4 +539,3 @@
     </script>
 
 {% endblock %}
-

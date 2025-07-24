@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Reporte de Pagos - Academia Musical</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.3;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            color: #0d6efd;
+            font-size: 20px;
+            margin: 0 0 3px 0;
+        }
+        
+        .header h2 {
+            color: #666;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .info-summary {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 10px;
+        }
+        
+        .info-grid {
+            display: table;
+            width: 100%;
+        }
+        
+        .info-row {
+            display: table-row;
+        }
+        
+        .info-cell {
+            display: table-cell;
+            padding: 2px 5px;
+            vertical-align: top;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            width: 25%;
+        }
+        
+        .info-value {
+            width: 25%;
+        }
+        
+        .summary-totals {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        
+        .summary-totals td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        .summary-totals .total { background-color: #e3f2fd; }
+        .summary-totals .pendiente { background-color: #fff3cd; }
+        .summary-totals .pagado { background-color: #d4edda; }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 6px;
+            border: 1px solid #ddd;
+            text-align: left;
+            font-size: 9px;
+        }
+        
+        .data-table th {
+            background-color: #0d6efd;
+            color: white;
+            font-weight: bold;
+            font-size: 9px;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .estado-badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: white;
+            font-size: 8px;
+            font-weight: bold;
+        }
+        
+        .estado-pendiente { background-color: #ffc107; color: #000; }
+        .estado-pagado { background-color: #28a745; }
+        .estado-cancelado { background-color: #dc3545; }
+        
+        .footer-info {
+            text-align: center;
+            font-size: 8px;
+            color: #666;
+            margin-top: 15px;
+            border-top: 1px solid #ddd;
+            padding-top: 8px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Academia Musical</h1>
+        <h2>Reporte de Pagos</h2>
+    </div>
+
+    <div class="info-summary">
+        <div class="info-grid">
+            <div class="info-row">
+                <div class="info-cell info-label">Generado:</div>
+                <div class="info-cell info-value">{{ fecha_generacion|date:"d/m/Y H:i" }}</div>
+                <div class="info-cell info-label">Usuario:</div>
+                <div class="info-cell info-value">{{ usuario_generador.get_full_name|default:usuario_generador.username }}</div>
+            </div>
+            {% if fecha_inicio or fecha_fin %}
+            <div class="info-row">
+                <div class="info-cell info-label">Período:</div>
+                <div class="info-cell info-value">
+                    {% if fecha_inicio %}{{ fecha_inicio|date:"d/m/Y" }}{% endif %}
+                    {% if fecha_fin %} - {{ fecha_fin|date:"d/m/Y" }}{% endif %}
+                </div>
+                {% if estado_filtro %}
+                <div class="info-cell info-label">Estado:</div>
+                <div class="info-cell info-value">{{ estado_filtro }}</div>
+                {% else %}
+                <div class="info-cell info-label"></div>
+                <div class="info-cell info-value"></div>
+                {% endif %}
+            </div>
+            {% endif %}
+            <div class="info-row">
+                <div class="info-cell info-label">Registros:</div>
+                <div class="info-cell info-value">{{ count_pagos }}</div>
+                <div class="info-cell info-label"></div>
+                <div class="info-cell info-value"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen de Totales -->
+    <table class="summary-totals">
+        <tr>
+            <td class="total">
+                <strong>Total General</strong><br>
+                ${{ total_pagos|floatformat:2 }}
+            </td>
+            <td class="pagado">
+                <strong>Total Pagado</strong><br>
+                ${{ total_pagados|floatformat:2 }}
+            </td>
+            <td class="pendiente">
+                <strong>Total Pendiente</strong><br>
+                ${{ total_pendientes|floatformat:2 }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- Tabla de Datos -->
+    {% if pagos %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 18%;">Estudiante</th>
+                <th style="width: 15%;">Curso</th>
+                <th style="width: 12%;">F. Matrícula</th>
+                <th style="width: 10%;">Monto</th>
+                <th style="width: 12%;">F. Pago</th>
+                <th style="width: 13%;">Estado</th>
+                <th style="width: 20%;">Observaciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pago in pagos %}
+            <tr>
+                <td>{{ pago.matricula.estudiante.get_full_name }}</td>
+                <td>{{ pago.matricula.clase.curso.nombre }}</td>
+                <td class="text-center">{{ pago.matricula.fecha_matricula|date:"d/m/y" }}</td>
+                <td class="text-right">${{ pago.monto|floatformat:2 }}</td>
+                <td class="text-center">{{ pago.fecha_pago|date:"d/m/y" }}</td>
+                <td class="text-center">
+                    <span class="estado-badge {% if pago.estado == 'PAGADO' %}estado-pagado{% elif pago.estado == 'CANCELADO' %}estado-cancelado{% else %}estado-pendiente{% endif %}">
+                        {{ pago.get_estado_display }}
+                    </span>
+                </td>
+                <td>{{ pago.observaciones|truncatechars:35|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-data">
+        <h3>No se encontraron registros</h3>
+        <p>No hay pagos que coincidan con los filtros seleccionados.</p>
+    </div>
+    {% endif %}
+
+    <div class="footer-info">
+        Academia Musical - Sistema de Gestión | Generado el {{ fecha_generacion|date:"d/m/Y H:i" }}
+    </div>
+</body>
+</html>

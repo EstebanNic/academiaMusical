@@ -1,0 +1,409 @@
+{% extends 'usuarios/base.html' %}
+{% load static %}
+{% block title %}Panel Administrador - Asistencias{% endblock %}
+{% block content %}
+
+<div class="main-content">
+    <div class="container mt-5">
+        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="asistencias-tab" data-bs-toggle="tab" data-bs-target="#asistencias" type="button" role="tab" aria-controls="asistencias" aria-selected="true">Historial de Asistencias</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tomar-asistencia-tab" data-bs-toggle="tab" data-bs-target="#tomar-asistencia" type="button" role="tab" aria-controls="tomar-asistencia" aria-selected="false">Tomar Asistencia por Clase</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="adminTabsContent">
+            <!-- Tab: Historial de Asistencias -->
+            <div class="tab-pane fade show active" id="asistencias" role="tabpanel" aria-labelledby="asistencias-tab">
+                <!-- Filtros -->
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <form method="GET" class="d-flex">
+                            <input type="date" class="form-control me-2" name="fecha_filtro" value="{{ fecha_filtro }}" placeholder="Filtrar por fecha">
+                            <select class="form-select me-2" name="clase_filtro">
+                                <option value="">Todas las clases</option>
+                                {% for clase in clases %}
+                                    <option value="{{ clase.id }}" {% if clase_filtro == clase.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ clase.curso.nombre }} - {{ clase.aula }} ({{ clase.hora_inicio }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-outline-primary me-2">Filtrar</button>
+                            <a href="{% url 'admin_asistencias' %}" class="btn btn-outline-secondary">Limpiar</a>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- NUEVO: Tabla de clases con historial de asistencias -->
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Curso</th>
+                                <th>Clase (Aula)</th>
+                                <th>Horario</th>
+                                <th>Fecha</th>
+                                <th>Profesor</th>
+                                <th>Estudiantes</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key, clase_info in historial_clases.items %}
+                            <tr>
+                                <td>{{ clase_info.curso.nombre }}</td>
+                                <td>{{ clase_info.clase.aula }}</td>
+                                <td>{{ clase_info.clase.hora_inicio }} - {{ clase_info.clase.hora_fin }}</td>
+                                <td>{{ clase_info.fecha }}</td>
+                                <td>{{ clase_info.profesor.get_full_name }}</td>
+                                <td>{{ clase_info.asistencias|length }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-info" 
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalDetalleAsistencias"
+                                        data-clase="{{ clase_info.clase.id }}"
+                                        data-fecha="{{ clase_info.fecha }}"
+                                        data-detalle="{{ forloop.counter0 }}">
+                                        Ver asistencias
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">No hay historial de asistencias.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Tab: Tomar Asistencia por Clase -->
+            <div class="tab-pane fade" id="tomar-asistencia" role="tabpanel" aria-labelledby="tomar-asistencia-tab">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Seleccionar Clase</h5>
+                                <div class="mb-3">
+                                    <label for="fecha_clase" class="form-label">Fecha de Asistencia</label>
+                                    <input type="date" class="form-control" id="fecha_clase" value="{{ fecha_hoy }}">
+                                </div>
+                                <div class="list-group" id="lista-clases">
+                                    {% for clase in clases %}
+                                    <button type="button" class="list-group-item list-group-item-action btn-seleccionar-clase"
+                                            data-clase-id="{{ clase.id }}"
+                                            data-clase-nombre="{{ clase.curso.nombre }}"
+                                            data-clase-aula="{{ clase.aula }}"
+                                            data-clase-horario="{{ clase.hora_inicio }} - {{ clase.hora_fin }}"
+                                            data-clase-profesor="{{ clase.profesor.get_full_name }}">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">{{ clase.curso.nombre }}</h6>
+                                            <small>{{ clase.hora_inicio }}</small>
+                                        </div>
+                                        <p class="mb-1">Aula: {{ clase.aula }}</p>
+                                        <small>Profesor: {{ clase.profesor.get_full_name }}</small>
+                                        <span class="badge bg-secondary">{{ clase.total_estudiantes }} estudiantes</span>
+                                    </button>
+                                    {% empty %}
+                                    <div class="text-center text-muted">No hay clases con estudiantes matriculados</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card" id="card-asistencia" style="display: none;">
+                            <div class="card-body">
+                                <h5 class="card-title" id="titulo-clase">Tomar Asistencia</h5>
+                                <div class="alert alert-info" id="info-clase"></div>
+                                
+                                <form method="POST" id="form-asistencia-masiva">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="registrar_asistencias_clase" value="1">
+                                    <input type="hidden" name="clase_id" id="clase_id_selected">
+                                    <input type="hidden" name="fecha_asistencia" id="fecha_asistencia_hidden">
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="tabla-estudiantes">
+                                            <thead>
+                                                <tr>
+                                                    <th>Estudiante</th>
+                                                    <th>Estado</th>
+                                                    <th>Observaciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbody-estudiantes">
+                                                <!-- Se llenará dinámicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <button type="button" class="btn btn-success" onclick="marcarTodos('PRESENTE')">Marcar Todos Presentes</button>
+                                            <button type="button" class="btn btn-danger" onclick="marcarTodos('AUSENTE')">Marcar Todos Ausentes</button>
+                                        </div>
+                                        <div>
+                                            <button type="submit" class="btn btn-primary">Guardar Asistencias</button>
+                                            <button type="button" class="btn btn-secondary" onclick="cancelarAsistencia()">Cancelar</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NUEVO: Modal para ver detalle de asistencias -->
+<div class="modal fade" id="modalDetalleAsistencias" tabindex="-1" aria-labelledby="modalDetalleAsistenciasLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalDetalleAsistenciasLabel">Detalle de Asistencias</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div id="detalle-asistencias-content">
+          <!-- Se llenará por JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let claseSeleccionada = null;
+
+// CAMBIO: Obtener datos directamente del template con manejo de errores
+let estudiantesPorClase = {};
+try {
+    const datosJSON = '{{ estudiantes_por_clase_json|safe }}';
+    if (datosJSON && datosJSON !== '{}' && datosJSON !== 'None') {
+        estudiantesPorClase = JSON.parse(datosJSON);
+    }
+} catch (error) {
+    console.error('Error al parsear datos de estudiantes:', error);
+    estudiantesPorClase = {};
+}
+
+// NUEVO: Obtener historial de clases para el modal
+let historialClases = {};
+try {
+    const historialJSON = '{{ historial_clases_json|safe }}';
+    if (historialJSON && historialJSON !== '{}' && historialJSON !== 'None') {
+        historialClases = JSON.parse(historialJSON);
+    }
+} catch (error) {
+    console.error('Error al parsear historial de clases:', error);
+    historialClases = {};
+}
+
+// Seleccionar clase para tomar asistencia
+document.querySelectorAll('.btn-seleccionar-clase').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const claseId = btn.getAttribute('data-clase-id');
+        const claseNombre = btn.getAttribute('data-clase-nombre');
+        const claseAula = btn.getAttribute('data-clase-aula');
+        const claseHorario = btn.getAttribute('data-clase-horario');
+        const claseProfesor = btn.getAttribute('data-clase-profesor');
+        const fechaClase = document.getElementById('fecha_clase').value;
+
+        if (!fechaClase) {
+            alert('Por favor seleccione una fecha para la asistencia');
+            return;
+        }
+
+        claseSeleccionada = claseId;
+
+        // Actualizar información de la clase
+        document.getElementById('titulo-clase').textContent = `Asistencia - ${claseNombre}`;
+        document.getElementById('info-clase').innerHTML = `
+            <strong>Clase:</strong> ${claseNombre}<br>
+            <strong>Aula:</strong> ${claseAula}<br>
+            <strong>Horario:</strong> ${claseHorario}<br>
+            <strong>Profesor:</strong> ${claseProfesor}<br>
+            <strong>Fecha:</strong> ${fechaClase}
+        `;
+
+        document.getElementById('clase_id_selected').value = claseId;
+        document.getElementById('fecha_asistencia_hidden').value = fechaClase;
+
+        // Resaltar clase seleccionada
+        document.querySelectorAll('.btn-seleccionar-clase').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Cargar estudiantes de la clase
+        cargarEstudiantesClase(claseId, fechaClase);
+
+        // Mostrar formulario de asistencia
+        document.getElementById('card-asistencia').style.display = 'block';
+    });
+});
+
+// SIMPLIFICADO: Cargar estudiantes desde datos ya disponibles (sin API)
+function cargarEstudiantesClase(claseId, fecha) {
+    const tbody = document.getElementById('tbody-estudiantes');
+    tbody.innerHTML = '<tr><td colspan="3" class="text-center">Cargando estudiantes...</td></tr>';
+    
+    // SIMPLE: Buscar estudiantes en los datos ya cargados
+    const estudiantes = estudiantesPorClase[claseId] || [];
+    
+    if (estudiantes.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="3" class="text-center text-muted">No hay estudiantes matriculados en esta clase</td>
+            </tr>
+        `;
+        return;
+    }
+
+    // NUEVO: Para cada estudiante, buscar si ya tiene asistencia en esta fecha
+    fetch(`{% url 'obtener_asistencias_fecha' %}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            'clase_id': claseId,
+            'fecha': fecha,
+            'estudiante_ids': estudiantes.map(e => e.id)
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+        return response.json();
+    })
+    .then(asistencias => {
+        mostrarEstudiantes(estudiantes, asistencias);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Si falla, mostrar estudiantes sin estado previo
+        mostrarEstudiantes(estudiantes, {});
+    });
+}
+
+// SIMPLIFICADO: Mostrar estudiantes con su estado actual
+function mostrarEstudiantes(estudiantes, asistenciasExistentes = {}) {
+    const tbody = document.getElementById('tbody-estudiantes');
+    tbody.innerHTML = '';
+    
+    estudiantes.forEach(function(estudiante) {
+        const asistencia = asistenciasExistentes[estudiante.id] || {};
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <strong>${estudiante.nombre}</strong><br>
+                <small class="text-muted">Cédula: ${estudiante.cedula}</small>
+            </td>
+            <td>
+                <select class="form-select" name="estado_${estudiante.id}" required>
+                    <option value="PRESENTE" ${asistencia.estado === 'PRESENTE' ? 'selected' : ''}>Presente</option>
+                    <option value="TARDE" ${asistencia.estado === 'TARDE' ? 'selected' : ''}>Llegó tarde</option>
+                    <option value="AUSENTE" ${asistencia.estado === 'AUSENTE' || !asistencia.estado ? 'selected' : ''}>Ausente</option>
+                    <option value="JUSTIFICADO" ${asistencia.estado === 'JUSTIFICADO' ? 'selected' : ''}>Ausencia justificada</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" class="form-control" name="observaciones_${estudiante.id}" 
+                       value="${asistencia.observaciones || ''}" placeholder="Observaciones...">
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function marcarTodos(estado) {
+    document.querySelectorAll('select[name^="estado_"]').forEach(function(select) {
+        select.value = estado;
+    });
+}
+
+function cancelarAsistencia() {
+    document.getElementById('card-asistencia').style.display = 'none';
+    document.querySelectorAll('.btn-seleccionar-clase').forEach(b => b.classList.remove('active'));
+    claseSeleccionada = null;
+}
+
+// Actualizar fecha cuando cambie
+document.getElementById('fecha_clase').addEventListener('change', function() {
+    if (claseSeleccionada) {
+        document.getElementById('fecha_asistencia_hidden').value = this.value;
+        // Recargar estudiantes con nueva fecha
+        cargarEstudiantesClase(claseSeleccionada, this.value);
+    }
+});
+
+document.getElementById('modalDetalleAsistencias').addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const detalleIdx = button.getAttribute('data-detalle');
+    
+    // Buscar el historial por índice
+    const claseInfo = historialClases[detalleIdx];
+    
+    if (!claseInfo || !claseInfo.asistencias || claseInfo.asistencias.length === 0) {
+        document.getElementById('detalle-asistencias-content').innerHTML = '<div class="text-center text-muted">No hay datos de asistencias para mostrar.</div>';
+        return;
+    }
+    
+    // Renderizar tabla de estudiantes y asistencias
+    let html = `
+        <h6>Curso: ${claseInfo.curso.nombre}</h6>
+        <h6>Clase: ${claseInfo.clase.aula}</h6>
+        <h6>Horario: ${claseInfo.clase.hora_inicio} - ${claseInfo.clase.hora_fin}</h6>
+        <h6>Fecha: ${claseInfo.fecha}</h6>
+        <h6>Profesor: ${claseInfo.profesor.first_name} ${claseInfo.profesor.last_name}</h6>
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Estudiante</th>
+                        <th>Estado</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    claseInfo.asistencias.forEach(function(asistencia) {
+        const badgeClass = 
+            asistencia.estado === 'PRESENTE' ? 'bg-success' :
+            asistencia.estado === 'TARDE' ? 'bg-warning text-dark' :
+            asistencia.estado === 'JUSTIFICADO' ? 'bg-info' : 'bg-danger';
+            
+        html += `
+            <tr>
+                <td>
+                    ${asistencia.estudiante.first_name} ${asistencia.estudiante.last_name}
+                    <br><small class="text-muted">Cédula: ${asistencia.estudiante.cedula}</small>
+                </td>
+                <td>
+                    <span class="badge ${badgeClass}">
+                        ${asistencia.estado}
+                    </span>
+                </td>
+                <td>${asistencia.observaciones}</td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    document.getElementById('detalle-asistencias-content').innerHTML = html;
+});
+</script>
+
+{% endblock %}

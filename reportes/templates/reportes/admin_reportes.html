@@ -1,0 +1,178 @@
+{% extends 'usuarios/base.html' %}
+{% load static %}
+{% block title %}Panel Administrador - Reportes{% endblock %}
+{% block content %}
+
+<div class="main-content">
+    <div class="container mt-5">
+        <h1 class="mb-4">Reportes del Sistema</h1>
+        
+        <div class="row">
+            <!-- Reporte de Pagos -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-dollar-sign me-2"></i>
+                            Reporte de Pagos
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Genere un reporte detallado de todos los pagos del sistema con filtros personalizables.</p>
+                        
+                        <form id="form-reporte-pagos" method="GET" action="{% url 'reporte_pagos_pdf' %}" target="_blank">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="fecha_inicio_pagos" class="form-label">Fecha Inicio</label>
+                                    <input type="date" class="form-control" id="fecha_inicio_pagos" name="fecha_inicio">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="fecha_fin_pagos" class="form-label">Fecha Fin</label>
+                                    <input type="date" class="form-control" id="fecha_fin_pagos" name="fecha_fin">
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label for="estado_pagos" class="form-label">Estado</label>
+                                    <select class="form-select" id="estado_pagos" name="estado">
+                                        <option value="">Todos los estados</option>
+                                        <option value="PENDIENTE">Pendientes</option>
+                                        <option value="PAGADO">Pagados</option>
+                                        <option value="CANCELADO">Cancelados</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-file-pdf me-1"></i>
+                                Generar PDF
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reporte de Asistencias -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-clipboard-check me-2"></i>
+                            Reporte de Asistencias
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Genere un reporte de asistencias por fecha, clase o estudiante.</p>
+                        
+                        <form id="form-reporte-asistencias" method="GET" action="{% url 'reporte_asistencias_pdf' %}" target="_blank">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="fecha_inicio_asistencias" class="form-label">Fecha Inicio</label>
+                                    <input type="date" class="form-control" id="fecha_inicio_asistencias" name="fecha_inicio">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="fecha_fin_asistencias" class="form-label">Fecha Fin</label>
+                                    <input type="date" class="form-control" id="fecha_fin_asistencias" name="fecha_fin">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success" disabled>
+                                <i class="fas fa-file-pdf me-1"></i>
+                                Próximamente
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reporte de Matrículas -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-info">
+                            <i class="fas fa-users me-2"></i>
+                            Reporte de Matrículas
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Genere un reporte de matrículas activas, finalizadas o canceladas.</p>
+                        
+                        <form id="form-reporte-matriculas" method="GET" action="{% url 'reporte_matriculas_pdf' %}" target="_blank">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="estado_matriculas" class="form-label">Estado</label>
+                                    <select class="form-select" id="estado_matriculas" name="estado">
+                                        <option value="">Todos los estados</option>
+                                        <option value="ACTIVA">Activas</option>
+                                        <option value="FINALIZADA">Finalizadas</option>
+                                        <option value="CANCELADA">Canceladas</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-info" disabled>
+                                <i class="fas fa-file-pdf me-1"></i>
+                                Próximamente
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas Generales -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-warning">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Estadísticas Generales
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Reporte completo con estadísticas y métricas del sistema.</p>
+                        
+                        <button type="button" class="btn btn-warning" disabled>
+                            <i class="fas fa-file-pdf me-1"></i>
+                            Próximamente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>Información sobre los Reportes</h6>
+                    <ul class="mb-0">
+                        <li>Los reportes se generan en formato PDF para fácil distribución e impresión.</li>
+                        <li>Puede aplicar filtros por fechas y estados según el tipo de reporte.</li>
+                        <li>Los archivos PDF se abren en una nueva pestaña.</li>
+                        <li>Todos los reportes incluyen la fecha de generación y el usuario que los creó.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+// Configurar fechas por defecto (último mes)
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+    
+    // Formatear fechas para inputs
+    const formatDate = (date) => {
+        return date.toISOString().split('T')[0];
+    };
+    
+    // Establecer fechas por defecto para pagos
+    document.getElementById('fecha_inicio_pagos').value = formatDate(lastMonth);
+    document.getElementById('fecha_fin_pagos').value = formatDate(today);
+    
+    // Establecer fechas por defecto para asistencias
+    document.getElementById('fecha_inicio_asistencias').value = formatDate(lastMonth);
+    document.getElementById('fecha_fin_asistencias').value = formatDate(today);
+});
+</script>
+
+{% endblock %}

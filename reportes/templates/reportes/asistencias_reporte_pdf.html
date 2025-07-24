@@ -1,0 +1,328 @@
+{% load dict_extras %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Reporte de Asistencias - Academia Musical</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 9px;
+            line-height: 1.2;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .header h1 {
+            color: #28a745;
+            font-size: 18px;
+            margin: 0 0 2px 0;
+        }
+        
+        .header h2 {
+            color: #666;
+            font-size: 12px;
+            margin: 0;
+        }
+        
+        .info-summary {
+            background-color: #f8f9fa;
+            padding: 8px;
+            border-radius: 3px;
+            margin-bottom: 12px;
+            font-size: 8px;
+        }
+        
+        .info-grid {
+            display: table;
+            width: 100%;
+        }
+        
+        .info-row {
+            display: table-row;
+        }
+        
+        .info-cell {
+            display: table-cell;
+            padding: 1px 4px;
+            vertical-align: top;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            width: 20%;
+        }
+        
+        .info-value {
+            width: 20%;
+        }
+        
+        .summary-stats {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+        
+        .summary-stats td {
+            padding: 6px;
+            border: 1px solid #ddd;
+            text-align: center;
+            font-weight: bold;
+            font-size: 9px;
+        }
+        
+        .summary-stats .presente { background-color: #d4edda; }
+        .summary-stats .tarde { background-color: #fff3cd; }
+        .summary-stats .ausente { background-color: #f8d7da; }
+        .summary-stats .justificado { background-color: #d1ecf1; }
+        
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 7px;
+        }
+        
+        .attendance-table th,
+        .attendance-table td {
+            padding: 3px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        
+        .attendance-table th {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            font-size: 7px;
+        }
+        
+        .attendance-table .student-info {
+            text-align: left;
+            font-size: 7px;
+            max-width: 120px;
+        }
+        
+        .attendance-table .date-header {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            width: 25px;
+            font-size: 6px;
+        }
+        
+        .attendance-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .estado-cell {
+            font-size: 6px;
+            font-weight: bold;
+        }
+        
+        .estado-presente { background-color: #d4edda; color: #155724; }
+        .estado-tarde { background-color: #fff3cd; color: #856404; }
+        .estado-ausente { background-color: #f8d7da; color: #721c24; }
+        .estado-justificado { background-color: #d1ecf1; color: #0c5460; }
+        
+        .footer-info {
+            text-align: center;
+            font-size: 7px;
+            color: #666;
+            margin-top: 12px;
+            border-top: 1px solid #ddd;
+            padding-top: 6px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .legend {
+            font-size: 6px;
+            margin-top: 8px;
+        }
+        
+        .legend-item {
+            display: inline-block;
+            margin-right: 15px;
+        }
+        
+        .legend-box {
+            display: inline-block;
+            width: 12px;
+            height: 8px;
+            margin-right: 3px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Academia Musical</h1>
+        <h2>Reporte de Asistencias por Período</h2>
+    </div>
+
+    <div class="info-summary">
+        <div class="info-grid">
+            <div class="info-row">
+                <div class="info-cell info-label">Generado:</div>
+                <div class="info-cell info-value">{{ fecha_generacion|date:"d/m/Y H:i" }}</div>
+                <div class="info-cell info-label">Usuario:</div>
+                <div class="info-cell info-value">{{ usuario_generador.get_full_name|default:usuario_generador.username }}</div>
+                <div class="info-cell info-label">Estudiantes:</div>
+                <div class="info-cell info-value">{{ total_estudiantes }}</div>
+            </div>
+            {% if fecha_inicio or fecha_fin %}
+            <div class="info-row">
+                <div class="info-cell info-label">Período:</div>
+                <div class="info-cell info-value">
+                    {% if fecha_inicio %}{{ fecha_inicio|date:"d/m/Y" }}{% endif %}
+                    {% if fecha_fin %} - {{ fecha_fin|date:"d/m/Y" }}{% endif %}
+                </div>
+                {% if clase_seleccionada %}
+                <div class="info-cell info-label">Clase:</div>
+                <div class="info-cell info-value">{{ clase_seleccionada.curso.nombre }} - {{ clase_seleccionada.aula }}</div>
+                {% else %}
+                <div class="info-cell info-label">Clase:</div>
+                <div class="info-cell info-value">Todas las clases</div>
+                {% endif %}
+                <div class="info-cell info-label">Total Días:</div>
+                <div class="info-cell info-value">{{ total_dias }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Resumen de Estadísticas -->
+    <table class="summary-stats">
+        <tr>
+            <td class="presente">
+                <strong>Presentes</strong><br>
+                {{ total_presentes }} ({{ porcentaje_presentes }}%)
+            </td>
+            <td class="tarde">
+                <strong>Tardanzas</strong><br>
+                {{ total_tardanzas }}
+            </td>
+            <td class="ausente">
+                <strong>Ausentes</strong><br>
+                {{ total_ausentes }}
+            </td>
+            <td class="justificado">
+                <strong>Justificados</strong><br>
+                {{ total_justificados }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- NUEVA: Tabla cruzada de asistencias -->
+    {% if estudiantes_data %}
+    <table class="attendance-table">
+        <thead>
+            <tr>
+                <th class="student-info">Estudiante</th>
+                <th class="student-info">Curso</th>
+                {% for fecha in fechas_periodo %}
+                <th class="date-header">{{ fecha|date:"d/m" }}</th>
+                {% endfor %}
+                <th>% Asist.</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for estudiante_id, data in estudiantes_data.items %}
+            <tr>
+                <td class="student-info">
+                    <strong>{{ data.estudiante.get_full_name }}</strong><br>
+                    <small>{{ data.estudiante.cedula }}</small>
+                </td>
+                <td class="student-info">{{ data.curso }}</td>
+                {% for fecha in fechas_periodo %}
+                <td class="estado-cell 
+                    {% if data.asistencias_por_fecha|get_item:fecha.estado == 'PRESENTE' %}estado-presente
+                    {% elif data.asistencias_por_fecha|get_item:fecha.estado == 'TARDE' %}estado-tarde
+                    {% elif data.asistencias_por_fecha|get_item:fecha.estado == 'JUSTIFICADO' %}estado-justificado
+                    {% else %}estado-ausente{% endif %}">
+                    {% with asistencia=data.asistencias_por_fecha|get_item:fecha %}
+                        {% if asistencia %}
+                            {% if asistencia.estado == 'PRESENTE' %}P
+                            {% elif asistencia.estado == 'TARDE' %}T
+                            {% elif asistencia.estado == 'JUSTIFICADO' %}J
+                            {% else %}A{% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    {% endwith %}
+                </td>
+                {% endfor %}
+                <td>
+                    {% with presentes=0 total=0 %}
+                        {% for fecha in fechas_periodo %}
+                            {% with asistencia=data.asistencias_por_fecha|get_item:fecha %}
+                                {% if asistencia %}
+                                    {% if asistencia.estado == 'PRESENTE' %}
+                                        {% with presentes=presentes|add:1 total=total|add:1 %}{% endwith %}
+                                    {% else %}
+                                        {% with total=total|add:1 %}{% endwith %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endwith %}
+                        {% endfor %}
+                        {% if total > 0 %}
+                            {{ presentes|floatformat:0 }}/{{ total|floatformat:0 }}
+                        {% else %}
+                            0/0
+                        {% endif %}
+                    {% endwith %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Leyenda -->
+    <div class="legend">
+        <strong>Leyenda:</strong>
+        <div class="legend-item">
+            <span class="legend-box estado-presente"></span>P = Presente
+        </div>
+        <div class="legend-item">
+            <span class="legend-box estado-tarde"></span>T = Tardanza
+        </div>
+        <div class="legend-item">
+            <span class="legend-box estado-ausente"></span>A = Ausente
+        </div>
+        <div class="legend-item">
+            <span class="legend-box estado-justificado"></span>J = Justificado
+        </div>
+        <div class="legend-item">- = Sin registro</div>
+    </div>
+    
+    {% else %}
+    <div class="no-data">
+        <h3>No se encontraron registros</h3>
+        <p>No hay asistencias que coincidan con los filtros seleccionados.</p>
+    </div>
+    {% endif %}
+
+    <div class="footer-info">
+        Academia Musical - Sistema de Gestión | Generado el {{ fecha_generacion|date:"d/m/Y H:i" }}
+    </div>
+</body>
+
+</html>

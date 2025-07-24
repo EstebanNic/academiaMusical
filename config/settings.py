@@ -42,9 +42,12 @@ INSTALLED_APPS = [
     'estudiantes',
     'profesores',
     'horarios',
+    'matriculas',
     'pagos',
     'reportes',
     'home',
+    'asistencias',
+    'aulas',
 ]
 
 MIDDLEWARE = [

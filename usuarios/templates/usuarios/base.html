@@ -1,109 +1,163 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Panel Administrador</title>
-    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link
+      rel="stylesheet"
+      href="{% static 'bootstrap/css/bootstrap.min.css' %}"
+    />
     <style>
-        .sidebar {
-            height: 100vh;
-            width: 240px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background: #0d6efd;
-            color: #fff;
-            padding-top: 1rem;
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-        }
-        .sidebar .sidebar-header {
-            font-size: 1.5rem;
-            font-weight: bold;
-            padding: 0 1rem 1rem 1rem;
-        }
-        .sidebar .nav-link {
-            color: #fff;
-        }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background: #0b5ed7;
-            color: #fff;
-        }
-        .sidebar .sidebar-footer {
-            margin-top: auto;
-            padding: 1rem;
-        }
-        .sidebar .dropdown-menu {
-            background: #fff;
-            color: #212529;
-        }
-        .main-content {
-            margin-left: 260px;
-        }
+      .sidebar {
+        height: 100vh;
+        width: 240px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: #0d6efd;
+        color: #fff;
+        padding-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        z-index: 100;
+      }
+      .sidebar .sidebar-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        padding: 0 1rem 1rem 1rem;
+      }
+      .sidebar .nav-link {
+        color: #fff;
+      }
+      .sidebar .nav-link:hover,
+      .sidebar .nav-link.active {
+        background: #0b5ed7;
+        color: #fff;
+      }
+      .sidebar .sidebar-footer {
+        margin-top: auto;
+        padding: 1rem;
+      }
+      .sidebar .dropdown-menu {
+        background: #fff;
+        color: #212529;
+      }
+      .main-content {
+        margin-left: 260px;
+      }
     </style>
-</head>
-<body>
-
-<!-- Sidebar Bootstrap -->
+  </head>
+  <body>
+    <!-- Sidebar Bootstrap -->
     <div class="sidebar">
-        <div class="sidebar-header">
-            Panel Administrador
+      <div class="sidebar-header">Panel Administrador</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a
+            class="nav-link {% if active_tab == 'inicio' %}active{% endif %}"
+            href="{% url 'admin_dashboard' %}"
+            >Inicio</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if active_tab == 'profesores' %}active{% endif %}"
+            href="{% url 'admin_profesores' %}"
+            >Profesores</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if active_tab == 'estudiantes' %}active{% endif %}"
+            href="{% url 'admin_estudiantes' %}"
+            >Estudiantes</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if active_tab == 'aulas' %}active{% endif %}"
+            href="{% url 'admin_aulas' %}"
+            >Aulas</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if active_tab == 'cursos' %}active{% endif %}"
+            href="{% url 'admin_cursos' %}"
+            >Cursos</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if active_tab == 'horarios' %}active{% endif %}"
+            href="{% url 'admin_clases' %}"
+            >Clases</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if active_tab == 'matriculas' %}active{% endif %}"
+            href="{% url 'admin_matriculas' %}"
+            >Matrículas</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if active_tab == 'pagos' %}active{% endif %}"
+            href="{% url 'admin_pagos' %}"
+            >Pagos</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if active_tab == 'asistencias' %}active{% endif %}"
+            href="{% url 'admin_asistencias' %}"
+            >Asistencias</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link {% if active_tab == 'reportes' %}active{% endif %}"
+            href="{% url 'admin_reportes' %}"
+            >Reportes</a
+          >
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        <div class="dropdown">
+          <a
+            class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+            href="#"
+            id="sidebarDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <span class="me-2">{{ user.first_name }} {{ user.last_name }}</span>
+          </a>
+          <ul
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="sidebarDropdown"
+          >
+            <li>
+              <form method="POST" action="{% url 'logout' %}" style="margin: 0">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item">
+                  Cerrar sesión
+                </button>
+              </form>
+            </li>
+          </ul>
         </div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'inicio' %}active{% endif %}" href="{% url 'admin_dashboard' %}">Inicio</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'profesores' %}active{% endif %}" href="{% url 'admin_profesores' %}">Profesores</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'estudiantes' %}active{% endif %}" href="{% url 'admin_estudiantes' %}">Estudiantes</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'cursos' %}active{% endif %}" href="{% url 'admin_cursos' %}">Cursos</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'horarios' %}active{% endif %}" href="{% url 'admin_clases' %}">Clases</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'matriculas' %}active{% endif %}" href="{% url 'admin_matriculas' %}">Matrículas</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'pagos' %}active{% endif %}" href="{% url 'admin_pagos' %}">Pagos</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'asistencias' %}active{% endif %}" href="{% url 'admin_asistencias' %}">Asistencias</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if active_tab == 'reportes' %}active{% endif %}" href="{% url 'admin_reportes' %}">Reportes</a>
-            </li>
-        </ul>
-        <div class="sidebar-footer">
-            <div class="dropdown">
-                <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" href="#" id="sidebarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="me-2">{{ user.first_name }} {{ user.last_name }}</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sidebarDropdown">
-                    <li>
-                        <form method="POST" action="{% url 'logout' %}" style="margin: 0;">
-                            {% csrf_token %}
-                            <button type="submit" class="dropdown-item">Cerrar sesión</button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-        </div>
+      </div>
     </div>
 
-<!-- Contenido principal -->
+    <!-- Contenido principal -->
 
     {% block content %}
     <!-- El contenido cambiará según la vista -->
     {% endblock %}
 
-
-<script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-</body>
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  </body>
 </html>

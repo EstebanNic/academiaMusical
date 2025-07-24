@@ -5,144 +5,306 @@
 
 <div class="main-content">
     <div class="container mt-5">
-        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="pagos-tab" data-bs-toggle="tab" data-bs-target="#pagos" type="button" role="tab" aria-controls="pagos" aria-selected="true">Pagos</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="add-pago-tab" data-bs-toggle="tab" data-bs-target="#add-pago" type="button" role="tab" aria-controls="add-pago" aria-selected="false">Procesar Pago</button>
-            </li>
-        </ul>
-        <div class="tab-content" id="adminTabsContent">
-            <div class="tab-pane fade show active" id="pagos" role="tabpanel" aria-labelledby="pagos-tab">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Estudiante</th>
-                                <th>Curso</th>
-                                <th>Fecha Matrícula</th>
-                                <th>Monto</th>
-                                <th>Fecha Pago</th>
-                                <th>Estado</th>
-                                <th>Observaciones</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pago in pagos %}
-                            <tr>
-                                <td>{{ pago.matricula.estudiante.get_full_name }}</td>
-                                <td>{{ pago.matricula.clase.curso.nombre }}</td>
-                                <td>{{ pago.matricula.fecha_matricula }}</td>
-                                <td>${{ pago.monto }}</td>
-                                <td>{{ pago.fecha_pago }}</td>
-                                <td>
-                                    <span class="badge {% if pago.estado == 'PAGADO' %}bg-success{% elif pago.estado == 'CANCELADO' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
-                                        {{ pago.get_estado_display }}
-                                    </span>
-                                </td>
-                                <td>{{ pago.observaciones }}</td>
-                                <td>
-                                    {% if pago.estado == 'PENDIENTE' %}
-                                        <button class="btn btn-sm btn-success btn-procesar-pago"
-                                                data-matricula-id="{{ pago.matricula.id }}"
-                                                data-monto-pendiente="{{ pago.monto }}"
-                                                data-estudiante="{{ pago.matricula.estudiante.get_full_name }}"
-                                                data-curso="{{ pago.matricula.clase.curso.nombre }}">
-                                            Procesar
-                                        </button>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="8" class="text-center">No hay pagos registrados.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+        <h2 class="mb-4">Pagos</h2>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="buscarCedulaPago" class="form-label small">Filtrar por cédula del estudiante:</label>
+                <input type="text" class="form-control form-control-sm" id="buscarCedulaPago" placeholder="Ej: 0102030405">
             </div>
-            <div class="tab-pane fade" id="add-pago" role="tabpanel" aria-labelledby="add-pago-tab">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">Procesar Pago</h5>
-                        <form method="POST" action="{% url 'admin_pagos' %}" id="form-procesar-pago">
-                            {% csrf_token %}
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="matricula" class="form-label">Matrícula</label>
-                                    <select class="form-select" id="matricula" name="matricula" required>
-                                        <option value="" selected disabled>Seleccione una matrícula</option>
-                                        {% for matricula in matriculas %}
-                                            <option value="{{ matricula.id }}" data-precio="{{ matricula.clase.curso.precio }}">
-                                                {{ matricula.estudiante.get_full_name }} - {{ matricula.clase.curso.nombre }} (${{ matricula.clase.curso.precio }}) ({{ matricula.fecha_matricula }})
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="monto" class="form-label">Monto del Pago</label>
-                                    <input type="number" class="form-control" id="monto" name="monto" min="0" step="0.01" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="estado" class="form-label">Estado</label>
-                                    <select class="form-select" id="estado" name="estado" required>
-                                        <option value="PAGADO">Pagado</option>
-                                        <option value="PENDIENTE">Pendiente</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-12 mb-3">
-                                    <label for="observaciones" class="form-label">Observaciones</label>
-                                    <textarea class="form-control" id="observaciones" name="observaciones"></textarea>
-                                </div>
-                                <div class="col-md-12 mb-3">
-                                    <div class="alert alert-info" id="info-pago" style="display: none;">
-                                        <strong>Información:</strong> <span id="texto-info"></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Procesar Pago</button>
-                        </form>
-                    </div>
-                </div>
+            <div class="col-md-8 d-flex align-items-end">
+                <span id="resultadosBusquedaPagos" class="text-muted small"></span>
+                <button class="btn btn-outline-secondary btn-sm ms-2" type="button" id="limpiarBusquedaPagos">
+                    <i class="fas fa-times"></i> Limpiar
+                </button>
             </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Estudiante</th>
+                        <th>Cédula</th>
+                        <th>Curso</th>
+                        <th>Fecha Matrícula</th>
+                        <th>Monto</th>
+                        <th>Monto restante</th> <!-- NUEVA COLUMNA -->
+                        <th>Fecha Pago</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="pagos-tbody">
+                    {% for pago in pagos %}
+                    <tr class="pago-row" data-cedula="{{ pago.matricula.estudiante.cedula|default:'' }}">
+                        <td>{{ pago.matricula.estudiante.get_full_name }}</td>
+                        <td>{{ pago.matricula.estudiante.cedula }}</td>
+                        <td>{{ pago.matricula.clase.curso.nombre }}</td>
+                        <td>{{ pago.matricula.fecha_matricula }}</td>
+                        <td>${{ pago.monto }}</td>
+                        <td>
+                            ${{ pago.saldo_pendiente|floatformat:2 }}
+                        </td>
+                        <td>{{ pago.fecha_pago }}</td>
+                        <td>
+                            <span class="badge {% if pago.estado == 'PAGADO' %}bg-success{% elif pago.estado == 'CANCELADO' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                {{ pago.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if pago.estado == 'PENDIENTE' %}
+                                <button class="btn btn-sm btn-success btn-procesar-pago"
+                                        data-pago-id="{{ pago.id }}"
+                                        data-matricula-id="{{ pago.matricula.id }}"
+                                        data-monto-pendiente="{{ pago.saldo_pendiente|floatformat:2 }}"
+                                        data-estudiante="{{ pago.matricula.estudiante.get_full_name }}"
+                                        data-cedula="{{ pago.matricula.estudiante.cedula }}"
+                                        data-curso="{{ pago.matricula.clase.curso.nombre }}">
+                                    Procesar
+                                </button>
+                            {% endif %}
+                            <button class="btn btn-sm btn-info btn-ver-mas-pago"
+                                    data-pago-id="{{ pago.id }}">
+                                Ver más
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center">No hay pagos registrados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
+<!-- Modal Procesar Pago -->
+<div class="modal fade" id="modalProcesarPago" tabindex="-1" aria-labelledby="modalProcesarPagoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'admin_pagos' %}" id="form-procesar-pago">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalProcesarPagoLabel">Procesar Pago</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="matricula" id="modal_matricula_id">
+          <input type="hidden" name="pago_id" id="modal_pago_id">
+          <div class="mb-2">
+            <strong>Estudiante:</strong> <span id="modal_estudiante"></span><br>
+            <strong>Cédula:</strong> <span id="modal_cedula"></span><br>
+            <strong>Curso:</strong> <span id="modal_curso"></span>
+          </div>
+          <div class="mb-3">
+            <label for="modal_monto" class="form-label">Monto a pagar</label>
+            <input type="number" class="form-control" id="modal_monto" name="monto" min="0" step="0.01" required>
+            <div class="form-text text-muted">Monto pendiente: $<span id="modal_monto_pendiente"></span></div>
+          </div>
+          <div class="mb-3 d-none">
+  <label for="modal_observaciones" class="form-label">Observaciones</label>
+  <textarea class="form-control" id="modal_observaciones" name="observaciones"></textarea>
+</div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Procesar Pago</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ver Más Pagos -->
+<div class="modal fade" id="modalVerMasPago" tabindex="-1" aria-labelledby="modalVerMasPagoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalVerMasPagoLabel">Historial de Pagos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div id="historial-pagos-content">
+          <!-- Se llena por JS -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="btnFacturaPDF" href="#" target="_blank" class="btn btn-primary">
+          <i class="fas fa-file-pdf me-1"></i> Generar factura PDF
+        </a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bloque de datos JSON para historial de pagos por matrícula -->
+<script id="pagos-historial-json" type="application/json">
+    {
+        {% for matricula in matriculas %}
+            "{{ matricula.id }}": [
+                {% for pago in matricula.pagos.all %}
+                    {
+                        "monto": "{{ pago.monto }}",
+                        "fecha_pago": "{{ pago.fecha_pago }}",
+                        "estado": "{{ pago.estado }}",
+                        "estado_display": "{{ pago.get_estado_display }}",
+                        "observaciones": "{{ pago.observaciones|default_if_none:'' }}"
+                    }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    }
+</script>
+
+<!-- Bloque de datos JSON para historial de pagos parciales por pago -->
+<script id="pagos-parciales-json" type="application/json">
+    {
+        {% for pago in pagos %}
+            "{{ pago.id }}": [
+                {% for parcial in pago.pagos_parciales.all %}
+                    {
+                        "monto": "{{ parcial.monto }}",
+                        "fecha": "{{ parcial.fecha }}",
+                        "observaciones": "{{ parcial.observaciones|default_if_none:'' }}"
+                    }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    }
+</script>
+
 <script>
-    // Procesar pago desde la tabla
+    // Filtro por cédula de estudiante en pagos
+    document.addEventListener('DOMContentLoaded', function() {
+      const buscarCedula = document.getElementById('buscarCedulaPago');
+      const limpiarBtn = document.getElementById('limpiarBusquedaPagos');
+      const pagoRows = document.querySelectorAll('.pago-row');
+      const resultadosSpan = document.getElementById('resultadosBusquedaPagos');
+      const totalPagos = pagoRows.length;
+
+      function filtrarPagos() {
+        const termino = buscarCedula.value.trim();
+        let visibles = 0;
+        pagoRows.forEach(row => {
+          const cedula = row.getAttribute('data-cedula') || '';
+          if (!termino || cedula.includes(termino)) {
+            row.style.display = '';
+            visibles++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        resultadosSpan.textContent = visibles === totalPagos
+          ? `Mostrando ${totalPagos} pago${totalPagos !== 1 ? 's' : ''}`
+          : `Mostrando ${visibles} de ${totalPagos} pago${totalPagos !== 1 ? 's' : ''}`;
+      }
+      buscarCedula.addEventListener('input', filtrarPagos);
+      limpiarBtn.addEventListener('click', function() {
+        buscarCedula.value = '';
+        filtrarPagos();
+        buscarCedula.focus();
+      });
+      buscarCedula.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          limpiarBtn.click();
+        }
+      });
+      filtrarPagos();
+    });
+
+    // Procesar pago desde la tabla (abre modal)
     document.querySelectorAll('.btn-procesar-pago').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            const matriculaId = btn.getAttribute('data-matricula-id');
-            const montoPendiente = btn.getAttribute('data-monto-pendiente');
-            const estudiante = btn.getAttribute('data-estudiante');
-            const curso = btn.getAttribute('data-curso');
-            
-            // Cambiar a la pestaña de procesar pago
-            const addPagoTab = new bootstrap.Tab(document.getElementById('add-pago-tab'));
-            addPagoTab.show();
-            
-            // Precargar los datos
-            document.getElementById('matricula').value = matriculaId;
-            document.getElementById('monto').value = montoPendiente;
-            document.getElementById('estado').value = 'PAGADO';
-            
-            // Mostrar información
-            document.getElementById('texto-info').textContent = `Procesando pago para ${estudiante} del curso ${curso}. Monto pendiente: $${montoPendiente}`;
-            document.getElementById('info-pago').style.display = 'block';
+            document.getElementById('modal_pago_id').value = btn.getAttribute('data-pago-id');
+            document.getElementById('modal_matricula_id').value = btn.getAttribute('data-matricula-id');
+            document.getElementById('modal_estudiante').textContent = btn.getAttribute('data-estudiante');
+            document.getElementById('modal_cedula').textContent = btn.getAttribute('data-cedula');
+            document.getElementById('modal_curso').textContent = btn.getAttribute('data-curso');
+            document.getElementById('modal_monto').value = btn.getAttribute('data-monto-pendiente');
+            document.getElementById('modal_monto_pendiente').textContent = btn.getAttribute('data-monto-pendiente');
+            document.getElementById('modal_observaciones').value = '';
+            var modal = new bootstrap.Modal(document.getElementById('modalProcesarPago'));
+            modal.show();
         });
     });
 
-    // Auto-completar monto al seleccionar matrícula
-    document.getElementById('matricula').addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const precio = selectedOption.getAttribute('data-precio');
-        if (precio) {
-            document.getElementById('monto').value = precio;
-        }
+    // Ver más pagos (abre modal con historial de pagos parciales, muestra monto inicial y monto restante)
+    document.querySelectorAll('.btn-ver-mas-pago').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const pagoId = btn.getAttribute('data-pago-id');
+            let pagosParciales = {};
+            try {
+                const jsonText = document.getElementById('pagos-parciales-json').textContent;
+                pagosParciales = JSON.parse(jsonText);
+            } catch (e) {
+                pagosParciales = {};
+            }
+            // Obtener monto inicial y monto restante del pago principal
+            let pagosHistorial = {};
+            try {
+                const jsonText2 = document.getElementById('pagos-historial-json').textContent;
+                pagosHistorial = JSON.parse(jsonText2);
+            } catch (e) {
+                pagosHistorial = {};
+            }
+            let montoInicial = '';
+            let montoRestante = '';
+            for (const matriculaId in pagosHistorial) {
+                const pagos = pagosHistorial[matriculaId];
+                const pagoPorId = pagos.find(p => p.monto && btn.getAttribute('data-pago-id') == pagoId);
+                if (pagoPorId) {
+                    montoInicial = pagoPorId.monto;
+                    // Buscar el pago principal en la tabla para obtener el monto restante
+                    const pagoRow = btn.closest('tr');
+                    if (pagoRow) {
+                        montoRestante = pagoRow.querySelector('td:nth-child(6)').textContent.replace('$', '').trim();
+                    }
+                    break;
+                }
+            }
+            // Si no se encontró, usar el monto del pago principal en la tabla
+            if (!montoInicial) {
+                const pagoRow = btn.closest('tr');
+                if (pagoRow) {
+                    montoInicial = pagoRow.querySelector('td:nth-child(5)').textContent.replace('$', '').trim();
+                    montoRestante = pagoRow.querySelector('td:nth-child(6)').textContent.replace('$', '').trim();
+                }
+            }
+
+            const data = pagosParciales[pagoId] || [];
+            let html = '';
+            html += `<div class="mb-2">
+                        <strong>Monto inicial:</strong> $${montoInicial}
+                        <span class="ms-3"><strong>Monto restante:</strong> $${montoRestante}</span>
+                    </div>`;
+            if (data.length === 0) {
+                html += '<div class="text-center text-muted">No hay pagos parciales registrados para este pago.</div>';
+            } else {
+                html += `<table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Monto abonado</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                data.forEach(function(parcial) {
+                    html += `<tr>
+                        <td>$${parcial.monto}</td>
+                        <td>${parcial.fecha}</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+            }
+            document.getElementById('historial-pagos-content').innerHTML = html;
+            // Actualizar el enlace del botón de factura PDF
+            document.getElementById('btnFacturaPDF').href = `/reportes/factura_pago/${pagoId}/`;
+            var modal = new bootstrap.Modal(document.getElementById('modalVerMasPago'));
+            modal.show();
+        });
     });
 </script>
 

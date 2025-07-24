@@ -8,13 +8,18 @@ from django.contrib.auth import logout
 from cursos.models import Curso, Nivel
 from horarios.models import Horario
 from matriculas.models import Matricula
-from pagos.models import Pago, EstadoPago
+from pagos.models import Pago, EstadoPago, PagoParcial
 from asistencias.models import Asistencia, EstadoAsistencia
 from datetime import datetime, date
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.db import models
 import json
+from aulas.models import Aula, Sede, Edificio, Piso
+from django.views.decorators.csrf import csrf_exempt
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -207,8 +212,6 @@ def admin_cursos(request):
     if request.user.rol != Usuario.Rol.ADMIN:
         return redirect('login')
 
-    # Obtener profesores desde Usuario (rol=PROFESOR)
-    profesores = Usuario.objects.filter(rol=Usuario.Rol.PROFESOR)
     curso_niveles = Nivel.choices
     
     # Lista predefinida de cursos musicales
@@ -234,7 +237,6 @@ def admin_cursos(request):
     
     # Variables para controlar modales
     mostrar_modal_duplicado_curso = False
-    mostrar_modal_profesor_ocupado = False
 
     if request.method == 'POST':
         # Eliminar curso
@@ -256,46 +258,18 @@ def admin_cursos(request):
                 nombre = request.POST.get('nombre', '')
                 nivel = request.POST.get('nivel', '')
                 precio = request.POST.get('precio', 0.00)
-                profesor_id = request.POST.get('profesor')
-                # No procesar descripción
                 
                 # Validar duplicado de curso (excluyendo el curso actual)
                 if Curso.objects.filter(nombre=nombre, nivel=nivel).exclude(id=curso.id).exists():
                     mostrar_modal_duplicado_curso = True
                 else:
-                    # Validar profesor no ocupado en otro curso del mismo tipo (excluyendo el curso actual)
-                    if profesor_id and profesor_id != '':
-                        try:
-                            profesor_usuario = Usuario.objects.get(id=profesor_id, rol=Usuario.Rol.PROFESOR)
-                            # Verificar si el profesor ya está en otro curso del mismo nombre (excluyendo el actual)
-                            if Curso.objects.filter(profesor=profesor_usuario, nombre=nombre).exclude(id=curso.id).exists():
-                                mostrar_modal_profesor_ocupado = True
-                            else:
-                                # Actualizar curso (sin descripción)
-                                curso.nombre = nombre
-                                curso.nivel = nivel
-                                curso.precio = precio
-                                curso.profesor = profesor_usuario
-                                curso.save()
-                                messages.success(request, 'Curso actualizado exitosamente.')
-                                return redirect('admin_cursos')
-                        except Usuario.DoesNotExist:
-                            curso.profesor = None
-                            curso.nombre = nombre
-                            curso.nivel = nivel
-                            curso.precio = precio
-                            curso.save()
-                            messages.success(request, 'Curso actualizado exitosamente.')
-                            return redirect('admin_cursos')
-                    else:
-                        # Sin profesor asignado (sin descripción)
-                        curso.nombre = nombre
-                        curso.nivel = nivel
-                        curso.precio = precio
-                        curso.profesor = None
-                        curso.save()
-                        messages.success(request, 'Curso actualizado exitosamente.')
-                        return redirect('admin_cursos')
+                    # Actualizar curso
+                    curso.nombre = nombre
+                    curso.nivel = nivel
+                    curso.precio = precio
+                    curso.save()
+                    messages.success(request, 'Curso actualizado exitosamente.')
+                    return redirect('admin_cursos')
                         
             except Curso.DoesNotExist:
                 messages.error(request, 'Curso no encontrado.')
@@ -306,60 +280,29 @@ def admin_cursos(request):
             nombre = request.POST.get('nombre', '')
             nivel = request.POST.get('nivel', '')
             precio = request.POST.get('precio', 0.00)
-            profesor_id = request.POST.get('profesor')
-            # No procesar descripción
-            
+            # Elimina el argumento instrumento, no lo pases a Curso
+            # instrumento = ''
+
             # Validar duplicado de curso
             if Curso.objects.filter(nombre=nombre, nivel=nivel).exists():
                 mostrar_modal_duplicado_curso = True
             else:
-                profesor = None
-                if profesor_id and profesor_id != '':
-                    try:
-                        profesor = Usuario.objects.get(id=profesor_id, rol=Usuario.Rol.PROFESOR)
-                        # Verificar si el profesor ya está en otro curso del mismo nombre
-                        if Curso.objects.filter(profesor=profesor, nombre=nombre).exists():
-                            mostrar_modal_profesor_ocupado = True
-                        else:
-                            # Crear curso (sin descripción)
-                            Curso.objects.create(
-                                nombre=nombre,
-                                nivel=nivel,
-                                precio=precio,
-                                profesor=profesor
-                            )
-                            messages.success(request, 'Curso registrado exitosamente.')
-                            return redirect('admin_cursos')
-                    except Usuario.DoesNotExist:
-                        # Crear curso sin profesor (sin descripción)
-                        Curso.objects.create(
-                            nombre=nombre,
-                            nivel=nivel,
-                            precio=precio,
-                            profesor=None
-                        )
-                        messages.success(request, 'Curso registrado exitosamente.')
-                        return redirect('admin_cursos')
-                else:
-                    # Crear curso sin profesor (sin descripción)
-                    Curso.objects.create(
-                        nombre=nombre,
-                        nivel=nivel,
-                        precio=precio,
-                        profesor=None
-                    )
-                    messages.success(request, 'Curso registrado exitosamente.')
-                    return redirect('admin_cursos')
+                # Crear curso sin instrumento
+                Curso.objects.create(
+                    nombre=nombre,
+                    nivel=nivel,
+                    precio=precio
+                )
+                messages.success(request, 'Curso registrado exitosamente.')
+                return redirect('admin_cursos')
 
-    cursos = Curso.objects.select_related('profesor').all().order_by('nombre', 'nivel')
+    cursos = Curso.objects.all().order_by('nombre', 'nivel')
     return render(request, 'usuarios/admin_cursos.html', {
         'active_tab': 'cursos',
         'cursos': cursos,
-        'profesores': profesores,
         'curso_niveles': curso_niveles,
         'cursos_musicales': cursos_musicales,
         'mostrar_modal_duplicado_curso': mostrar_modal_duplicado_curso,
-        'mostrar_modal_profesor_ocupado': mostrar_modal_profesor_ocupado,
     })
 
 @login_required
@@ -489,7 +432,14 @@ def admin_clases(request):
 
     cursos = Curso.objects.all()
     profesores = Usuario.objects.filter(rol=Usuario.Rol.PROFESOR)
-    clases = Horario.objects.select_related('curso', 'profesor').all().order_by('-fecha_inicio', '-hora_inicio')
+    # CAMBIO: Mostrar todas las aulas, no sólo las activas
+    aulas = Aula.objects.all().order_by('sede', 'edificio', 'piso', 'nombre')
+    clases = Horario.objects.select_related('curso', 'profesor', 'aula').all().order_by('-fecha_inicio', '-hora_inicio')
+
+    # Calcular cupos_disponibles para cada clase
+    for clase in clases:
+        total_matriculados = Matricula.objects.filter(clase=clase, estado='ACTIVA').count()
+        clase.cupos_disponibles = max(clase.cupos - total_matriculados, 0)
 
     if request.method == 'POST':
         clase_id = request.POST.get('clase_id')
@@ -507,12 +457,17 @@ def admin_clases(request):
             try:
                 clase = Horario.objects.get(id=clase_id)
                 clase.curso_id = request.POST.get('curso', '')
-                clase.profesor_id = request.POST.get('profesor', '')
+                clase.profesor_id = request.POST.get('profesor', '') or None
+                clase.aula_id = request.POST.get('aula', '') or None
                 clase.fecha_inicio = request.POST.get('fecha_inicio', '')
                 clase.fecha_fin = request.POST.get('fecha_fin', '')
                 clase.hora_inicio = request.POST.get('hora_inicio', '')
                 clase.hora_fin = request.POST.get('hora_fin', '')
                 clase.descripcion = request.POST.get('descripcion', '')
+                # CORRECCIÓN: Actualizar cupos si se envía en el formulario
+                cupos = request.POST.get('cupos')
+                if cupos is not None and cupos != '':
+                    clase.cupos = int(cupos)
                 clase.save()
                 messages.success(request, 'Clase actualizada exitosamente.')
             except Horario.DoesNotExist:
@@ -521,21 +476,26 @@ def admin_clases(request):
         # Agregar clase
         else:
             curso_id = request.POST.get('curso', '')
-            profesor_id = request.POST.get('profesor', '')
+            profesor_id = request.POST.get('profesor', '') or None
+            aula_id = request.POST.get('aula', '') or None
             fecha_inicio = request.POST.get('fecha_inicio', '')
             fecha_fin = request.POST.get('fecha_fin', '')
             hora_inicio = request.POST.get('hora_inicio', '')
             hora_fin = request.POST.get('hora_fin', '')
             descripcion = request.POST.get('descripcion', '')
+            # CORRECCIÓN: Obtener cupos correctamente del formulario
+            cupos = request.POST.get('cupos', 15)
             try:
                 Horario.objects.create(
                     curso_id=curso_id,
                     profesor_id=profesor_id,
+                    aula_id=aula_id,
                     fecha_inicio=fecha_inicio,
                     fecha_fin=fecha_fin,
                     hora_inicio=hora_inicio,
                     hora_fin=hora_fin,
-                    descripcion=descripcion
+                    descripcion=descripcion,
+                    cupos=cupos  # <-- Solución aquí
                 )
                 messages.success(request, 'Clase registrada exitosamente.')
             except Exception:
@@ -546,7 +506,8 @@ def admin_clases(request):
         'active_tab': 'horarios',
         'clases': clases,
         'cursos': cursos,
-        'profesores': profesores
+        'profesores': profesores,
+        'aulas': aulas
     })
 
 @login_required
@@ -598,7 +559,12 @@ def admin_matriculas(request):
     # GET o POST con errores: mostrar datos
     matriculas = Matricula.objects.select_related('estudiante', 'clase', 'clase__curso', 'clase__profesor')
     estudiantes = Usuario.objects.filter(rol=Usuario.Rol.ESTUDIANTE)
-    clases = Horario.objects.select_related('curso', 'profesor').all().order_by('-fecha_inicio', '-hora_inicio')
+    clases = Horario.objects.select_related('curso', 'profesor', 'aula').all().order_by('-fecha_inicio', '-hora_inicio')
+
+    # Calcular cupos_disponibles para cada clase (después de registrar matrícula)
+    for clase in clases:
+        total_matriculados = Matricula.objects.filter(clase=clase, estado='ACTIVA').count()
+        clase.cupos_disponibles = max(clase.cupos - total_matriculados, 0)
 
     return render(request, 'usuarios/admin_matriculas.html', {
         'matriculas': matriculas,
@@ -616,60 +582,25 @@ def admin_pagos(request):
     matriculas = Matricula.objects.select_related('estudiante', 'clase', 'clase__curso').all()
 
     if request.method == 'POST':
+        pago_id = request.POST.get('pago_id')
         matricula_id = request.POST.get('matricula')
         monto_pago = float(request.POST.get('monto', 0))
-        estado = request.POST.get('estado', EstadoPago.PENDIENTE)
         observaciones = request.POST.get('observaciones', '')
 
         try:
-            matricula = Matricula.objects.get(id=matricula_id)
-            
-            # Buscar el pago pendiente existente para esta matrícula
-            pago_existente = Pago.objects.filter(
-                matricula=matricula, 
-                estado=EstadoPago.PENDIENTE
-            ).first();
-            
-            if pago_existente:
-                # Actualizar el pago existente
-                nuevo_monto = float(pago_existente.monto) - monto_pago
-                
-                if nuevo_monto <= 0:
-                    # Si el monto es 0 o menor, marcar como pagado
-                    pago_existente.monto = 0
-                    pago_existente.estado = EstadoPago.PAGADO
-                    pago_existente.observaciones = f"{pago_existente.observaciones or ''} | Pago completado con ${monto_pago}"
-                else:
-                    # Reducir el monto pendiente
-                    pago_existente.monto = nuevo_monto
-                    pago_existente.observaciones = f"{pago_existente.observaciones or ''} | Pago parcial de ${monto_pago}"
-                
-                pago_existente.save()
-                
-                # Crear un registro del pago realizado si es necesario (opcional)
-                if estado == EstadoPago.PAGADO:
-                    Pago.objects.create(
-                        matricula=matricula,
-                        monto=monto_pago,
-                        estado=EstadoPago.PAGADO,
-                        observaciones=f"Pago realizado: ${monto_pago}. {observaciones}"
-                    )
-                
-                messages.success(request, f'Pago de ${monto_pago} procesado exitosamente. Saldo restante: ${nuevo_monto if nuevo_monto > 0 else 0}')
-            else:
-                # Si no hay pago pendiente, crear uno nuevo
-                Pago.objects.create(
-                    matricula=matricula,
-                    monto=monto_pago,
-                    estado=estado,
-                    observaciones=observaciones
-                )
-                messages.success(request, 'Pago registrado exitosamente.')
-                
+            pago = Pago.objects.get(id=pago_id)
+            # Crear el pago parcial
+            PagoParcial.objects.create(
+                pago=pago,
+                monto=monto_pago,
+                observaciones=observaciones
+            )
+            # Actualizar estado del pago principal
+            pago.actualizar_estado()
+            messages.success(request, f'Pago procesado exitosamente. Saldo restante: ${pago.saldo_pendiente:.2f}')
             return redirect('admin_pagos')
-            
-        except Matricula.DoesNotExist:
-            messages.error(request, 'Matrícula no encontrada.')
+        except Pago.DoesNotExist:
+            messages.error(request, 'Pago no encontrado.')
 
     return render(request, 'usuarios/admin_pagos.html', {
         'active_tab': 'pagos',
@@ -677,6 +608,22 @@ def admin_pagos(request):
         'matriculas': matriculas,
         'estados_pago': EstadoPago.choices,
     })
+
+@login_required
+@csrf_exempt
+def pagos_historial_api(request, matricula_id):
+    # Devuelve el historial de pagos para una matrícula en formato JSON
+    pagos = Pago.objects.filter(matricula_id=matricula_id).order_by('fecha_pago')
+    data = []
+    for pago in pagos:
+        data.append({
+            'monto': float(pago.monto),
+            'fecha_pago': pago.fecha_pago.strftime('%Y-%m-%d'),
+            'estado': pago.estado,
+            'estado_display': pago.get_estado_display(),
+            'observaciones': pago.observaciones,
+        })
+    return JsonResponse(data, safe=False)
 
 @login_required
 def admin_asistencias(request):
@@ -831,7 +778,7 @@ def admin_asistencias(request):
         historial_clases_json[str(idx)] = {
             'clase': {
                 'id': clase_info['clase'].id,
-                'aula': clase_info['clase'].aula,
+                'aula': str(clase_info['clase'].aula) if clase_info['clase'].aula else "",
                 'hora_inicio': str(clase_info['clase'].hora_inicio),
                 'hora_fin': str(clase_info['clase'].hora_fin),
             },
@@ -840,8 +787,8 @@ def admin_asistencias(request):
             },
             'fecha': str(clase_info['fecha']),
             'profesor': {
-                'first_name': clase_info['profesor'].first_name,
-                'last_name': clase_info['profesor'].last_name,
+                'first_name': clase_info['profesor'].first_name if clase_info['profesor'] else "",
+                'last_name': clase_info['profesor'].last_name if clase_info['profesor'] else "",
             },
             'asistencias': [
                 {
@@ -949,3 +896,123 @@ def admin_reportes_redirect(request):
 def admin_reportes_redirect(request):
     """Redireccionar a la app de reportes"""
     return redirect('admin_reportes')
+
+@login_required
+def admin_reportes_redirect(request):
+    """Redireccionar a la app de reportes"""
+    return redirect('admin_reportes')
+    return JsonResponse({'error': 'Error interno del servidor'}, status=500)
+
+@login_required
+def admin_reportes_redirect(request):
+    """Redireccionar a la app de reportes"""
+    return redirect('admin_reportes')
+def admin_reportes_redirect(request):
+    """Redireccionar a la app de reportes"""
+    return redirect('admin_reportes')
+
+def admin_aulas(request):
+    mostrar_modal_duplicado = False
+    duplicado_mensaje = ""
+
+    if request.method == 'POST':
+        aula_id = request.POST.get('aula_id')
+        nombre = request.POST.get('nombre', '').strip()
+        sede = request.POST.get('sede')
+        edificio = request.POST.get('edificio')
+        piso = request.POST.get('piso')
+        capacidad = request.POST.get('capacidad')
+        activa = 'activa' in request.POST
+
+        # Eliminar aula
+        if request.POST.get('eliminar_aula') == '1' and aula_id:
+            try:
+                aula = Aula.objects.get(id=aula_id)
+                aula.delete()
+                messages.success(request, f'Aula "{aula.nombre}" eliminada exitosamente.')
+            except Aula.DoesNotExist:
+                messages.error(request, 'Aula no encontrada.')
+            return redirect('admin_aulas')
+        # Editar aula
+        elif aula_id:
+            try:
+                aula = Aula.objects.get(id=aula_id)
+                # Validar duplicado de nombre (excluyendo el aula actual)
+                if Aula.objects.filter(nombre=nombre).exclude(id=aula.id).exists():
+                    mostrar_modal_duplicado = True
+                    duplicado_mensaje = f'Ya existe un aula con el nombre "{nombre}".'
+                else:
+                    aula.nombre = nombre
+                    aula.sede = sede
+                    aula.edificio = edificio
+                    aula.piso = piso
+                    aula.capacidad = capacidad
+                    aula.activa = activa
+                    aula.save()
+                    messages.success(request, f'Aula "{aula.nombre}" actualizada exitosamente.')
+                    return redirect('admin_aulas')
+            except Aula.DoesNotExist:
+                messages.error(request, 'Aula no encontrada.')
+            # Si hay duplicado, no guardar y mostrar modal
+            # Si no, ya se redirige arriba
+
+        # Alta de aula
+        else:
+            # Validar duplicado de nombre
+            if Aula.objects.filter(nombre=nombre).exists():
+                mostrar_modal_duplicado = True
+                duplicado_mensaje = f'Ya existe un aula con el nombre "{nombre}".'
+            else:
+                Aula.objects.create(
+                    nombre=nombre,
+                    sede=sede,
+                    edificio=edificio,
+                    piso=piso,
+                    capacidad=capacidad,
+                    activa=activa,
+                )
+                messages.success(request, f'Aula "{nombre}" registrada exitosamente.')
+                return redirect('admin_aulas')
+
+    aulas = Aula.objects.all().prefetch_related('clases_aula__matriculas')
+    for aula in aulas:
+        total_matriculados = 0
+        for clase in aula.clases_aula.all():
+            for matricula in clase.matriculas.all():
+                if matricula.estado == 'ACTIVA':
+                    total_matriculados += 1
+        # Nunca mostrar negativos
+        aula.puestos_disponibles = max(aula.capacidad - total_matriculados, 0)
+
+    context = {
+        'aulas': aulas,
+        'sedes': Sede.choices,
+        'edificios': Edificio.choices,
+        'pisos': Piso.choices,
+        'mostrar_modal_duplicado': mostrar_modal_duplicado,
+        'duplicado_mensaje': duplicado_mensaje,
+        'active_tab': 'aulas',
+    }
+    return render(request, 'usuarios/admin_aulas.html', context)
+
+@login_required
+def factura_pago_pdf(request, pago_id):
+    try:
+        pago = Pago.objects.select_related('matricula__estudiante', 'matricula__clase__curso').get(id=pago_id)
+    except Pago.DoesNotExist:
+        return HttpResponse("Pago no encontrado.", status=404)
+    usuario_generador = request.user
+    fecha_generacion = datetime.now()
+    template = get_template('reportes/factura_pago_pdf.html')
+    html = template.render({
+        'pago': pago,
+        'usuario_generador': usuario_generador,
+        'fecha_generacion': fecha_generacion,
+    })
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="factura_pago_{pago_id}.pdf"'
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse("Error al generar el PDF", status=500)
+    return response
+    return response

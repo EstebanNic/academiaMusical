@@ -10,6 +10,7 @@ urlpatterns = [
     path('panel/admin/estudiantes/', views.admin_estudiantes, name='admin_estudiantes'),
     path('panel/admin/cursos/', views.admin_cursos, name='admin_cursos'),
     path('panel/admin/clases/', views.admin_clases, name='admin_clases'),
+    path('panel/admin/aulas/', views.admin_aulas, name='admin_aulas'),
     path('panel/admin/matriculas/', views.admin_matriculas, name='admin_matriculas'),
     path('panel/admin/pagos/', views.admin_pagos, name='admin_pagos'),
     path('panel/admin/asistencias/', views.admin_asistencias, name='admin_asistencias'),

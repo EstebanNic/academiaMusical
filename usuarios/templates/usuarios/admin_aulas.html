@@ -1,0 +1,634 @@
+{% extends 'usuarios/base.html' %} {% load static %} {% block title %}Panel
+Administrador - Aulas{% endblock %} {% block content %}
+
+<div class="main-content">
+  <div class="container mt-5">
+    <!-- Filtros de aulas -->
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <label for="filtro-sede" class="form-label">Filtrar por sede</label>
+        <select class="form-select" id="filtro-sede">
+          <option value="">Todas</option>
+          {% for value, label in sedes %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="filtro-edificio" class="form-label"
+          >Filtrar por edificio</label
+        >
+        <select class="form-select" id="filtro-edificio">
+          <option value="">Todos</option>
+          {% for value, label in edificios %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="filtro-piso" class="form-label">Filtrar por piso</label>
+        <select class="form-select" id="filtro-piso">
+          <option value="">Todos</option>
+          {% for value, label in pisos %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="filtro-capacidad" class="form-label"
+          >Capacidad mínima</label
+        >
+        <input
+          type="number"
+          class="form-control"
+          id="filtro-capacidad"
+          min="1"
+          placeholder="Ej: 15"
+        />
+      </div>
+    </div>
+    <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link active"
+          id="aulas-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#aulas"
+          type="button"
+          role="tab"
+          aria-controls="aulas"
+          aria-selected="true"
+        >
+          Aulas
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button
+          class="nav-link"
+          id="add-aula-tab"
+          data-bs-toggle="tab"
+          data-bs-target="#add-aula"
+          type="button"
+          role="tab"
+          aria-controls="add-aula"
+          aria-selected="false"
+        >
+          Añadir Aula
+        </button>
+      </li>
+    </ul>
+    <div class="tab-content" id="adminTabsContent">
+      <div
+        class="tab-pane fade show active"
+        id="aulas"
+        role="tabpanel"
+        aria-labelledby="aulas-tab"
+      >
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Sede</th>
+                <th>Edificio</th>
+                <th>Piso</th>
+                <th>Capacidad</th>
+                <!-- <th>Puestos disponibles</th> --> <!-- OCULTAR -->
+                <!-- <th>Estado</th> --> <!-- OCULTAR -->
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="aulas-tbody">
+              {% for aula in aulas %}
+                <tr
+                  data-sede="{{ aula.sede }}"
+                  data-edificio="{{ aula.edificio }}"
+                  data-piso="{{ aula.piso }}"
+                  data-capacidad="{{ aula.capacidad }}"
+                >
+                  <td><strong>{{ aula.nombre }}</strong></td>
+                  <td>{{ aula.get_sede_display }}</td>
+                  <td>{{ aula.get_edificio_display }}</td>
+                  <td>{{ aula.get_piso_display }}</td>
+                  <td>{{ aula.capacidad }} estudiantes</td>
+                  <!-- <td>
+                    <span class="text-muted">Ver cupos en clases</span>
+                  </td> --> <!-- OCULTAR -->
+                  <!-- <td>
+                    {% if aula.activa %}
+                    <span class="badge bg-success">Activa</span>
+                    {% else %}
+                    <span class="badge bg-danger">Inactiva</span>
+                    {% endif %}
+                  </td> --> <!-- OCULTAR -->
+                  <td>
+                    <button
+                      class="btn btn-sm btn-warning me-1 btn-editar-aula"
+                      data-aula-id="{{ aula.id }}"
+                      data-aula-nombre="{{ aula.nombre }}"
+                      data-aula-sede="{{ aula.sede }}"
+                      data-aula-edificio="{{ aula.edificio }}"
+                      data-aula-piso="{{ aula.piso }}"
+                      data-aula-capacidad="{{ aula.capacidad }}"
+                      data-aula-activa="{{ aula.activa }}"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      class="btn btn-sm btn-danger btn-eliminar-aula"
+                      data-aula-id="{{ aula.id }}"
+                      data-aula-nombre="{{ aula.nombre }}"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="text-center">
+                  No hay aulas registradas.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div
+        class="tab-pane fade"
+        id="add-aula"
+        role="tabpanel"
+        aria-labelledby="add-aula-tab"
+      >
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Registrar Aula</h5>
+            <form
+              method="POST"
+              action="{% url 'admin_aulas' %}"
+              id="add-aula-form"
+            >
+              {% csrf_token %}
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="nombre" class="form-label">
+                    Nombre del Aula <span class="text-danger">*</span>
+                  </label>
+                  <select
+                    class="form-select"
+                    id="nombre"
+                    name="nombre"
+                    required
+                  >
+                    <option value="" disabled selected>
+                      Seleccione un aula
+                    </option>
+                    <option value="Aula 101">Aula 101</option>
+                    <option value="Aula 102">Aula 102</option>
+                    <option value="Aula 103">Aula 103</option>
+                    <option value="Aula 201">Aula 201</option>
+                    <option value="Aula 202">Aula 202</option>
+                    <option value="Aula 203">Aula 203</option>
+                    <option value="Aula 301">Aula 301</option>
+                    <option value="Aula 302">Aula 302</option>
+                    <option value="Aula 303">Aula 303</option>
+                    <!-- Agrega más si lo necesitas -->
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="sede" class="form-label"
+                    >Sede <span class="text-danger">*</span></label
+                  >
+                  <select class="form-select" id="sede" name="sede" required>
+                    {% for value, label in sedes %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="edificio" class="form-label"
+                    >Edificio <span class="text-danger">*</span></label
+                  >
+                  <select
+                    class="form-select"
+                    id="edificio"
+                    name="edificio"
+                    required
+                  >
+                    {% for value, label in edificios %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="piso" class="form-label"
+                    >Piso <span class="text-danger">*</span></label
+                  >
+                  <select class="form-select" id="piso" name="piso" required>
+                    {% for value, label in pisos %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="capacidad" class="form-label"
+                    >Capacidad <span class="text-danger">*</span></label
+                  >
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="capacidad"
+                    name="capacidad"
+                    min="1"
+                    max="50"
+                    value="15"
+                    required
+                  />
+                </div>
+                <!-- OCULTAR campo aula activa -->
+                <!-- <div class="col-md-6 mb-3">
+                  <div class="form-check mt-4">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="activa"
+                      name="activa"
+                      checked
+                    />
+                    <label class="form-check-label" for="activa">
+                      Aula activa
+                    </label>
+                  </div>
+                </div> -->
+              </div>
+              <button type="submit" class="btn btn-primary">Registrar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Aula -->
+<div
+  class="modal fade"
+  id="modalEditarAula"
+  tabindex="-1"
+  aria-labelledby="modalEditarAulaLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalEditarAulaLabel">Editar Aula</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form
+          id="form-editar-aula"
+          method="POST"
+          action="{% url 'admin_aulas' %}"
+        >
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit_nombre" class="form-label"
+                >Nombre del Aula</label
+              >
+              <select
+                class="form-select"
+                id="edit_nombre"
+                name="nombre"
+                required
+              >
+                <option value="" disabled>Seleccione un aula</option>
+                <option value="Aula 101">Aula 101</option>
+                <option value="Aula 102">Aula 102</option>
+                <option value="Aula 103">Aula 103</option>
+                <option value="Aula 201">Aula 201</option>
+                <option value="Aula 202">Aula 202</option>
+                <option value="Aula 203">Aula 203</option>
+                <option value="Aula 301">Aula 301</option>
+                <option value="Aula 302">Aula 302</option>
+                <option value="Aula 303">Aula 303</option>
+                <!-- Agrega más si lo necesitas -->
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_sede" class="form-label">Sede</label>
+              <select class="form-select" id="edit_sede" name="sede" required>
+                {% for value, label in sedes %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_edificio" class="form-label">Edificio</label>
+              <select
+                class="form-select"
+                id="edit_edificio"
+                name="edificio"
+                required
+              >
+                {% for value, label in edificios %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_piso" class="form-label">Piso</label>
+              <select class="form-select" id="edit_piso" name="piso" required>
+                {% for value, label in pisos %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit_capacidad" class="form-label">Capacidad</label>
+              <input
+                type="number"
+                class="form-control"
+                id="edit_capacidad"
+                name="capacidad"
+                min="1"
+                max="50"
+                required
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="form-check mt-4">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="edit_activa"
+                  name="activa"
+                />
+                <label class="form-check-label" for="edit_activa">
+                  Aula activa
+                </label>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" name="aula_id" id="edit_aula_id" />
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ver Más Aula -->
+<div
+  class="modal fade"
+  id="modalVerMasAula"
+  tabindex="-1"
+  aria-labelledby="modalVerMasAulaLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalVerMasAulaLabel">Detalles del Aula</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <ul class="list-group">
+          <li class="list-group-item">
+            <strong>Nombre:</strong> <span id="vermas-aula-nombre"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Sede:</strong> <span id="vermas-aula-sede"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Edificio:</strong> <span id="vermas-aula-edificio"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Piso:</strong> <span id="vermas-aula-piso"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Capacidad:</strong>
+            <span id="vermas-aula-capacidad"></span> estudiantes
+          </li>
+          <!-- <li class="list-group-item">
+            <strong>Estado:</strong> <span id="vermas-aula-activa"></span>
+          </li> --> <!-- OCULTAR -->
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmar Eliminación -->
+<div
+  class="modal fade"
+  id="modalConfirmarEliminarAula"
+  tabindex="-1"
+  aria-labelledby="modalConfirmarEliminarAulaLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalConfirmarEliminarAulaLabel">
+          Confirmar eliminación
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          ¿Está seguro de que desea eliminar el aula
+          <span id="eliminar-nombre-aula"></span>?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <form
+          id="form-eliminar-aula"
+          method="POST"
+          action="{% url 'admin_aulas' %}"
+        >
+          {% csrf_token %}
+          <input type="hidden" name="aula_id" id="eliminar_aula_id" />
+          <input type="hidden" name="eliminar_aula" value="1" />
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Aula Duplicada -->
+<div
+  class="modal fade"
+  id="modalAulaDuplicada"
+  tabindex="-1"
+  aria-labelledby="modalAulaDuplicadaLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAulaDuplicadaLabel">
+          <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+          Aula duplicada
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning mb-0">
+          <i class="fas fa-info-circle me-2"></i>
+          <strong>No se puede registrar o editar el aula.</strong>
+          <br /><br />
+          {% if duplicado_mensaje %} {{ duplicado_mensaje }} {% else %} Ya
+          existe un aula con los mismos datos. Por favor, verifique el nombre
+          del aula. {% endif %}
+          <ul class="mt-2 mb-0">
+            <li>El <strong>nombre</strong> del aula debe ser único.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+          <i class="fas fa-check me-1"></i>
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Modal Editar Aula
+  document.querySelectorAll(".btn-editar-aula").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.getElementById("edit_aula_id").value =
+        btn.getAttribute("data-aula-id") || "";
+      document.getElementById("edit_nombre").value =
+        btn.getAttribute("data-aula-nombre") || "";
+      document.getElementById("edit_sede").value =
+        btn.getAttribute("data-aula-sede") || "";
+      document.getElementById("edit_edificio").value =
+        btn.getAttribute("data-aula-edificio") || "";
+      document.getElementById("edit_piso").value =
+        btn.getAttribute("data-aula-piso") || "";
+      document.getElementById("edit_capacidad").value =
+        btn.getAttribute("data-aula-capacidad") || "";
+      document.getElementById("edit_activa").checked =
+        btn.getAttribute("data-aula-activa") === "True";
+      var modal = new bootstrap.Modal(
+        document.getElementById("modalEditarAula")
+      );
+      modal.show();
+    });
+  });
+
+  // Modal Ver Más Aula
+  document.querySelectorAll(".btn-ver-mas-aula").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.getElementById("vermas-aula-nombre").textContent =
+        btn.getAttribute("data-aula-nombre") || "";
+      document.getElementById("vermas-aula-sede").textContent =
+        btn.getAttribute("data-aula-sede") || "";
+      document.getElementById("vermas-aula-edificio").textContent =
+        btn.getAttribute("data-aula-edificio") || "";
+      document.getElementById("vermas-aula-piso").textContent =
+        btn.getAttribute("data-aula-piso") || "";
+      document.getElementById("vermas-aula-capacidad").textContent =
+        btn.getAttribute("data-aula-capacidad") || "";
+      document.getElementById("vermas-aula-activa").textContent =
+        btn.getAttribute("data-aula-activa") || "";
+      var modal = new bootstrap.Modal(
+        document.getElementById("modalVerMasAula")
+      );
+      modal.show();
+    });
+  });
+
+  // Modal Confirmar Eliminación
+  document.querySelectorAll(".btn-eliminar-aula").forEach(function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      document.getElementById("eliminar-nombre-aula").textContent =
+        btn.getAttribute("data-aula-nombre") || "";
+      document.getElementById("eliminar_aula_id").value =
+        btn.getAttribute("data-aula-id") || "";
+      var modal = new bootstrap.Modal(
+        document.getElementById("modalConfirmarEliminarAula")
+      );
+      modal.show();
+    });
+  });
+
+  // Filtros de aulas
+  document.addEventListener('DOMContentLoaded', function() {
+    // Filtro de aulas
+    const filtroSede = document.getElementById('filtro-sede');
+    const filtroEdificio = document.getElementById('filtro-edificio');
+    const filtroPiso = document.getElementById('filtro-piso');
+    const filtroCapacidad = document.getElementById('filtro-capacidad');
+    const aulasRows = document.querySelectorAll('#aulas-tbody tr');
+
+    function filtrarAulas() {
+      const sede = filtroSede.value;
+      const edificio = filtroEdificio.value;
+      const piso = filtroPiso.value;
+      const capacidad = parseInt(filtroCapacidad.value) || null;
+
+      aulasRows.forEach(function(row) {
+        let mostrar = true;
+        if (sede && row.getAttribute('data-sede') !== sede) mostrar = false;
+        if (edificio && row.getAttribute('data-edificio') !== edificio) mostrar = false;
+        if (piso && row.getAttribute('data-piso') !== piso) mostrar = false;
+        if (capacidad && parseInt(row.getAttribute('data-capacidad')) < capacidad) mostrar = false;
+        row.style.display = mostrar ? '' : 'none';
+      });
+    }
+
+    filtroSede.addEventListener('change', filtrarAulas);
+    filtroEdificio.addEventListener('change', filtrarAulas);
+    filtroPiso.addEventListener('change', filtrarAulas);
+    filtroCapacidad.addEventListener('input', filtrarAulas);
+  });
+
+  // Mostrar modal de aula duplicada si corresponde
+  document.addEventListener('DOMContentLoaded', function() {
+    {% if mostrar_modal_duplicado %}
+      var modalDuplicada = new bootstrap.Modal(document.getElementById('modalAulaDuplicada'));
+      modalDuplicada.show();
+    {% endif %}
+  });
+</script>
+
+{% endblock %}

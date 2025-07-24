@@ -44,7 +44,6 @@
                                     <th>Cédula</th>
                                     <th>Email</th>
                                     <th>Teléfono</th>
-                                    <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -55,11 +54,6 @@
                                     <td class="cedula-cell">{{ estudiante.cedula }}</td>
                                     <td>{{ estudiante.email }}</td>
                                     <td>{{ estudiante.telefono }}</td>
-                                    <td>
-                                        <span class="badge {% if estudiante.is_active %}bg-success{% else %}bg-secondary{% endif %}">
-                                            {% if estudiante.is_active %}Activo{% else %}Inactivo{% endif %}
-                                        </span>
-                                    </td>
                                     <td>
                                         <button class="btn btn-sm btn-info me-1 btn-ver-mas-estudiante"
                                             data-estudiante-nombre="{{ estudiante.first_name }} {{ estudiante.last_name }}"
@@ -86,7 +80,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr id="no-estudiantes-row">
-                                    <td colspan="6" class="text-center">No hay estudiantes registrados.</td>
+                                    <td colspan="5" class="text-center">No hay estudiantes registrados.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -231,7 +225,6 @@
               <li class="list-group-item"><strong>Email:</strong> <span id="vermas-email"></span></li>
               <li class="list-group-item"><strong>Teléfono:</strong> <span id="vermas-telefono"></span></li>
               <li class="list-group-item"><strong>Dirección:</strong> <span id="vermas-direccion"></span></li>
-              <li class="list-group-item"><strong>Estado:</strong> <span id="vermas-estado"></span></li>
             </ul>
           </div>
           <div class="modal-footer">
@@ -518,7 +511,6 @@
                 document.getElementById('vermas-email').textContent = btn.getAttribute('data-estudiante-email') || '';
                 document.getElementById('vermas-telefono').textContent = btn.getAttribute('data-estudiante-telefono') || '';
                 document.getElementById('vermas-direccion').textContent = btn.getAttribute('data-estudiante-direccion') || '';
-                document.getElementById('vermas-estado').textContent = btn.getAttribute('data-estudiante-estado') || '';
                 var modal = new bootstrap.Modal(document.getElementById('modalVerMasEstudiante'));
                 modal.show();
             });

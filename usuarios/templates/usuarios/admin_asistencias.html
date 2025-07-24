@@ -21,25 +21,19 @@
                     <div class="col-md-8">
                         <form method="GET" class="d-flex">
                             <input type="date" class="form-control me-2" name="fecha_filtro" value="{{ fecha_filtro }}" placeholder="Filtrar por fecha">
-                            <select class="form-select me-2" name="clase_filtro">
-                                <option value="">Todas las clases</option>
-                                {% for clase in clases %}
-                                    <option value="{{ clase.id }}" {% if clase_filtro == clase.id|stringformat:"s" %}selected{% endif %}>
-                                        {{ clase.curso.nombre }} - {{ clase.aula }} ({{ clase.hora_inicio }})
-                                    </option>
-                                {% endfor %}
-                            </select>
+                            <input type="text" class="form-control me-2" name="codigo_filtro" placeholder="Filtrar por código de clase" value="{{ request.GET.codigo_filtro|default:'' }}">
                             <button type="submit" class="btn btn-outline-primary me-2">Filtrar</button>
                             <a href="{% url 'admin_asistencias' %}" class="btn btn-outline-secondary">Limpiar</a>
                         </form>
                     </div>
                 </div>
                 
-                <!-- NUEVO: Tabla de clases con historial de asistencias -->
+                <!-- Tabla de clases con historial de asistencias -->
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
                             <tr>
+                                <th>Código de clase</th> <!-- NUEVA COLUMNA -->
                                 <th>Curso</th>
                                 <th>Clase (Aula)</th>
                                 <th>Horario</th>
@@ -51,7 +45,13 @@
                         </thead>
                         <tbody>
                             {% for key, clase_info in historial_clases.items %}
+                            {% if not request.GET.codigo_filtro or clase_info.clase.codigo|default:''|upper == request.GET.codigo_filtro|upper %}
                             <tr>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        {{ clase_info.clase.codigo }}
+                                    </span>
+                                </td>
                                 <td>{{ clase_info.curso.nombre }}</td>
                                 <td>{{ clase_info.clase.aula }}</td>
                                 <td>{{ clase_info.clase.hora_inicio }} - {{ clase_info.clase.hora_fin }}</td>
@@ -69,9 +69,10 @@
                                     </button>
                                 </td>
                             </tr>
+                            {% endif %}
                             {% empty %}
                             <tr>
-                                <td colspan="7" class="text-center">No hay historial de asistencias.</td>
+                                <td colspan="8" class="text-center">No hay historial de asistencias.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -86,7 +87,13 @@
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Seleccionar Clase</h5>
+                                <!-- NUEVO FILTRO POR CÓDIGO DE CLASE -->
                                 <div class="mb-3">
+                                    <label for="filtroCodigoClase" class="form-label">Filtrar por código de clase</label>
+                                    <input type="text" class="form-control" id="filtroCodigoClase" placeholder="Ej: PIA-0001">
+                                </div>
+                                <!-- OCULTAR FECHA DE ASISTENCIA -->
+                                <div class="mb-3" style="display: none;">
                                     <label for="fecha_clase" class="form-label">Fecha de Asistencia</label>
                                     <input type="date" class="form-control" id="fecha_clase" value="{{ fecha_hoy }}">
                                 </div>
@@ -94,6 +101,7 @@
                                     {% for clase in clases %}
                                     <button type="button" class="list-group-item list-group-item-action btn-seleccionar-clase"
                                             data-clase-id="{{ clase.id }}"
+                                            data-clase-codigo="{{ clase.codigo }}"
                                             data-clase-nombre="{{ clase.curso.nombre }}"
                                             data-clase-aula="{{ clase.aula }}"
                                             data-clase-horario="{{ clase.hora_inicio }} - {{ clase.hora_fin }}"
@@ -102,7 +110,10 @@
                                             <h6 class="mb-1">{{ clase.curso.nombre }}</h6>
                                             <small>{{ clase.hora_inicio }}</small>
                                         </div>
-                                        <p class="mb-1">Aula: {{ clase.aula }}</p>
+                                        <p class="mb-1">
+                                            <span class="badge bg-secondary">{{ clase.codigo }}</span>
+                                            Aula: {{ clase.aula }}
+                                        </p>
                                         <small>Profesor: {{ clase.profesor.get_full_name }}</small>
                                         <span class="badge bg-secondary">{{ clase.total_estudiantes }} estudiantes</span>
                                     </button>
@@ -123,7 +134,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="registrar_asistencias_clase" value="1">
                                     <input type="hidden" name="clase_id" id="clase_id_selected">
-                                    <input type="hidden" name="fecha_asistencia" id="fecha_asistencia_hidden">
+                                    <input type="hidden" name="fecha_asistencia" id="fecha_asistencia_hidden" value="{{ fecha_hoy }}">
                                     
                                     <div class="table-responsive">
                                         <table class="table table-bordered" id="tabla-estudiantes">
@@ -131,7 +142,7 @@
                                                 <tr>
                                                     <th>Estudiante</th>
                                                     <th>Estado</th>
-                                                    <th>Observaciones</th>
+                                                    <th style="display: none;">Observaciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="tbody-estudiantes">
@@ -141,10 +152,6 @@
                                     </div>
                                     
                                     <div class="d-flex justify-content-between">
-                                        <div>
-                                            <button type="button" class="btn btn-success" onclick="marcarTodos('PRESENTE')">Marcar Todos Presentes</button>
-                                            <button type="button" class="btn btn-danger" onclick="marcarTodos('AUSENTE')">Marcar Todos Ausentes</button>
-                                        </div>
                                         <div>
                                             <button type="submit" class="btn btn-primary">Guardar Asistencias</button>
                                             <button type="button" class="btn btn-secondary" onclick="cancelarAsistencia()">Cancelar</button>
@@ -292,39 +299,36 @@ function cargarEstudiantesClase(claseId, fecha) {
     });
 }
 
-// SIMPLIFICADO: Mostrar estudiantes con su estado actual
+// Mostrar estudiantes con grupo de radio para estado (Presente/Ausente)
 function mostrarEstudiantes(estudiantes, asistenciasExistentes = {}) {
     const tbody = document.getElementById('tbody-estudiantes');
     tbody.innerHTML = '';
-    
     estudiantes.forEach(function(estudiante) {
         const asistencia = asistenciasExistentes[estudiante.id] || {};
+        const estadoActual = asistencia.estado || 'AUSENTE';
+        let grupo = `
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="estado_${estudiante.id}" id="estado_${estudiante.id}_PRESENTE" value="PRESENTE" ${estadoActual === 'PRESENTE' ? 'checked' : ''}>
+                <label class="form-check-label" for="estado_${estudiante.id}_PRESENTE">Presente</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="estado_${estudiante.id}" id="estado_${estudiante.id}_AUSENTE" value="AUSENTE" ${estadoActual === 'AUSENTE' ? 'checked' : ''}>
+                <label class="form-check-label" for="estado_${estudiante.id}_AUSENTE">Ausente</label>
+            </div>
+        `;
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>
                 <strong>${estudiante.nombre}</strong><br>
                 <small class="text-muted">Cédula: ${estudiante.cedula}</small>
             </td>
-            <td>
-                <select class="form-select" name="estado_${estudiante.id}" required>
-                    <option value="PRESENTE" ${asistencia.estado === 'PRESENTE' ? 'selected' : ''}>Presente</option>
-                    <option value="TARDE" ${asistencia.estado === 'TARDE' ? 'selected' : ''}>Llegó tarde</option>
-                    <option value="AUSENTE" ${asistencia.estado === 'AUSENTE' || !asistencia.estado ? 'selected' : ''}>Ausente</option>
-                    <option value="JUSTIFICADO" ${asistencia.estado === 'JUSTIFICADO' ? 'selected' : ''}>Ausencia justificada</option>
-                </select>
-            </td>
-            <td>
+            <td>${grupo}</td>
+            <td style="display: none;">
                 <input type="text" class="form-control" name="observaciones_${estudiante.id}" 
                        value="${asistencia.observaciones || ''}" placeholder="Observaciones...">
             </td>
         `;
         tbody.appendChild(row);
-    });
-}
-
-function marcarTodos(estado) {
-    document.querySelectorAll('select[name^="estado_"]').forEach(function(select) {
-        select.value = estado;
     });
 }
 
@@ -403,6 +407,34 @@ document.getElementById('modalDetalleAsistencias').addEventListener('show.bs.mod
     `;
     
     document.getElementById('detalle-asistencias-content').innerHTML = html;
+});
+
+// Filtro por código de clase en "Tomar Asistencia por Clase"
+document.addEventListener('DOMContentLoaded', function() {
+    const filtroCodigo = document.getElementById('filtroCodigoClase');
+    const claseButtons = document.querySelectorAll('.btn-seleccionar-clase');
+    function filtrarClasesPorCodigo() {
+        const termino = filtroCodigo.value.trim().toUpperCase();
+        let visibles = 0;
+        claseButtons.forEach(btn => {
+            const codigo = (btn.getAttribute('data-clase-codigo') || '').toUpperCase();
+            if (!termino || codigo.includes(termino)) {
+                btn.style.display = '';
+                visibles++;
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+    }
+    filtroCodigo.addEventListener('input', filtrarClasesPorCodigo);
+    filtroCodigo.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            filtroCodigo.value = '';
+            filtrarClasesPorCodigo();
+            filtroCodigo.focus();
+        }
+    });
+    filtrarClasesPorCodigo();
 });
 </script>
 

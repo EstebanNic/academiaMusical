@@ -40,61 +40,128 @@ Administrador - Horarios{% endblock %} {% block content %}
         role="tabpanel"
         aria-labelledby="clases-tab"
       >
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label for="buscarCodigoClase" class="form-label small"
+              >Filtrar por código de clase:</label
+            >
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              id="buscarCodigoClase"
+              placeholder="Ej: PIA-0001"
+            />
+          </div>
+          <div class="col-md-8 d-flex align-items-end">
+            <span
+              id="resultadosBusquedaClases"
+              class="text-muted small"
+            ></span>
+            <button
+              class="btn btn-outline-secondary btn-sm ms-2"
+              type="button"
+              id="limpiarBusquedaClases"
+            >
+              <i class="fas fa-times"></i> Limpiar
+            </button>
+          </div>
+        </div>
         <div class="table-responsive">
           <table class="table table-striped">
             <thead>
-                            <tr>
-                                <th>Código</th>
-                                <th>Curso</th>
-                                <th>Profesor</th>
-                                <th>Fecha Inicio</th>
-                                <th>Fecha Fin</th>
-                                <th>Hora Inicio</th>
-                                <th>Hora Fin</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="clases-tbody">
-                            {% for clase in clases %}
-                            <tr>
-                                <td><span class="badge bg-secondary">{{ clase.codigo }}</span></td>
-                                <td>{{ clase.curso.nombre }}</td>
-                                <td>{% if clase.profesor %}{{ clase.profesor.first_name }} {{ clase.profesor.last_name }}{% else %}<span class="text-muted">Sin profesor</span>{% endif %}</td>
-                                <td>{{ clase.fecha_inicio }}</td>
-                                <td>{{ clase.fecha_fin }}</td>
-                                <td>{{ clase.hora_inicio }}</td>
-                                <td>{{ clase.hora_fin }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-info me-1 btn-ver-mas-clase"
-                                        data-clase-codigo="{{ clase.codigo }}"
-                                        data-clase-curso="{{ clase.curso.nombre }}"
-                                        data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.first_name }} {{ clase.profesor.last_name }}{% endif %}"
-                                        data-clase-hora-inicio="{{ clase.hora_inicio }}"
-                                        data-clase-hora-fin="{{ clase.hora_fin }}"
-                                        data-clase-fecha-inicio="{{ clase.fecha_inicio }}"
-                                        data-clase-fecha-fin="{{ clase.fecha_fin }}"
-                                    >Ver más</button>
-                                    <button class="btn btn-sm btn-warning me-1 btn-editar-clase"
-                                        data-clase-id="{{ clase.id }}"
-                                        data-clase-curso="{{ clase.curso.id }}"
-                                        data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.id }}{% endif %}"
-                                        data-clase-hora-inicio="{{ clase.hora_inicio }}"
-                                        data-clase-hora-fin="{{ clase.hora_fin }}"
-                                        data-clase-fecha-inicio="{{ clase.fecha_inicio }}"
-                                        data-clase-fecha-fin="{{ clase.fecha_fin }}"
-                                    >Editar</button>
-                                    <button class="btn btn-sm btn-danger btn-eliminar-clase"
-                                        data-clase-id="{{ clase.id }}"
-                                        data-clase-codigo="{{ clase.codigo }}"
-                                    >Eliminar</button>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="8" class="text-center">No hay clases registradas.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
+              <tr>
+                <th>Código</th>
+                <th>Curso</th>
+                <th>Profesor</th>
+                <th>Aula</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+                <th>Hora Inicio</th>
+                <th>Hora Fin</th>
+                <th>Cupos</th>
+                <th>Cupos disponibles</th> <!-- NUEVA COLUMNA -->
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="clases-tbody">
+              {% for clase in clases %}
+              <tr class="clase-row" data-codigo="{{ clase.codigo }}">
+                <td>
+                  <span class="badge bg-secondary">{{ clase.codigo }}</span>
+                </td>
+                <td>{{ clase.curso.nombre }}</td>
+                <td>
+                  {% if clase.profesor %}
+                    {{ clase.profesor.first_name }}{% if clase.profesor.last_name %} {{ clase.profesor.last_name }}{% else %} <span class="text-muted">Sin apellido</span>{% endif %}
+                  {% else %}
+                    <span class="text-muted">Sin profesor</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if clase.aula %}{{ clase.aula.nombre }}{% else %}<span
+                    class="text-muted"
+                    >Sin aula</span
+                  >{% endif %}
+                </td>
+                <td>{{ clase.fecha_inicio }}</td>
+                <td>{{ clase.fecha_fin }}</td>
+                <td>{{ clase.hora_inicio }}</td>
+                <td>{{ clase.hora_fin }}</td>
+                <td>{{ clase.cupos }}</td>
+                <td>
+                  {% if clase.cupos_disponibles is not None %}
+                    <span class="{% if clase.cupos_disponibles <= 0 %}text-danger{% elif clase.cupos_disponibles < 5 %}text-warning{% else %}text-success{% endif %}">
+                      {{ clase.cupos_disponibles }}
+                    </span>
+                  {% else %}
+                    <span class="text-muted">-</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-info me-1 btn-ver-mas-clase"
+                    data-clase-codigo="{{ clase.codigo }}"
+                    data-clase-curso="{{ clase.curso.nombre }}"
+                    data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.first_name }}{% if clase.profesor.last_name %} {{ clase.profesor.last_name }}{% else %} Sin apellido{% endif %}{% else %}Sin profesor{% endif %}"
+                    data-clase-aula="{% if clase.aula %}{{ clase.aula.nombre }}{% endif %}"
+                    data-clase-hora-inicio="{{ clase.hora_inicio }}"
+                    data-clase-hora-fin="{{ clase.hora_fin }}"
+                    data-clase-fecha-inicio="{{ clase.fecha_inicio }}"
+                    data-clase-fecha-fin="{{ clase.fecha_fin }}"
+                  >
+                    Ver más
+                  </button>
+                  <button
+                    class="btn btn-sm btn-warning me-1 btn-editar-clase"
+                    data-clase-id="{{ clase.id }}"
+                    data-clase-curso="{{ clase.curso.id }}"
+                    data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.id }}{% endif %}"
+                    data-clase-aula="{% if clase.aula %}{{ clase.aula.id }}{% endif %}"
+                    data-clase-hora-inicio="{{ clase.hora_inicio }}"
+                    data-clase-hora-fin="{{ clase.hora_fin }}"
+                    data-clase-fecha-inicio="{{ clase.fecha_inicio }}"
+                    data-clase-fecha-fin="{{ clase.fecha_fin }}"
+                    data-clase-cupos="{{ clase.cupos }}"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    class="btn btn-sm btn-danger btn-eliminar-clase"
+                    data-clase-id="{{ clase.id }}"
+                    data-clase-codigo="{{ clase.codigo }}"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="10" class="text-center">
+                  No hay clases registradas.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
           </table>
         </div>
       </div>
@@ -136,6 +203,17 @@ Administrador - Horarios{% endblock %} {% block content %}
                     {% for profesor in profesores %}
                     <option value="{{ profesor.id }}">
                       {{ profesor.first_name }} {{ profesor.last_name }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="aula" class="form-label">Aula</label>
+                  <select class="form-select" id="aula" name="aula">
+                    <option value="" selected>Sin aula</option>
+                    {% for aula in aulas %}
+                    <option value="{{ aula.id }}">
+                      {{ aula.nombre }} - {{ aula.ubicacion_completa }}
                     </option>
                     {% endfor %}
                   </select>
@@ -185,6 +263,10 @@ Administrador - Horarios{% endblock %} {% block content %}
                     name="hora_fin"
                     required
                   ></select>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label for="cupos" class="form-label">Cupos <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" id="cupos" name="cupos" min="1" max="50" value="15" required>
                 </div>
               </div>
               <button type="submit" class="btn btn-primary">Registrar</button>
@@ -240,6 +322,17 @@ Administrador - Horarios{% endblock %} {% block content %}
               </select>
             </div>
             <div class="col-md-6 mb-3">
+              <label for="edit_aula" class="form-label">Aula</label>
+              <select class="form-select" id="edit_aula" name="aula">
+                <option value="">Sin aula</option>
+                {% for aula in aulas %}
+                <option value="{{ aula.id }}">
+                  {{ aula.nombre }} - {{ aula.ubicacion_completa }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
               <label for="edit_fecha_inicio" class="form-label"
                 >Fecha Inicio</label
               >
@@ -262,12 +355,28 @@ Administrador - Horarios{% endblock %} {% block content %}
               />
             </div>
             <div class="col-md-3 mb-3">
-              <label for="edit_hora_inicio" class="form-label">Hora Inicio</label>
-              <select class="form-select" id="edit_hora_inicio" name="hora_inicio" required></select>
+              <label for="edit_hora_inicio" class="form-label"
+                >Hora Inicio</label
+              >
+              <select
+                class="form-select"
+                id="edit_hora_inicio"
+                name="hora_inicio"
+                required
+              ></select>
             </div>
             <div class="col-md-3 mb-3">
               <label for="edit_hora_fin" class="form-label">Hora Fin</label>
-              <select class="form-select" id="edit_hora_fin" name="hora_fin" required></select>
+              <select
+                class="form-select"
+                id="edit_hora_fin"
+                name="hora_fin"
+                required
+              ></select>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="edit_cupos" class="form-label">Cupos</label>
+              <input type="number" class="form-control" id="edit_cupos" name="cupos" min="1" max="50" required>
             </div>
           </div>
           <input type="hidden" name="clase_id" id="edit_clase_id" />
@@ -301,13 +410,34 @@ Administrador - Horarios{% endblock %} {% block content %}
       </div>
       <div class="modal-body">
         <ul class="list-group">
-          <li class="list-group-item"><strong>Código:</strong> <span id="vermas-codigo"></span></li>
-          <li class="list-group-item"><strong>Curso:</strong> <span id="vermas-curso"></span></li>
-          <li class="list-group-item"><strong>Profesor:</strong> <span id="vermas-profesor"></span></li>
-          <li class="list-group-item"><strong>Fecha Inicio:</strong> <span id="vermas-fecha-inicio"></span></li>
-          <li class="list-group-item"><strong>Fecha Fin:</strong> <span id="vermas-fecha-fin"></span></li>
-          <li class="list-group-item"><strong>Hora Inicio:</strong> <span id="vermas-hora-inicio"></span></li>
-          <li class="list-group-item"><strong>Hora Fin:</strong> <span id="vermas-hora-fin"></span></li>
+          <li class="list-group-item">
+            <strong>Código:</strong> <span id="vermas-codigo"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Curso:</strong> <span id="vermas-curso"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Profesor:</strong> <span id="vermas-profesor"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Aula:</strong> <span id="vermas-aula"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Fecha Inicio:</strong>
+            <span id="vermas-fecha-inicio"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Fecha Fin:</strong> <span id="vermas-fecha-fin"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Hora Inicio:</strong> <span id="vermas-hora-inicio"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Hora Fin:</strong> <span id="vermas-hora-fin"></span>
+          </li>
+          <li class="list-group-item">
+            <strong>Cupos:</strong> <span id="vermas-cupos"></span>
+          </li>
         </ul>
       </div>
       <div class="modal-footer">
@@ -371,44 +501,78 @@ Administrador - Horarios{% endblock %} {% block content %}
 
 <script>
   // Modal Editar Clase
-  document.querySelectorAll('.btn-editar-clase').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-          document.getElementById('edit_clase_id').value = btn.getAttribute('data-clase-id') || '';
-          document.getElementById('edit_curso').value = btn.getAttribute('data-clase-curso') || '';
-          document.getElementById('edit_profesor').value = btn.getAttribute('data-clase-profesor') || '';
-          document.getElementById('edit_fecha_inicio').value = btn.getAttribute('data-clase-fecha-inicio') || '';
-          document.getElementById('edit_fecha_fin').value = btn.getAttribute('data-clase-fecha-fin') || '';
-          generarOpcionesHoras('edit_hora_inicio', btn.getAttribute('data-clase-hora-inicio'));
-          generarOpcionesHoras('edit_hora_fin', btn.getAttribute('data-clase-hora-fin'));
-          var modal = new bootstrap.Modal(document.getElementById('modalEditarClase'));
-          modal.show();
-      });
+  document.querySelectorAll(".btn-editar-clase").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.getElementById("edit_clase_id").value =
+        btn.getAttribute("data-clase-id") || "";
+      document.getElementById("edit_curso").value =
+        btn.getAttribute("data-clase-curso") || "";
+      document.getElementById("edit_profesor").value =
+        btn.getAttribute("data-clase-profesor") || "";
+      document.getElementById("edit_aula").value =
+        btn.getAttribute("data-clase-aula") || "";
+      document.getElementById("edit_fecha_inicio").value =
+        btn.getAttribute("data-clase-fecha-inicio") || "";
+      document.getElementById("edit_fecha_fin").value =
+        btn.getAttribute("data-clase-fecha-fin") || "";
+      document.getElementById("edit_cupos").value =
+        btn.getAttribute("data-clase-cupos") || "";
+      generarOpcionesHoras(
+        "edit_hora_inicio",
+        btn.getAttribute("data-clase-hora-inicio")
+      );
+      generarOpcionesHoras(
+        "edit_hora_fin",
+        btn.getAttribute("data-clase-hora-fin")
+      );
+      var modal = new bootstrap.Modal(
+        document.getElementById("modalEditarClase")
+      );
+      modal.show();
+    });
   });
 
   // Modal Ver Más Clase
-  document.querySelectorAll('.btn-ver-mas-clase').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-          document.getElementById('vermas-codigo').textContent = btn.getAttribute('data-clase-codigo') || '';
-          document.getElementById('vermas-curso').textContent = btn.getAttribute('data-clase-curso') || '';
-          document.getElementById('vermas-profesor').textContent = btn.getAttribute('data-clase-profesor') || 'Sin profesor';
-          document.getElementById('vermas-hora-inicio').textContent = btn.getAttribute('data-clase-hora-inicio') || '';
-          document.getElementById('vermas-hora-fin').textContent = btn.getAttribute('data-clase-hora-fin') || '';
-          document.getElementById('vermas-fecha-inicio').textContent = btn.getAttribute('data-clase-fecha-inicio') || '';
-          document.getElementById('vermas-fecha-fin').textContent = btn.getAttribute('data-clase-fecha-fin') || '';
-          var modal = new bootstrap.Modal(document.getElementById('modalVerMasClase'));
-          modal.show();
-      });
+  document.querySelectorAll(".btn-ver-mas-clase").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.getElementById("vermas-codigo").textContent =
+        btn.getAttribute("data-clase-codigo") || "";
+      document.getElementById("vermas-curso").textContent =
+        btn.getAttribute("data-clase-curso") || "";
+      document.getElementById("vermas-profesor").textContent =
+        btn.getAttribute("data-clase-profesor") || "Sin profesor";
+      document.getElementById("vermas-aula").textContent =
+        btn.getAttribute("data-clase-aula") || "Sin aula";
+      document.getElementById("vermas-hora-inicio").textContent =
+        btn.getAttribute("data-clase-hora-inicio") || "";
+      document.getElementById("vermas-hora-fin").textContent =
+        btn.getAttribute("data-clase-hora-fin") || "";
+      document.getElementById("vermas-fecha-inicio").textContent =
+        btn.getAttribute("data-clase-fecha-inicio") || "";
+      document.getElementById("vermas-fecha-fin").textContent =
+        btn.getAttribute("data-clase-fecha-fin") || "";
+      document.getElementById("vermas-cupos").textContent =
+        btn.getAttribute("data-clase-cupos") || "";
+      var modal = new bootstrap.Modal(
+        document.getElementById("modalVerMasClase")
+      );
+      modal.show();
+    });
   });
 
   // Modal Confirmar Eliminación
-  document.querySelectorAll('.btn-eliminar-clase').forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          document.getElementById('eliminar-codigo-clase').textContent = btn.getAttribute('data-clase-codigo') || '';
-          document.getElementById('eliminar_clase_id').value = btn.getAttribute('data-clase-id') || '';
-          var modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminarClase'));
-          modal.show();
-      });
+  document.querySelectorAll(".btn-eliminar-clase").forEach(function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      document.getElementById("eliminar-codigo-clase").textContent =
+        btn.getAttribute("data-clase-codigo") || "";
+      document.getElementById("eliminar_clase_id").value =
+        btn.getAttribute("data-clase-id") || "";
+      var modal = new bootstrap.Modal(
+        document.getElementById("modalConfirmarEliminarClase")
+      );
+      modal.show();
+    });
   });
 
   // Horario laboral: 08:00 a 20:00, intervalos de 30 minutos
@@ -502,6 +666,45 @@ Administrador - Horarios{% endblock %} {% block content %}
       fechaInput.setAttribute("min", minDate);
     }
   });
+
+  // Filtro por código de clase
+  document.addEventListener('DOMContentLoaded', function() {
+    const buscarCodigo = document.getElementById('buscarCodigoClase');
+    const limpiarBtn = document.getElementById('limpiarBusquedaClases');
+    const claseRows = document.querySelectorAll('.clase-row');
+    const resultadosSpan = document.getElementById('resultadosBusquedaClases');
+    const totalClases = claseRows.length;
+
+    function filtrarClases() {
+      const termino = buscarCodigo.value.trim().toUpperCase();
+      let visibles = 0;
+      claseRows.forEach(row => {
+        const codigo = row.getAttribute('data-codigo').toUpperCase();
+        if (!termino || codigo.includes(termino)) {
+          row.style.display = '';
+          visibles++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      resultadosSpan.textContent = visibles === totalClases
+        ? `Mostrando ${totalClases} clase${totalClases !== 1 ? 's' : ''}`
+        : `Mostrando ${visibles} de ${totalClases} clase${totalClases !== 1 ? 's' : ''}`;
+    }
+    buscarCodigo.addEventListener('input', filtrarClases);
+    limpiarBtn.addEventListener('click', function() {
+      buscarCodigo.value = '';
+      filtrarClases();
+      buscarCodigo.focus();
+    });
+    buscarCodigo.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        limpiarBtn.click();
+      }
+    });
+    filtrarClases();
+  });
 </script>
 
 {% endblock %}
+

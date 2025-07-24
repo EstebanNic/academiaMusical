@@ -18,12 +18,25 @@
         <div class="tab-content" id="adminTabsContent">
             <!-- Vista general de matrículas -->
             <div class="tab-pane fade show active" id="matriculas" role="tabpanel" aria-labelledby="matriculas-tab">
+                <div class="row mb-3">
+                  <div class="col-md-4">
+                    <label for="buscarCedulaMatricula" class="form-label small">Filtrar por cédula del estudiante:</label>
+                    <input type="text" class="form-control form-control-sm" id="buscarCedulaMatricula" placeholder="Ej: 0102030405">
+                  </div>
+                  <div class="col-md-8 d-flex align-items-end">
+                    <span id="resultadosBusquedaMatriculas" class="text-muted small"></span>
+                    <button class="btn btn-outline-secondary btn-sm ms-2" type="button" id="limpiarBusquedaMatriculas">
+                      <i class="fas fa-times"></i> Limpiar
+                    </button>
+                  </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
                             <tr>
                                 <th>Estudiante</th>
-                                <th>Clase</th>
+                                <th>Cédula</th> <!-- NUEVA COLUMNA -->
+                                <th>Horario</th>
                                 <th>Curso</th>
                                 <th>Profesor</th>
                                 <th>Fecha Matrícula</th>
@@ -33,10 +46,10 @@
                         </thead>
                         <tbody id="matriculas-tbody">
                             {% for matricula in matriculas %}
-                            <tr>
+                            <tr class="matricula-row" data-cedula="{{ matricula.estudiante.cedula|default:'' }}">
                                 <td>{{ matricula.estudiante.first_name }} {{ matricula.estudiante.last_name }}</td>
+                                <td>{{ matricula.estudiante.cedula }}</td>
                                 <td>
-                                    {{ matricula.clase.curso.nombre }}<br>
                                     {{ matricula.clase.fecha_inicio }} {{ matricula.clase.hora_inicio }}-{{ matricula.clase.hora_fin }}<br>
                                     Aula: {{ matricula.clase.aula }}
                                 </td>
@@ -88,12 +101,14 @@
                                 <div class="col-md-6 mb-3">
                                     <label for="clase" class="form-label">Clase</label>
                                     <select class="form-select" id="clase" name="clase" required>
-                                        <option value="" selected disabled>Seleccione una clase</option>
-                                        {% for clase in clases %}
-                                            <option value="{{ clase.id }}">
-                                                {{ clase.curso.nombre }} | ${{ clase.curso.precio }} | {{ clase.fecha_inicio }} {{ clase.hora_inicio }}-{{ clase.hora_fin }} | Aula: {{ clase.aula }}
-                                            </option>
-                                        {% endfor %}
+                                      <option value="" selected disabled>Seleccione una clase</option>
+                                      {% for clase in clases %}
+                                        {% if clase.cupos_disponibles > 0 %}
+                                          <option value="{{ clase.id }}">
+                                            {{ clase.curso.nombre }} | ${{ clase.curso.precio }} | {{ clase.fecha_inicio }} {{ clase.hora_inicio }}-{{ clase.hora_fin }} | Aula: {{ clase.aula.nombre }} | {{ clase.cupos_disponibles }} cupos disponibles
+                                          </option>
+                                        {% endif %}
+                                      {% endfor %}
                                     </select>
                                 </div>
                                 <div class="col-md-12 mb-3">
@@ -144,6 +159,44 @@
             var modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminarMatricula'));
             modal.show();
         });
+    });
+
+    // Filtro por cédula de estudiante en matrículas
+    document.addEventListener('DOMContentLoaded', function() {
+      const buscarCedula = document.getElementById('buscarCedulaMatricula');
+      const limpiarBtn = document.getElementById('limpiarBusquedaMatriculas');
+      const matriculaRows = document.querySelectorAll('.matricula-row');
+      const resultadosSpan = document.getElementById('resultadosBusquedaMatriculas');
+      const totalMatriculas = matriculaRows.length;
+
+      function filtrarMatriculas() {
+        const termino = buscarCedula.value.trim();
+        let visibles = 0;
+        matriculaRows.forEach(row => {
+          const cedula = row.getAttribute('data-cedula') || '';
+          if (!termino || cedula.includes(termino)) {
+            row.style.display = '';
+            visibles++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        resultadosSpan.textContent = visibles === totalMatriculas
+          ? `Mostrando ${totalMatriculas} matrícula${totalMatriculas !== 1 ? 's' : ''}`
+          : `Mostrando ${visibles} de ${totalMatriculas} matrícula${totalMatriculas !== 1 ? 's' : ''}`;
+      }
+      buscarCedula.addEventListener('input', filtrarMatriculas);
+      limpiarBtn.addEventListener('click', function() {
+        buscarCedula.value = '';
+        filtrarMatriculas();
+        buscarCedula.focus();
+      });
+      buscarCedula.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          limpiarBtn.click();
+        }
+      });
+      filtrarMatriculas();
     });
 </script>
 

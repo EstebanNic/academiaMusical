@@ -44,8 +44,7 @@
                                     <th>Cédula</th>
                                     <th>Email</th>
                                     <th>Teléfono</th>
-                                    <th>Instrumento</th>
-                                    <th>Estado</th>
+                                    <!-- <th>Estado</th> --> <!-- OCULTAR -->
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -56,19 +55,17 @@
                                     <td class="cedula-cell">{{ profesor.cedula }}</td>
                                     <td>{{ profesor.email }}</td>
                                     <td>{{ profesor.telefono }}</td>
-                                    <td>{{ profesor.instrumento }}</td>
-                                    <td>
+                                    <!-- <td>
                                         <span class="badge {% if profesor.is_active %}bg-success{% else %}bg-secondary{% endif %}">
                                             {% if profesor.is_active %}Activo{% else %}Inactivo{% endif %}
                                         </span>
-                                    </td>
+                                    </td> --> <!-- OCULTAR -->
                                     <td>
                                         <button class="btn btn-sm btn-info me-1 btn-ver-mas-profesor"
                                             data-profesor-nombre="{{ profesor.first_name }} {{ profesor.last_name }}"
                                             data-profesor-cedula="{{ profesor.cedula }}"
                                             data-profesor-email="{{ profesor.email }}"
                                             data-profesor-telefono="{{ profesor.telefono }}"
-                                            data-profesor-instrumento="{{ profesor.instrumento }}"
                                             data-profesor-direccion="{{ profesor.direccion }}"
                                             data-profesor-estado="{% if profesor.is_active %}Activo{% else %}Inactivo{% endif %}"
                                         >Ver más</button>
@@ -78,7 +75,6 @@
                                             data-profesor-nombre="{{ profesor.first_name }}"
                                             data-profesor-apellido="{{ profesor.last_name }}"
                                             data-profesor-email="{{ profesor.email }}"
-                                            data-profesor-instrumento="{{ profesor.instrumento }}"
                                             data-profesor-telefono="{{ profesor.telefono }}"
                                             data-profesor-direccion="{{ profesor.direccion }}"
                                         >Editar</button>
@@ -90,7 +86,7 @@
                                 </tr>
                                 {% empty %}
                                 <tr id="no-profesores-row">
-                                    <td colspan="7" class="text-center">No hay profesores registrados.</td>
+                                    <td colspan="5" class="text-center">No hay profesores registrados.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -138,9 +134,10 @@
                                             El email es requerido y debe ser único.
                                         </div>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-6 mb-3 d-none">
+                                        <!-- Instrumento oculto, no ocupa espacio -->
                                         <label for="instrumento" class="form-label">Instrumento <span class="text-danger">*</span></label>
-                                        <select class="form-select" id="instrumento" name="instrumento" required>
+                                        <select class="form-select" id="instrumento" name="instrumento">
                                             <option value="" selected disabled>Seleccione un instrumento</option>
                                             <option value="Piano">Piano</option>
                                             <option value="Guitarra">Guitarra</option>
@@ -219,9 +216,10 @@
                         <label for="edit_email" class="form-label">Email</label>
                         <input type="email" class="form-control" id="edit_email" name="email" required>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3 d-none">
+                        <!-- Instrumento oculto, no ocupa espacio -->
                         <label for="edit_instrumento" class="form-label">Instrumento</label>
-                        <select class="form-select" id="edit_instrumento" name="instrumento" required>
+                        <select class="form-select" id="edit_instrumento" name="instrumento">
                             <option value="" disabled>Seleccione un instrumento</option>
                             <option value="Piano">Piano</option>
                             <option value="Guitarra">Guitarra</option>
@@ -266,9 +264,9 @@
               <li class="list-group-item"><strong>Cédula:</strong> <span id="vermas-cedula"></span></li>
               <li class="list-group-item"><strong>Email:</strong> <span id="vermas-email"></span></li>
               <li class="list-group-item"><strong>Teléfono:</strong> <span id="vermas-telefono"></span></li>
-              <li class="list-group-item"><strong>Instrumento:</strong> <span id="vermas-instrumento"></span></li>
+              <li class="list-group-item d-none"><strong>Instrumento:</strong> <span id="vermas-instrumento"></span></li>
               <li class="list-group-item"><strong>Dirección:</strong> <span id="vermas-direccion"></span></li>
-              <li class="list-group-item"><strong>Estado:</strong> <span id="vermas-estado"></span></li>
+              <!-- <li class="list-group-item"><strong>Estado:</strong> <span id="vermas-estado"></span></li> --> <!-- OCULTAR -->
             </ul>
           </div>
           <div class="modal-footer">
@@ -549,17 +547,20 @@
         });
 
         // Modal Ver Más Profesor
-        document.querySelectorAll('.btn-ver-mas-profesor').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                document.getElementById('vermas-nombre').textContent = btn.getAttribute('data-profesor-nombre') || '';
-                document.getElementById('vermas-cedula').textContent = btn.getAttribute('data-profesor-cedula') || '';
-                document.getElementById('vermas-email').textContent = btn.getAttribute('data-profesor-email') || '';
-                document.getElementById('vermas-telefono').textContent = btn.getAttribute('data-profesor-telefono') || '';
-                document.getElementById('vermas-instrumento').textContent = btn.getAttribute('data-profesor-instrumento') || '';
-                document.getElementById('vermas-direccion').textContent = btn.getAttribute('data-profesor-direccion') || '';
-                document.getElementById('vermas-estado').textContent = btn.getAttribute('data-profesor-estado') || '';
-                var modal = new bootstrap.Modal(document.getElementById('modalVerMasProfesor'));
-                modal.show();
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-ver-mas-profesor').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    document.getElementById('vermas-nombre').textContent = btn.getAttribute('data-profesor-nombre') || '';
+                    document.getElementById('vermas-cedula').textContent = btn.getAttribute('data-profesor-cedula') || '';
+                    document.getElementById('vermas-email').textContent = btn.getAttribute('data-profesor-email') || '';
+                    document.getElementById('vermas-telefono').textContent = btn.getAttribute('data-profesor-telefono') || '';
+                    document.getElementById('vermas-instrumento').textContent = btn.getAttribute('data-profesor-instrumento') || '';
+                    document.getElementById('vermas-direccion').textContent = btn.getAttribute('data-profesor-direccion') || '';
+                    // Estado oculto, pero si lo quieres mostrar, descomenta la siguiente línea
+                    // document.getElementById('vermas-estado').textContent = btn.getAttribute('data-profesor-estado') || '';
+                    var modal = new bootstrap.Modal(document.getElementById('modalVerMasProfesor'));
+                    modal.show();
+                });
             });
         });
 

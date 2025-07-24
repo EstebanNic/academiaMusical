@@ -25,11 +25,11 @@
                                     <i class="fas fa-search me-2"></i>Buscar Cursos
                                 </h6>
                                 <div class="row">
-                                    <div class="col-md-3 mb-2">
+                                    <div class="col-md-4 mb-2">
                                         <label for="buscarNombre" class="form-label small">Por Nombre:</label>
                                         <input type="text" class="form-control form-control-sm" id="buscarNombre" placeholder="Ej: Piano, Guitarra...">
                                     </div>
-                                    <div class="col-md-3 mb-2">
+                                    <div class="col-md-4 mb-2">
                                         <label for="buscarNivel" class="form-label small">Por Nivel:</label>
                                         <select class="form-select form-select-sm" id="buscarNivel">
                                             <option value="">Todos los niveles</option>
@@ -38,17 +38,7 @@
                                             {% endfor %}
                                         </select>
                                     </div>
-                                    <div class="col-md-3 mb-2">
-                                        <label for="buscarProfesor" class="form-label small">Por Profesor:</label>
-                                        <select class="form-select form-select-sm" id="buscarProfesor">
-                                            <option value="">Todos los profesores</option>
-                                            <option value="Sin profesor">Sin profesor</option>
-                                            {% for profesor in profesores %}
-                                                <option value="{{ profesor.first_name }} {{ profesor.last_name }}">{{ profesor.first_name }} {{ profesor.last_name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3 mb-2 d-flex align-items-end">
+                                    <div class="col-md-4 mb-2 d-flex align-items-end">
                                         <button class="btn btn-outline-secondary btn-sm me-2" type="button" id="limpiarBusquedaCursos">
                                             <i class="fas fa-times"></i> Limpiar
                                         </button>
@@ -78,7 +68,6 @@
                                 <th>Nombre</th>
                                 <th>Nivel</th>
                                 <th>Precio</th>
-                                <th>Profesor</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -86,31 +75,21 @@
                             {% for curso in cursos %}
                             <tr class="curso-row" 
                                 data-nombre="{{ curso.nombre|lower }}"
-                                data-nivel="{{ curso.get_nivel_display }}"
-                                data-profesor="{% if curso.profesor %}{{ curso.profesor.first_name }} {{ curso.profesor.last_name }}{% else %}Sin profesor{% endif %}">
+                                data-nivel="{{ curso.get_nivel_display }}">
                                 <td class="nombre-cell">{{ curso.nombre }}</td>
                                 <td class="nivel-cell">{{ curso.get_nivel_display }}</td>
                                 <td>${{ curso.precio }}</td>
-                                <td class="profesor-cell">
-                                    {% if curso.profesor %}
-                                        {{ curso.profesor.first_name }} {{ curso.profesor.last_name }}
-                                    {% else %}
-                                        <span class="text-muted">Sin profesor</span>
-                                    {% endif %}
-                                </td>
                                 <td>
                                     <button class="btn btn-sm btn-info me-1 btn-ver-mas-curso"
                                         data-curso-nombre="{{ curso.nombre }}"
                                         data-curso-nivel="{{ curso.get_nivel_display }}"
                                         data-curso-precio="{{ curso.precio }}"
-                                        data-curso-profesor="{% if curso.profesor %}{{ curso.profesor.first_name }} {{ curso.profesor.last_name }}{% endif %}"
                                     >Ver más</button>
                                     <button class="btn btn-sm btn-warning me-1 btn-editar-curso"
                                         data-curso-id="{{ curso.id }}"
                                         data-curso-nombre="{{ curso.nombre }}"
                                         data-curso-nivel="{{ curso.nivel }}"
                                         data-curso-precio="{{ curso.precio }}"
-                                        data-curso-profesor="{% if curso.profesor %}{{ curso.profesor.id }}{% else %}{% endif %}"
                                     >Editar</button>
                                     <button class="btn btn-sm btn-danger btn-eliminar-curso"
                                         data-curso-id="{{ curso.id }}"
@@ -120,7 +99,7 @@
                             </tr>
                             {% empty %}
                             <tr id="no-cursos-row">
-                                <td colspan="5" class="text-center">No hay cursos registrados.</td>
+                                <td colspan="4" class="text-center">No hay cursos registrados.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -157,18 +136,9 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-12 mb-3">
                                     <label for="precio" class="form-label">Precio <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="precio" name="precio" min="0" step="0.01" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="profesor" class="form-label">Profesor</label>
-                                    <select class="form-select" id="profesor" name="profesor">
-                                        <option value="" selected>Sin profesor</option>
-                                        {% for profesor in profesores %}
-                                            <option value="{{ profesor.id }}">{{ profesor.first_name }} {{ profesor.last_name }}</option>
-                                        {% endfor %}
-                                    </select>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -216,18 +186,9 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-md-12 mb-3">
                     <label for="edit_precio" class="form-label">Precio</label>
                     <input type="number" class="form-control" id="edit_precio" name="precio" min="0" step="0.01" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="edit_profesor" class="form-label">Profesor</label>
-                    <select class="form-select" id="edit_profesor" name="profesor">
-                        <option value="">Sin profesor</option>
-                        {% for profesor in profesores %}
-                            <option value="{{ profesor.id }}">{{ profesor.first_name }} {{ profesor.last_name }}</option>
-                        {% endfor %}
-                    </select>
                 </div>
             </div>
             <input type="hidden" name="curso_id" id="edit_curso_id">
@@ -251,7 +212,6 @@
           <li class="list-group-item"><strong>Curso:</strong> <span id="vermas-nombre"></span></li>
           <li class="list-group-item"><strong>Nivel:</strong> <span id="vermas-nivel"></span></li>
           <li class="list-group-item"><strong>Precio:</strong> $<span id="vermas-precio"></span></li>
-          <li class="list-group-item"><strong>Profesor:</strong> <span id="vermas-profesor"></span></li>
         </ul>
       </div>
       <div class="modal-footer">
@@ -318,51 +278,13 @@
   </div>
 </div>
 
-<!-- Modal Profesor Ocupado -->
-<div class="modal fade" id="modalProfesorOcupado" tabindex="-1" aria-labelledby="modalProfesorOcupadoLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalProfesorOcupadoLabel">
-            <i class="fas fa-user-times text-danger me-2"></i>
-            Profesor ya asignado
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <div class="alert alert-danger mb-0">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            <strong>El profesor seleccionado ya está asignado a este curso.</strong>
-            <br><br>
-            Un profesor no puede estar asignado a múltiples cursos del mismo tipo:
-            <ul class="mt-2 mb-0">
-                <li>Seleccione un <strong>profesor diferente</strong></li>
-                <li>O deje el curso <strong>sin profesor</strong> por ahora</li>
-            </ul>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-            <i class="fas fa-user-edit me-1"></i>
-            Cambiar profesor
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
     // Verificar si hay que mostrar los modales
     document.addEventListener('DOMContentLoaded', function() {
-        //{% if mostrar_modal_duplicado_curso %}
+        {% if mostrar_modal_duplicado_curso %}
             var modalDuplicado = new bootstrap.Modal(document.getElementById('modalCursoDuplicado'));
             modalDuplicado.show();
-        //{% endif %}
-
-        //{% if mostrar_modal_profesor_ocupado %}
-            var modalProfesorOcupado = new bootstrap.Modal(document.getElementById('modalProfesorOcupado'));
-            modalProfesorOcupado.show();
-        //{% endif %}
+        {% endif %}
 
         // Inicializar búsqueda de cursos
         inicializarBusquedaCursos();
@@ -372,7 +294,6 @@
     function inicializarBusquedaCursos() {
         const buscarNombre = document.getElementById('buscarNombre');
         const buscarNivel = document.getElementById('buscarNivel');
-        const buscarProfesor = document.getElementById('buscarProfesor');
         const limpiarBtn = document.getElementById('limpiarBusquedaCursos');
         const resultadosSpan = document.getElementById('resultadosBusquedaCursos');
         const sinResultadosDiv = document.getElementById('sin-resultados-cursos');
@@ -386,27 +307,18 @@
         function filtrarCursos() {
             const terminoNombre = buscarNombre.value.trim().toLowerCase();
             const terminoNivel = buscarNivel.value.trim();
-            const terminoProfesor = buscarProfesor.value.trim();
             let cursosVisibles = 0;
 
-            if (terminoNombre === '' && terminoNivel === '' && terminoProfesor === '') {
+            if (terminoNombre === '' && terminoNivel === '') {
                 // Mostrar todos los cursos
                 cursoRows.forEach(row => {
                     row.style.display = '';
                     // Restaurar contenido original sin resaltado
                     const nombreCell = row.querySelector('.nombre-cell');
                     const nivelCell = row.querySelector('.nivel-cell');
-                    const profesorCell = row.querySelector('.profesor-cell');
                     
                     nombreCell.innerHTML = row.getAttribute('data-nombre');
                     nivelCell.innerHTML = row.getAttribute('data-nivel');
-                    // Para profesor, manejar el caso "Sin profesor"
-                    const profesorOriginal = row.getAttribute('data-profesor');
-                    if (profesorOriginal === 'Sin profesor') {
-                        profesorCell.innerHTML = '<span class="text-muted">Sin profesor</span>';
-                    } else {
-                        profesorCell.innerHTML = profesorOriginal;
-                    }
                 });
                 cursosVisibles = totalCursos;
                 sinResultadosDiv.classList.add('d-none');
@@ -415,20 +327,17 @@
                 cursoRows.forEach(row => {
                     const nombre = row.getAttribute('data-nombre').toLowerCase();
                     const nivel = row.getAttribute('data-nivel');
-                    const profesor = row.getAttribute('data-profesor');
                     
                     const coincideNombre = terminoNombre === '' || nombre.includes(terminoNombre);
                     const coincideNivel = terminoNivel === '' || nivel === terminoNivel;
-                    const coincideProfesor = terminoProfesor === '' || profesor === terminoProfesor;
                     
-                    if (coincideNombre && coincideNivel && coincideProfesor) {
+                    if (coincideNombre && coincideNivel) {
                         row.style.display = '';
                         cursosVisibles++;
                         
                         // Resaltar coincidencias
                         const nombreCell = row.querySelector('.nombre-cell');
                         const nivelCell = row.querySelector('.nivel-cell');
-                        const profesorCell = row.querySelector('.profesor-cell');
                         
                         // Resaltar nombre si hay búsqueda por nombre
                         if (terminoNombre !== '') {
@@ -445,21 +354,6 @@
                             nivelCell.innerHTML = `<mark class="bg-info text-dark">${nivel}</mark>`;
                         } else {
                             nivelCell.innerHTML = nivel;
-                        }
-                        
-                        // Resaltar profesor si hay búsqueda por profesor
-                        if (terminoProfesor !== '') {
-                            if (profesor === 'Sin profesor') {
-                                profesorCell.innerHTML = '<mark class="bg-secondary text-white">Sin profesor</mark>';
-                            } else {
-                                profesorCell.innerHTML = `<mark class="bg-success text-white">${profesor}</mark>`;
-                            }
-                        } else {
-                            if (profesor === 'Sin profesor') {
-                                profesorCell.innerHTML = '<span class="text-muted">Sin profesor</span>';
-                            } else {
-                                profesorCell.innerHTML = profesor;
-                            }
                         }
                     } else {
                         row.style.display = 'none';
@@ -490,14 +384,12 @@
         function limpiarBusquedaCursos() {
             buscarNombre.value = '';
             buscarNivel.value = '';
-            buscarProfesor.value = '';
             filtrarCursos();
         }
 
         // Event listeners
         buscarNombre.addEventListener('input', filtrarCursos);
         buscarNivel.addEventListener('change', filtrarCursos);
-        buscarProfesor.addEventListener('change', filtrarCursos);
         limpiarBtn.addEventListener('click', limpiarBusquedaCursos);
         
         // Atajos de teclado
@@ -515,9 +407,6 @@
             document.getElementById('edit_nombre').value = btn.getAttribute('data-curso-nombre') || '';
             document.getElementById('edit_nivel').value = btn.getAttribute('data-curso-nivel') || '';
             document.getElementById('edit_precio').value = btn.getAttribute('data-curso-precio') || '';
-            // Forzar el valor como string para evitar problemas de comparación
-            var profesorId = btn.getAttribute('data-curso-profesor');
-            document.getElementById('edit_profesor').value = profesorId !== null ? profesorId.toString() : '';
             var modal = new bootstrap.Modal(document.getElementById('modalEditarCurso'));
             modal.show();
         });
@@ -529,7 +418,6 @@
             document.getElementById('vermas-nombre').textContent = btn.getAttribute('data-curso-nombre') || '';
             document.getElementById('vermas-nivel').textContent = btn.getAttribute('data-curso-nivel') || '';
             document.getElementById('vermas-precio').textContent = btn.getAttribute('data-curso-precio') || '';
-            document.getElementById('vermas-profesor').textContent = btn.getAttribute('data-curso-profesor') || 'Sin profesor';
             var modal = new bootstrap.Modal(document.getElementById('modalVerMasCurso'));
             modal.show();
         });

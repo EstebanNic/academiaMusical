@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'reportes',
     'home',
     'asistencias',
+    'aulas',
 ]
 
 MIDDLEWARE = [

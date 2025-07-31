@@ -15,8 +15,6 @@ urlpatterns = [
     path('panel/admin/pagos/', views.admin_pagos, name='admin_pagos'),
     path('panel/admin/asistencias/', views.admin_asistencias, name='admin_asistencias'),
     path('panel/admin/asistencias/estudiantes-fecha/', views.obtener_asistencias_fecha, name='obtener_asistencias_fecha'),
-    path('panel/profesor/', views.profesor_dashboard, name='profesor_dashboard'),
-    path('panel/estudiante/', views.estudiante_dashboard, name='estudiante_dashboard'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('panel/admin/reportes/', views.admin_reportes_redirect, name='admin_reportes_redirect'),
 ]

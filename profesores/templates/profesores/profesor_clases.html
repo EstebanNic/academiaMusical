@@ -1,0 +1,228 @@
+{% extends 'profesores/base.html' %}
+{% block content %}
+<div class="main-content">
+  <div class="container mt-5">
+    <div class="row">
+      <!-- Columna izquierda: Lista de clases y filtro -->
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Mis Clases Asignadas</h5>
+            <div class="mb-3">
+              <label for="filtroCodigoClase" class="form-label">Filtrar por código de clase</label>
+              <input type="text" class="form-control" id="filtroCodigoClase" placeholder="Ej: PIA-0001">
+            </div>
+            <div class="list-group" id="lista-clases-profesor">
+              {% for clase in clases %}
+              <button type="button"
+                class="list-group-item list-group-item-action btn-seleccionar-clase"
+                data-clase-id="{{ clase.id }}"
+                data-clase-nombre="{{ clase.curso.nombre }}">
+                <div class="d-flex w-100 justify-content-between">
+                  <h6 class="mb-1">{{ clase.curso.nombre }}</h6>
+                  <small>{{ clase.hora_inicio|time:"H:i" }} - {{ clase.hora_fin|time:"H:i" }}</small>
+                </div>
+                <p class="mb-1">
+                  <span class="badge bg-secondary">{{ clase.codigo }}</span>
+                  Aula: {% if clase.aula %}{{ clase.aula.nombre }}{% else %}Sin aula{% endif %}
+                </p>
+                <small>Fecha: {{ clase.fecha_inicio|date:"Y-m-d" }} a {{ clase.fecha_fin|date:"Y-m-d" }}</small>
+              </button>
+              {% empty %}
+              <div class="text-center text-muted">No tienes clases asignadas.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Columna derecha: Formulario de asistencia -->
+      <div class="col-md-8">
+        <div class="card" id="card-asistencia" style="display: none;">
+          <div class="card-body">
+            <h5 class="card-title" id="titulo-clase">Tomar Asistencia</h5>
+            <div class="alert alert-info" id="info-clase"></div>
+            <form id="form-tomar-asistencia">
+              <div class="mb-3">
+                <label for="fecha_asistencia" class="form-label">Fecha</label>
+                <input type="date" class="form-control" id="fecha_asistencia" name="fecha_asistencia" value="{{ fecha_hoy }}">
+              </div>
+              <div class="table-responsive">
+                <table class="table table-bordered" id="tabla-estudiantes-asistencia">
+                  <thead>
+                    <tr>
+                      <th>Estudiante</th>
+                      <th>Estado</th>
+                      <th>Pago</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-estudiantes-asistencia">
+                    <!-- Se llenará por JS -->
+                  </tbody>
+                </table>
+              </div>
+              <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary">Guardar Asistencia</button>
+                <button type="button" class="btn btn-secondary" id="btn-cancelar-asistencia">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="modalConfirmacionAsistencia" tabindex="-1" aria-labelledby="modalConfirmacionAsistenciaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalConfirmacionAsistenciaLabel">Confirmación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="mensaje-confirmacion-asistencia">
+        <!-- Mensaje dinámico -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const estudiantesPorClase = JSON.parse('{{ estudiantes_por_clase_json|escapejs }}');
+    const fechaHoy = "{{ fecha_hoy }}";
+    let claseSeleccionada = null;
+
+    // Filtro por código de clase
+    const filtroCodigo = document.getElementById('filtroCodigoClase');
+    const claseButtons = document.querySelectorAll('.btn-seleccionar-clase');
+    function filtrarClasesPorCodigo() {
+      const termino = filtroCodigo.value.trim().toUpperCase();
+      claseButtons.forEach(btn => {
+        const codigo = (btn.querySelector('.badge')?.textContent || '').toUpperCase();
+        btn.style.display = (!termino || codigo.includes(termino)) ? '' : 'none';
+      });
+    }
+    filtroCodigo.addEventListener('input', filtrarClasesPorCodigo);
+    filtroCodigo.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        filtroCodigo.value = '';
+        filtrarClasesPorCodigo();
+        filtroCodigo.focus();
+      }
+    });
+    filtrarClasesPorCodigo();
+
+    // Mostrar formulario de asistencia al seleccionar clase
+    claseButtons.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        claseSeleccionada = btn.getAttribute('data-clase-id');
+        const claseNombre = btn.getAttribute('data-clase-nombre');
+        document.getElementById('fecha_asistencia').value = fechaHoy;
+        document.getElementById('titulo-clase').textContent = `Tomar Asistencia - ${claseNombre}`;
+        document.getElementById('info-clase').innerHTML = `<strong>Clase:</strong> ${claseNombre}`;
+        claseButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // Llenar tabla de estudiantes
+        const estudiantes = estudiantesPorClase[claseSeleccionada] || [];
+        const tbody = document.getElementById('tbody-estudiantes-asistencia');
+        tbody.innerHTML = '';
+        if (estudiantes.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No hay estudiantes matriculados en esta clase</td></tr>';
+        } else {
+          estudiantes.forEach(function(est) {
+            const disabled = est.pagado ? '' : 'disabled';
+            tbody.innerHTML += `
+              <tr>
+                <td>
+                  <strong>${est.nombre}</strong><br>
+                  <small class="text-muted">Cédula: ${est.cedula}</small>
+                </td>
+                <td>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="estado_${est.id}" id="estado_${est.id}_PRESENTE" value="PRESENTE" ${est.pagado ? 'checked' : ''} ${disabled}>
+                    <label class="form-check-label" for="estado_${est.id}_PRESENTE">Presente</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="estado_${est.id}" id="estado_${est.id}_AUSENTE" value="AUSENTE" ${disabled}>
+                    <label class="form-check-label" for="estado_${est.id}_AUSENTE">Ausente</label>
+                  </div>
+                  ${!est.pagado ? '<span class="text-danger small">No puede tomar asistencia hasta que pague</span>' : ''}
+                </td>
+                <td>
+                  ${est.pagado ? '<span class="badge bg-success">Pagado</span>' : '<span class="badge bg-danger">No pagado</span>'}
+                </td>
+              </tr>
+            `;
+          });
+        }
+        // Mostrar el formulario de asistencia
+        document.getElementById('card-asistencia').style.display = 'block';
+      });
+    });
+
+    // Cancelar asistencia
+    document.getElementById('btn-cancelar-asistencia').addEventListener('click', function() {
+      document.getElementById('card-asistencia').style.display = 'none';
+      claseButtons.forEach(b => b.classList.remove('active'));
+      claseSeleccionada = null;
+    });
+
+    // Guardar asistencia por AJAX
+    document.getElementById('form-tomar-asistencia').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const claseId = claseSeleccionada;
+      const fecha = document.getElementById('fecha_asistencia').value;
+      const estudiantes = estudiantesPorClase[claseId] || [];
+      const data = {
+        clase_id: claseId,
+        fecha: fecha,
+        asistencias: []
+      };
+      estudiantes.forEach(function(est) {
+        if (est.pagado) {
+          const estado = document.querySelector(`input[name="estado_${est.id}"]:checked`)?.value || 'AUSENTE';
+          data.asistencias.push({
+            estudiante_id: est.id,
+            estado: estado
+          });
+        }
+      });
+
+      fetch('/panel/profesores/clases/guardar-asistencia/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        let mensaje = '';
+        if (result.success) {
+          mensaje = '¡Asistencia guardada correctamente!';
+        } else {
+          mensaje = 'Error al guardar la asistencia. ' + (result.error || '');
+        }
+        document.getElementById('mensaje-confirmacion-asistencia').textContent = mensaje;
+        var modal = new bootstrap.Modal(document.getElementById('modalConfirmacionAsistencia'));
+        modal.show();
+        if (result.success) {
+          document.getElementById('card-asistencia').style.display = 'none';
+          claseButtons.forEach(b => b.classList.remove('active'));
+          claseSeleccionada = null;
+        }
+      })
+      .catch(() => {
+        document.getElementById('mensaje-confirmacion-asistencia').textContent = 'Error al guardar la asistencia.';
+        var modal = new bootstrap.Modal(document.getElementById('modalConfirmacionAsistencia'));
+        modal.show();
+      });
+    });
+  });
+</script>
+{% endblock %}

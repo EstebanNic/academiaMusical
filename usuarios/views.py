@@ -33,9 +33,9 @@ def login_view(request):
             if user.rol == Usuario.Rol.ADMIN:
                 return redirect('admin_dashboard')
             elif user.rol == Usuario.Rol.PROFESOR:
-                return redirect('profesor_dashboard')
+                return redirect('admin_profesores_dashboard')
             elif user.rol == Usuario.Rol.ESTUDIANTE:
-                return redirect('estudiante_dashboard')
+                return redirect('estudiante_clases')  # <-- Cambia aquí
         else:
             messages.error(request, 'Usuario o contraseña incorrectos')
 
@@ -78,14 +78,6 @@ def admin_dashboard(request):
         'pagos_pendientes': pagos_pendientes,
         'clases_hoy': clases_hoy,
     })
-
-@login_required
-def profesor_dashboard(request):
-    return render(request, 'usuarios/profesor_dashboard.html')
-
-@login_required
-def estudiante_dashboard(request):
-    return render(request, 'usuarios/estudiante_dashboard.html')
 
 @login_required
 def admin_profesores(request):
@@ -483,7 +475,6 @@ def admin_clases(request):
             hora_inicio = request.POST.get('hora_inicio', '')
             hora_fin = request.POST.get('hora_fin', '')
             descripcion = request.POST.get('descripcion', '')
-            # CORRECCIÓN: Obtener cupos correctamente del formulario
             cupos = request.POST.get('cupos', 15)
             try:
                 Horario.objects.create(
@@ -887,30 +878,8 @@ def obtener_asistencias_fecha(request):
 def admin_reportes_redirect(request):
     """Redireccionar a la app de reportes"""
     return redirect('admin_reportes')
-    return JsonResponse({'error': 'Error interno del servidor'}, status=500)
 
 @login_required
-def admin_reportes_redirect(request):
-    """Redireccionar a la app de reportes"""
-    return redirect('admin_reportes')
-def admin_reportes_redirect(request):
-    """Redireccionar a la app de reportes"""
-    return redirect('admin_reportes')
-
-@login_required
-def admin_reportes_redirect(request):
-    """Redireccionar a la app de reportes"""
-    return redirect('admin_reportes')
-    return JsonResponse({'error': 'Error interno del servidor'}, status=500)
-
-@login_required
-def admin_reportes_redirect(request):
-    """Redireccionar a la app de reportes"""
-    return redirect('admin_reportes')
-def admin_reportes_redirect(request):
-    """Redireccionar a la app de reportes"""
-    return redirect('admin_reportes')
-
 def admin_aulas(request):
     mostrar_modal_duplicado = False
     duplicado_mensaje = ""
@@ -1009,10 +978,10 @@ def factura_pago_pdf(request, pago_id):
         'usuario_generador': usuario_generador,
         'fecha_generacion': fecha_generacion,
     })
+
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'filename="factura_pago_{pago_id}.pdf"'
     pisa_status = pisa.CreatePDF(html, dest=response)
     if pisa_status.err:
         return HttpResponse("Error al generar el PDF", status=500)
-    return response
     return response

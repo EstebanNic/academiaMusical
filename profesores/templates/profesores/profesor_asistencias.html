@@ -1,0 +1,95 @@
+{% extends 'profesores/base.html' %}
+{% block content %}
+<div class="main-content">
+  <div class="container mt-5">
+    <h3>Historial de Asistencias</h3>
+    <div class="mb-2">
+      <span class="fw-bold">Rango de fechas para el filtro:</span>
+      <span class="text-muted">Seleccione fecha de inicio, fecha de fin y escriba el código de clase para filtrar.</span>
+    </div>
+    <form method="get" class="row mb-3" id="form-filtros-asistencias">
+      <div class="col-md-3">
+        <input type="date" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+      </div>
+      <div class="col-md-3">
+        <input type="date" name="fecha_fin" class="form-control" value="{{ fecha_fin }}">
+      </div>
+      <div class="col-md-4">
+        <input type="text" name="codigo_clase" class="form-control" placeholder="Filtrar por código de clase" value="{{ codigo_clase_filtro }}">
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a href="{% url 'profesor_asistencias' %}" class="btn btn-outline-secondary" id="btn-limpiar-filtros">Limpiar</a>
+      </div>
+    </form>
+    {% if fecha_inicio and fecha_fin and codigo_clase_filtro %}
+      <div class="mb-3">
+        <form method="get" action="{% url 'profe_reportes_pdf' %}" target="_blank" class="d-inline">
+          <input type="hidden" name="fecha_inicio" value="{{ fecha_inicio }}">
+          <input type="hidden" name="fecha_fin" value="{{ fecha_fin }}">
+          <input type="hidden" name="codigo_clase" value="{{ codigo_clase_filtro }}">
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-file-pdf"></i> Generar reporte PDF
+          </button>
+        </form>
+      </div>
+      {% if tabla_asistencias %}
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm">
+            <thead>
+              <tr>
+                <th>Estudiante</th>
+                <th>Cédula</th>
+                <th>Horario</th>
+                <th>Clase</th>
+                <th>Código</th>
+                {% for fecha in fechas_rango %}
+                  <th>{{ fecha|date:"d-m" }}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for fila in tabla_asistencias %}
+              <tr>
+                <td>{{ fila.estudiante.get_full_name }}</td>
+                <td>{{ fila.estudiante.cedula }}</td>
+                <td>
+                  {{ fila.clase.hora_inicio|time:"H:i" }} - {{ fila.clase.hora_fin|time:"H:i" }}
+                </td>
+                <td>{{ fila.clase.curso.nombre }}</td>
+                <td><span class="badge bg-secondary">{{ fila.clase.codigo }}</span></td>
+                {% for asistencia in fila.asistencias %}
+                  {% if asistencia %}
+                    {% if asistencia.estado == 'PRESENTE' %}
+                      <td class="text-success text-center fw-bold">P</td>
+                    {% elif asistencia.estado == 'AUSENTE' %}
+                      <td class="text-danger text-center fw-bold">A</td>
+                    {% elif asistencia.estado == 'TARDE' %}
+                      <td class="text-warning text-center fw-bold">T</td>
+                    {% elif asistencia.estado == 'JUSTIFICADO' %}
+                      <td class="text-info text-center fw-bold">J</td>
+                    {% else %}
+                      <td class="text-secondary text-center fw-bold">?</td>
+                    {% endif %}
+                  {% else %}
+                    <td class="text-muted text-center">-</td>
+                  {% endif %}
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-warning text-center mt-4">
+          No hay asistencias registradas para este filtro.
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="alert alert-info text-center mt-4">
+        Debe seleccionar fecha de inicio, fecha de fin y escribir el código de clase para ver asistencias.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

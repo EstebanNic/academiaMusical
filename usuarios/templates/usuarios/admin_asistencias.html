@@ -54,8 +54,8 @@
                                 </td>
                                 <td>{{ clase_info.curso.nombre }}</td>
                                 <td>{{ clase_info.clase.aula }}</td>
-                                <td>{{ clase_info.clase.hora_inicio }} - {{ clase_info.clase.hora_fin }}</td>
-                                <td>{{ clase_info.fecha }}</td>
+                                <td>{{ clase_info.clase.hora_inicio|time:"H:i" }} - {{ clase_info.clase.hora_fin|time:"H:i" }}</td>
+                                <td>{{ clase_info.fecha|date:"Y-m-d" }}</td>
                                 <td>{{ clase_info.profesor.get_full_name }}</td>
                                 <td>{{ clase_info.asistencias|length }}</td>
                                 <td>
@@ -63,7 +63,7 @@
                                         data-bs-toggle="modal"
                                         data-bs-target="#modalDetalleAsistencias"
                                         data-clase="{{ clase_info.clase.id }}"
-                                        data-fecha="{{ clase_info.fecha }}"
+                                        data-fecha="{{ clase_info.fecha|date:"Y-m-d" }}"
                                         data-detalle="{{ forloop.counter0 }}">
                                         Ver asistencias
                                     </button>
@@ -100,15 +100,15 @@
                                 <div class="list-group" id="lista-clases">
                                     {% for clase in clases %}
                                     <button type="button" class="list-group-item list-group-item-action btn-seleccionar-clase"
-                                            data-clase-id="{{ clase.id }}"
-                                            data-clase-codigo="{{ clase.codigo }}"
-                                            data-clase-nombre="{{ clase.curso.nombre }}"
-                                            data-clase-aula="{{ clase.aula }}"
-                                            data-clase-horario="{{ clase.hora_inicio }} - {{ clase.hora_fin }}"
-                                            data-clase-profesor="{{ clase.profesor.get_full_name }}">
+                                        data-clase-id="{{ clase.id }}"
+                                        data-clase-codigo="{{ clase.codigo }}"
+                                        data-clase-nombre="{{ clase.curso.nombre }}"
+                                        data-clase-aula="{{ clase.aula }}"
+                                        data-clase-horario="{{ clase.hora_inicio|time:"H:i" }} - {{ clase.hora_fin|time:"H:i" }}"
+                                        data-clase-profesor="{{ clase.profesor.get_full_name }}">
                                         <div class="d-flex w-100 justify-content-between">
                                             <h6 class="mb-1">{{ clase.curso.nombre }}</h6>
-                                            <small>{{ clase.hora_inicio }}</small>
+                                            <small>{{ clase.hora_inicio|time:"H:i" }}</small>
                                         </div>
                                         <p class="mb-1">
                                             <span class="badge bg-secondary">{{ clase.codigo }}</span>

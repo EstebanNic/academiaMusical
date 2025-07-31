@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Reporte de Asistencias - Profesor</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 9px; color: #333; margin: 0; padding: 0; }
+        .header {
+            background: #0d6efd;
+            color: #fff;
+            padding: 10px 0 6px 0;
+            text-align: center;
+            border-bottom: 2px solid #0b5ed7;
+        }
+        .header h2 { margin: 0; font-size: 16px; }
+        .header h4 { margin: 0; font-size: 10px; font-weight: normal; }
+        .info-table {
+            width: 100%;
+            margin: 8px 0 12px 0;
+            border-collapse: collapse;
+        }
+        .info-table td {
+            padding: 2px 6px;
+            font-size: 9px;
+            border: none;
+        }
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            table-layout: fixed;
+        }
+        .main-table th, .main-table td {
+            border: 1px solid #bbb;
+            padding: 3px 2px;
+            text-align: center;
+            font-size: 8px;
+            vertical-align: middle;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        .main-table th {
+            background: #e3f0ff;
+            color: #0d6efd;
+            font-weight: bold;
+        }
+        .main-table .estudiante-cell {
+            text-align: left;
+            font-weight: bold;
+            background: #f8f9fa;
+            max-width: 90px;
+        }
+        .main-table .cedula-cell {
+            max-width: 60px;
+            font-size: 8px;
+        }
+        .main-table .horario-cell {
+            max-width: 60px;
+            font-size: 8px;
+        }
+        .main-table .clase-cell {
+            max-width: 70px;
+            font-size: 8px;
+        }
+        .main-table .codigo-cell {
+            font-size: 8px;
+            background: #f0f0f0;
+            max-width: 40px;
+        }
+        .main-table .fecha-cell {
+            max-width: 28px;
+            font-size: 7px;
+        }
+        .estado-P { background: #d4edda; color: #155724; }
+        .estado-A { background: #f8d7da; color: #721c24; }
+        .estado-T { background: #fff3cd; color: #856404; }
+        .estado-J { background: #d1ecf1; color: #0c5460; }
+        .estado-Q { background: #f0f0f0; color: #888; }
+        .footer {
+            text-align: center;
+            font-size: 8px;
+            color: #666;
+            border-top: 1px solid #bbb;
+            padding-top: 6px;
+            margin-top: 10px;
+        }
+        .legend {
+            font-size: 8px;
+            margin-top: 8px;
+        }
+        .legend span {
+            display: inline-block;
+            width: 12px;
+            height: 8px;
+            margin-right: 3px;
+            vertical-align: middle;
+        }
+        .legend .P { background: #d4edda; border: 1px solid #155724;}
+        .legend .A { background: #f8d7da; border: 1px solid #721c24;}
+        .legend .T { background: #fff3cd; border: 1px solid #856404;}
+        .legend .J { background: #d1ecf1; border: 1px solid #0c5460;}
+        .legend .Q { background: #f0f0f0; border: 1px solid #888;}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Academia Musical</h2>
+        <h4>Reporte de Asistencias por Profesor</h4>
+    </div>
+    <table class="info-table">
+        <tr>
+            <td><strong>Profesor:</strong></td>
+            <td>{{ profesor.get_full_name }}</td>
+            <td><strong>Fecha:</strong></td>
+            <td>{{ fecha_generacion|date:"d/m/Y" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Clase:</strong></td>
+            <td>{% if tabla_asistencias.0.clase %}{{ tabla_asistencias.0.clase.curso.nombre }}{% else %}-{% endif %}</td>
+            <td><strong>Período:</strong></td>
+            <td>{{ fecha_inicio }} - {{ fecha_fin }}</td>
+        </tr>
+        <tr>
+            <td><strong>Código:</strong></td>
+            <td>{% if tabla_asistencias.0.clase %}{{ tabla_asistencias.0.clase.codigo }}{% else %}-{% endif %}</td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+    <table class="main-table">
+        <thead>
+            <tr>
+                <th class="estudiante-cell">Estudiante</th>
+                <th class="cedula-cell">Cédula</th>
+                <th class="horario-cell">Horario</th>
+                <th class="clase-cell">Clase</th>
+                <th class="codigo-cell">Código</th>
+                {% for fecha in fechas_rango %}
+                    <th class="fecha-cell">{{ fecha|date:"d-m" }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for fila in tabla_asistencias %}
+            <tr>
+                <td class="estudiante-cell">{{ fila.estudiante.get_full_name }}</td>
+                <td class="cedula-cell">{{ fila.estudiante.cedula }}</td>
+                <td class="horario-cell">
+                  {{ fila.clase.hora_inicio|time:"H:i" }}-{{ fila.clase.hora_fin|time:"H:i" }}
+                </td>
+                <td class="clase-cell">{{ fila.clase.curso.nombre }}</td>
+                <td class="codigo-cell">{{ fila.clase.codigo }}</td>
+                {% for asistencia in fila.asistencias %}
+                  {% if asistencia %}
+                    {% if asistencia.estado == 'PRESENTE' %}
+                      <td class="estado-P fecha-cell">P</td>
+                    {% elif asistencia.estado == 'AUSENTE' %}
+                      <td class="estado-A fecha-cell">A</td>
+                    {% elif asistencia.estado == 'TARDE' %}
+                      <td class="estado-T fecha-cell">T</td>
+                    {% elif asistencia.estado == 'JUSTIFICADO' %}
+                      <td class="estado-J fecha-cell">J</td>
+                    {% else %}
+                      <td class="estado-Q fecha-cell">?</td>
+                    {% endif %}
+                  {% else %}
+                    <td class="estado-Q fecha-cell">-</td>
+                  {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="legend">
+        <strong>Leyenda:</strong>
+        <span class="P"></span> P = Presente
+        <span class="A"></span> A = Ausente
+        <span class="T"></span> T = Tarde
+        <span class="J"></span> J = Justificado
+        <span class="Q"></span> - = Sin registro
+    </div>
+    <div class="footer">
+        Academia Musical - Sistema de Gestión | Generado el {{ fecha_generacion|date:"d/m/Y" }}
+    </div>
+</body>
+</html>

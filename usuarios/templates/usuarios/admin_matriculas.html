@@ -50,7 +50,7 @@
                                 <td>{{ matricula.estudiante.first_name }} {{ matricula.estudiante.last_name }}</td>
                                 <td>{{ matricula.estudiante.cedula }}</td>
                                 <td>
-                                    {{ matricula.clase.fecha_inicio }} {{ matricula.clase.hora_inicio }}-{{ matricula.clase.hora_fin }}<br>
+                                    {{ matricula.clase.fecha_inicio|date:"Y-m-d" }} {{ matricula.clase.hora_inicio|time:"H:i" }}-{{ matricula.clase.hora_fin|time:"H:i" }}<br>
                                     Aula: {{ matricula.clase.aula }}
                                 </td>
                                 <td>{{ matricula.clase.curso.nombre }}</td>
@@ -61,7 +61,7 @@
                                         Sin profesor
                                     {% endif %}
                                 </td>
-                                <td>{{ matricula.fecha_matricula }}</td>
+                                <td>{{ matricula.fecha_matricula|date:"Y-m-d" }}</td>
                                 <td>{{ matricula.get_estado_display }}</td>
                                 <td>
                                     <button class="btn btn-sm btn-danger btn-eliminar-matricula"
@@ -105,7 +105,7 @@
                                       {% for clase in clases %}
                                         {% if clase.cupos_disponibles > 0 %}
                                           <option value="{{ clase.id }}">
-                                            {{ clase.curso.nombre }} | ${{ clase.curso.precio }} | {{ clase.fecha_inicio }} {{ clase.hora_inicio }}-{{ clase.hora_fin }} | Aula: {{ clase.aula.nombre }} | {{ clase.cupos_disponibles }} cupos disponibles
+                                            {{ clase.curso.nombre }} | ${{ clase.curso.precio }} | {{ clase.fecha_inicio|date:"Y-m-d" }} {{ clase.hora_inicio|time:"H:i" }}-{{ clase.hora_fin|time:"H:i" }} | Aula: {{ clase.aula.nombre }} | {{ clase.cupos_disponibles }} cupos disponibles
                                           </option>
                                         {% endif %}
                                       {% endfor %}

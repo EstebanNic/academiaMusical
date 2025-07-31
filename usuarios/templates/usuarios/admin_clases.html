@@ -105,8 +105,8 @@ Administrador - Horarios{% endblock %} {% block content %}
                 </td>
                 <td>{{ clase.fecha_inicio }}</td>
                 <td>{{ clase.fecha_fin }}</td>
-                <td>{{ clase.hora_inicio }}</td>
-                <td>{{ clase.hora_fin }}</td>
+                <td>{{ clase.hora_inicio|time:"H:i" }}</td>
+                <td>{{ clase.hora_fin|time:"H:i" }}</td>
                 <td>{{ clase.cupos }}</td>
                 <td>
                   {% if clase.cupos_disponibles is not None %}
@@ -137,10 +137,10 @@ Administrador - Horarios{% endblock %} {% block content %}
                     data-clase-curso="{{ clase.curso.id }}"
                     data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.id }}{% endif %}"
                     data-clase-aula="{% if clase.aula %}{{ clase.aula.id }}{% endif %}"
-                    data-clase-hora-inicio="{{ clase.hora_inicio }}"
-                    data-clase-hora-fin="{{ clase.hora_fin }}"
-                    data-clase-fecha-inicio="{{ clase.fecha_inicio }}"
-                    data-clase-fecha-fin="{{ clase.fecha_fin }}"
+                    data-clase-hora-inicio="{{ clase.hora_inicio|time:'H:i' }}"
+                    data-clase-hora-fin="{{ clase.hora_fin|time:'H:i' }}"
+                    data-clase-fecha-inicio="{{ clase.fecha_inicio|date:'Y-m-d' }}"
+                    data-clase-fecha-fin="{{ clase.fecha_fin|date:'Y-m-d' }}"
                     data-clase-cupos="{{ clase.cupos }}"
                   >
                     Editar
@@ -500,6 +500,25 @@ Administrador - Horarios{% endblock %} {% block content %}
 </div>
 
 <script>
+  // Formatea una fecha a YYYY-MM-DD si es necesario
+  function formatDateToInput(dateStr) {
+    if (!dateStr) return "";
+    // Si ya está en formato YYYY-MM-DD, retorna igual
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // Si está en formato DD/MM/YYYY o similar, conviértelo
+    var parts = dateStr.split("-");
+    if (parts.length === 3) {
+      // Si es YYYY-MM-DD, retorna igual
+      return dateStr;
+    }
+    parts = dateStr.split("/");
+    if (parts.length === 3) {
+      // Asume DD/MM/YYYY
+      return parts[2] + "-" + parts[1].padStart(2, "0") + "-" + parts[0].padStart(2, "0");
+    }
+    return dateStr;
+  }
+
   // Modal Editar Clase
   document.querySelectorAll(".btn-editar-clase").forEach(function (btn) {
     btn.addEventListener("click", function () {
@@ -511,12 +530,17 @@ Administrador - Horarios{% endblock %} {% block content %}
         btn.getAttribute("data-clase-profesor") || "";
       document.getElementById("edit_aula").value =
         btn.getAttribute("data-clase-aula") || "";
-      document.getElementById("edit_fecha_inicio").value =
-        btn.getAttribute("data-clase-fecha-inicio") || "";
-      document.getElementById("edit_fecha_fin").value =
-        btn.getAttribute("data-clase-fecha-fin") || "";
+
+      // Formatear fechas antes de asignar
+      var fechaInicio = formatDateToInput(btn.getAttribute("data-clase-fecha-inicio"));
+      var fechaFin = formatDateToInput(btn.getAttribute("data-clase-fecha-fin"));
+      document.getElementById("edit_fecha_inicio").value = fechaInicio;
+      document.getElementById("edit_fecha_fin").value = fechaFin;
+
       document.getElementById("edit_cupos").value =
         btn.getAttribute("data-clase-cupos") || "";
+
+      // Generar opciones de hora y seleccionar el valor actual
       generarOpcionesHoras(
         "edit_hora_inicio",
         btn.getAttribute("data-clase-hora-inicio")
@@ -525,6 +549,18 @@ Administrador - Horarios{% endblock %} {% block content %}
         "edit_hora_fin",
         btn.getAttribute("data-clase-hora-fin")
       );
+
+      var horaInicio = btn.getAttribute("data-clase-hora-inicio");
+      var horaFin = btn.getAttribute("data-clase-hora-fin");
+      var selectInicio = document.getElementById("edit_hora_inicio");
+      var selectFin = document.getElementById("edit_hora_fin");
+      if (selectInicio && horaInicio) {
+        selectInicio.value = horaInicio;
+      }
+      if (selectFin && horaFin) {
+        selectFin.value = horaFin;
+      }
+
       var modal = new bootstrap.Modal(
         document.getElementById("modalEditarClase")
       );

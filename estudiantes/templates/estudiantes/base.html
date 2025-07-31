@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Panel Estudiantes</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
+    <style>
+      .main-content {
+        margin-top: 70px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar Bootstrap -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Panel Estudiantes</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarEstudiante"
+          aria-controls="navbarEstudiante"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarEstudiante">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link {% if active_tab == 'clases' %}active{% endif %}" href="{% url 'estudiante_clases' %}">Mis Clases</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if active_tab == 'asistencias' %}active{% endif %}" href="{% url 'estudiante_asistencias' %}">Asistencias</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if active_tab == 'perfil' %}active{% endif %}" href="{% url 'estudiante_perfil' %}">Perfil</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdownEstudiante"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {{ user.first_name }} {{ user.last_name }}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownEstudiante">
+                <li>
+                  <form method="POST" action="{% url 'logout' %}" style="margin: 0">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item">
+                      Cerrar sesión
+                    </button>
+                  </form>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    {% block content %}
+    <!-- El contenido cambiará según la vista -->
+    {% endblock %}
+
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  </body>
+</html>

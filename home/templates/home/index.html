@@ -1,18 +1,214 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Academia Musical</title>
-    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
-</head>
-<body>
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    <!-- Fontawesome Link for Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <nav class="navbar">
+        <h2 class="logo"><a href="#">ACADEMIA</a></h2>
+        <input type="checkbox" id="menu-toggler" />
+        <label for="menu-toggler" id="hamburger-btn">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="white"
+            width="24px"
+            height="24px"
+          >
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M3 18h18v-2H3v2zm0-5h18V11H3v2zm0-7v2h18V6H3z" />
+          </svg>
+        </label>
+        <ul class="all-links">
+          <li><a href="#home">Inicio</a></li>
+          <li><a href="#services">Servicios</a></li>
+          <li><a href="#portfolio">Portafolio</a></li>
+          <li><a href="#about">Sobre Nosotros</a></li>
+          <li><a href="#contact">Contacto</a></li>
+          <li><a href="/login/">Ingresar</a></li>
+        </ul>
+      </nav>
+    </header>
 
-    <div class="container mt-5">
-        <h1 class="text-center">Bienvenido a la Academia Musical</h1>
-        <a href="/login/" class="btn btn-primary">Iniciar sesión</a>
-    </div>
+    <section class="homepage" id="home">
+      <div class="content">
+        <div class="text">
+          <h1>Academia Musical y Servicios</h1>
+          <p>
+            Descubre clases y servicios musicales de alta calidad para todas las
+            edades. <br />
+            ¡Inspírate y vive la música!
+          </p>
+        </div>
+        <a href="#services">Nuestros Servicios</a>
+      </div>
+    </section>
 
-    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-</body>
+    <section class="services" id="services">
+      <h2>Nuestros Servicios</h2>
+      <p>Explora nuestra variedad de servicios musicales.</p>
+      <ul class="cards">
+        <li class="card">
+          <img src="{% static 'images/tents.jpg' %}" alt="img" />
+          <h3>Clases de Instrumentos</h3>
+          <p>
+            Aprende a tocar piano, guitarra, violín y más con nuestros
+            profesores expertos.
+          </p>
+        </li>
+        <li class="card">
+          <img src="{% static 'images/bags.jpg' %}" alt="img" />
+          <h3>Clases de Canto</h3>
+          <p>Desarrolla tu voz y técnica vocal en clases personalizadas.</p>
+        </li>
+        <li class="card">
+          <img src="{% static 'images/stoves.jpg' %}" alt="img" />
+          <h3>Ensamble Musical</h3>
+          <p>
+            Participa en grupos y ensambles para vivir la experiencia musical en
+            conjunto.
+          </p>
+        </li>
+        <li class="card">
+          <img src="{% static 'images/backpacks.jpg' %}" alt="img" />
+          <h3>Teoría Musical</h3>
+          <p>
+            Fortalece tus conocimientos musicales con clases de teoría y
+            armonía.
+          </p>
+        </li>
+        <li class="card">
+          <img src="{% static 'images/chair.jpg' %}" alt="img" />
+          <h3>Eventos y Recitales</h3>
+          <p>
+            Presenta tu talento en nuestros eventos y recitales organizados por
+            la academia.
+          </p>
+        </li>
+        <li class="card">
+          <img src="{% static 'images/light.jpg' %}" alt="img" />
+          <h3>Alquiler de Salas</h3>
+          <p>
+            Reserva espacios equipados para ensayos y presentaciones musicales.
+          </p>
+        </li>
+      </ul>
+    </section>
+
+    <section class="portfolio" id="portfolio">
+      <h2>Portafolio</h2>
+      <p>Conoce algunos de nuestros momentos musicales destacados.</p>
+      <ul class="cards">
+        <li class="card">
+          <img src="{% static 'images/camping-1.jpg' %}" alt="img" />
+          <h3>Concierto de Piano</h3>
+          <p>
+            Disfruta de presentaciones de nuestros estudiantes y profesores en
+            el escenario.
+          </p>
+        </li>
+        <li class="card">
+          <img src="{% static 'images/camping-2.jpg' %}" alt="img" />
+          <h3>Recital de Guitarra</h3>
+          <p>
+            Recitales íntimos y públicos para mostrar el avance de nuestros
+            alumnos.
+          </p>
+        </li>
+        <li class="card">
+          <img src="{% static 'images/camping-3.jpg' %}" alt="img" />
+          <h3>Ensamble Coral</h3>
+          <p>Participación en coros y agrupaciones vocales de la academia.</p>
+        </li>
+        <li class="card">
+          <img src="{% static 'images/camping-4.jpg' %}" alt="img" />
+          <h3>Festival Musical</h3>
+          <p>
+            Eventos anuales donde la música y el talento se unen en un gran
+            espectáculo.
+          </p>
+        </li>
+        <li class="card">
+          <img src="{% static 'images/camping-5.jpg' %}" alt="img" />
+          <h3>Clases Magistrales</h3>
+          <p>
+            Sesiones especiales con músicos invitados y maestros reconocidos.
+          </p>
+        </li>
+        <li class="card">
+          <img src="{% static 'images/camping-6.jpg' %}" alt="img" />
+          <h3>Sesiones de Grabación</h3>
+          <p>
+            Oportunidad de grabar y producir tu propia música en nuestro
+            estudio.
+          </p>
+        </li>
+      </ul>
+    </section>
+
+    <section class="about" id="about">
+      <h2>Sobre Nosotros</h2>
+      <p>Conoce nuestra historia y misión en la educación musical.</p>
+      <div class="row company-info">
+        <h3>Nuestra Historia</h3>
+        <p>
+          Más de una década formando músicos y artistas, brindando educación y
+          servicios musicales de calidad para todas las edades y niveles.
+        </p>
+        <h3>Nuestra Misión</h3>
+        <p>
+          Inspirar y educar a través de la música, ofreciendo clases y servicios
+          que potencian el talento y la creatividad.
+        </p>
+        <h3>Nuestra Visión</h3>
+        <p>
+          Ser la academia musical de referencia, reconocida por su excelencia
+          educativa y compromiso con el arte.
+        </p>
+      </div>
+    </section>
+
+    <section class="contact" id="contact">
+      <h2>Contacto</h2>
+      <p>Contáctanos para consultas o inscripciones.</p>
+      <div class="row">
+        <div class="col information">
+          <div class="contact-details">
+            <p>
+              <i class="fas fa-map-marker-alt"></i> Calle Música 123, Ciudad,
+              País
+            </p>
+            <p><i class="fas fa-envelope"></i> info@academiamusical.com</p>
+            <p><i class="fas fa-phone"></i> (123) 456-7890</p>
+            <p>
+              <i class="fas fa-clock"></i> Lunes - Viernes: 9:00 AM - 7:00 PM
+            </p>
+            <p><i class="fas fa-clock"></i> Sábado: 10:00 AM - 3:00 PM</p>
+            <p><i class="fas fa-clock"></i> Domingo: Cerrado</p>
+            <p><i class="fas fa-globe"></i> www.academiamusical.com</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <footer>
+      <div>
+        <span>Copyright © 2023 Academia Musical</span>
+        <span class="link">
+          <a href="#">Inicio</a>
+        </span>
+      </div>
+    </footer>
+  </body>
 </html>

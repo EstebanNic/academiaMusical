@@ -3,147 +3,498 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>Panel Administrador</title>
-    <link
-      rel="stylesheet"
-      href="{% static 'bootstrap/css/bootstrap.min.css' %}"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Panel Administrador{% endblock %} - Academia Musical</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+      /* ==========================================
+         🎨 VARIABLES DE DISEÑO - Personalización Fácil
+         ========================================== */
+      :root {
+        /* 🎨 Colores principales - Cambia estos para modificar toda la paleta */
+        --primary-color: #667eea;        /* Color principal (azul-púrpura) */
+        --primary-dark: #5a67d8;         /* Versión más oscura del principal */
+        --secondary-color: #764ba2;      /* Color secundario (púrpura) */
+        
+        /* 📏 Dimensiones del layout */
+        --sidebar-width: 280px;          /* Ancho del sidebar (cambiar para hacer más/menos ancho) */
+        --header-height: 70px;           /* Altura del header */
+        
+        /* 🌈 Colores de fondo y texto */
+        --bg-light: #f8fafc;             /* Color de fondo principal */
+        --text-muted: #64748b;           /* Color de texto secundario */
+        --border-color: #e2e8f0;         /* Color de bordes */
+        
+        /* ✨ Sombras (modificar para efectos más/menos dramáticos) */
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);      /* Sombra suave */
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);     /* Sombra media */
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);   /* Sombra pronunciada */
+      }
+
+      /* ==========================================
+         🏗️ ESTILOS BASE
+         ========================================== */
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;  /* 📝 Cambiar fuente aquí */
+        background: var(--bg-light);
+        margin: 0;
+        color: #1e293b;
+      }
+
+      /* ==========================================
+         📱 SIDEBAR - Navegación lateral
+         ========================================== */
       .sidebar {
         height: 100vh;
-        width: 240px;
+        width: var(--sidebar-width);
         position: fixed;
         top: 0;
         left: 0;
-        background: #0d6efd;
+        /* 🌈 Gradiente del sidebar - Modificar aquí para cambiar colores */
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         color: #fff;
-        padding-top: 1rem;
+        padding: 0;
         display: flex;
         flex-direction: column;
+        z-index: 1000;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s ease;
+      }
+
+      /* ==========================================
+         🏢 HEADER DEL SIDEBAR - Logo y título
+         ========================================== */
+      .sidebar-header {
+        padding: 2rem 1.5rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);  /* 🎨 Fondo semi-transparente */
+      }
+
+      .sidebar-header .logo {
+        display: flex;
+        align-items: center;
+        font-size: 1.5rem;                      /* 📏 Tamaño del título */
+        font-weight: 700;
+        color: white;
+        text-decoration: none;
+      }
+
+      .sidebar-header .logo i {
+        font-size: 2rem;                        /* 📏 Tamaño del icono musical */
+        margin-right: 0.75rem;
+        /* 🌈 Gradiente del icono musical */
+        background: linear-gradient(45deg, #fff, #e2e8f0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* ==========================================
+         🧭 NAVEGACIÓN DEL SIDEBAR
+         ========================================== */
+      .sidebar-nav {
+        flex: 1;
+        padding: 1rem 0;
+        overflow-y: auto;
+      }
+
+      .sidebar-nav .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 0.875rem 1.5rem;              /* 📏 Espaciado de los links */
+        color: rgba(255, 255, 255, 0.8);       /* 🎨 Color de links inactivos */
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;             /* ⚡ Velocidad de transición */
+        border: none;
+        background: none;
+        margin: 0.125rem 0.75rem;
+        border-radius: 0.75rem;                /* 📐 Redondez de los botones */
+        position: relative;
+      }
+
+      .sidebar-nav .nav-link i {
+        width: 20px;
+        margin-right: 0.75rem;
+        font-size: 1.125rem;                   /* 📏 Tamaño de iconos */
+        text-align: center;
+      }
+
+      .sidebar-nav .nav-link:hover {
+        background: rgba(255, 255, 255, 0.1);  /* 🎨 Color hover */
+        color: white;
+        transform: translateX(4px);            /* ✨ Efecto de desplazamiento */
+      }
+
+      .sidebar-nav .nav-link.active {
+        background: rgba(255, 255, 255, 0.15); /* 🎨 Color del link activo */
+        color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* ✨ Indicador visual del link activo */
+      .sidebar-nav .nav-link.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;                            /* 📏 Grosor del indicador */
+        height: 24px;                          /* 📏 Altura del indicador */
+        background: white;                     /* 🎨 Color del indicador */
+        border-radius: 0 4px 4px 0;
+      }
+
+      /* ==========================================
+         👤 FOOTER DEL SIDEBAR - Información del usuario
+         ========================================== */
+      .sidebar-footer {
+        padding: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      .user-dropdown {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.1);   /* 🎨 Fondo del área de usuario */
+        border-radius: 0.75rem;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .user-dropdown:hover {
+        background: rgba(255, 255, 255, 0.15);  /* 🎨 Color hover del área de usuario */
+        color: white;
+      }
+
+      .user-avatar {
+        width: 40px;                            /* 📏 Tamaño del avatar */
+        height: 40px;
+        /* 🌈 Gradiente del avatar */
+        background: linear-gradient(45deg, #fff, #e2e8f0);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .user-info {
+        flex: 1;
+      }
+
+      .user-name {
+        font-weight: 600;
+        font-size: 0.875rem;                    /* 📏 Tamaño del nombre */
+        line-height: 1.2;
+      }
+
+      .user-role {
+        font-size: 0.75rem;                     /* 📏 Tamaño del rol */
+        opacity: 0.8;
+      }
+
+      /* ==========================================
+         📄 CONTENIDO PRINCIPAL
+         ========================================== */
+      .main-content {
+        margin-left: var(--sidebar-width);     /* 📏 Margen para el sidebar */
+        min-height: 100vh;
+        background: var(--bg-light);
+      }
+
+      .content-header {
+        background: white;                      /* 🎨 Fondo del header */
+        padding: 1.5rem 2rem;                  /* 📏 Espaciado del header */
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        position: sticky;
+        top: 0;
         z-index: 100;
       }
-      .sidebar .sidebar-header {
-        font-size: 1.5rem;
-        font-weight: bold;
-        padding: 0 1rem 1rem 1rem;
+
+      .content-header h1 {
+        margin: 0;
+        font-size: 1.875rem;                   /* 📏 Tamaño del título principal */
+        font-weight: 700;
+        color: #1e293b;
       }
-      .sidebar .nav-link {
-        color: #fff;
+
+      .content-body {
+        padding: 2rem;                         /* 📏 Espaciado del contenido */
       }
-      .sidebar .nav-link:hover,
-      .sidebar .nav-link.active {
-        background: #0b5ed7;
-        color: #fff;
+
+      /* ==========================================
+         🃏 TARJETAS (CARDS)
+         ========================================== */
+      .card {
+        border: none;
+        border-radius: 1rem;                   /* 📐 Redondez de las tarjetas */
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        background: white;
       }
-      .sidebar .sidebar-footer {
-        margin-top: auto;
-        padding: 1rem;
+
+      .card:hover {
+        box-shadow: var(--shadow-md);          /* ✨ Sombra al hacer hover */
+        transform: translateY(-2px);          /* ✨ Efecto de elevación */
       }
-      .sidebar .dropdown-menu {
-        background: #fff;
-        color: #212529;
+
+      .card-header {
+        background: transparent;               /* 🎨 Fondo transparente del header */
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.5rem;
+        border-radius: 1rem 1rem 0 0 !important;
       }
-      .main-content {
-        margin-left: 260px;
+
+      .card-body {
+        padding: 1.5rem;                      /* 📏 Espaciado interno de tarjetas */
+      }
+
+      /* ==========================================
+         🔘 BOTONES
+         ========================================== */
+      .btn {
+        border-radius: 0.5rem;                 /* 📐 Redondez de botones */
+        font-weight: 500;
+        padding: 0.625rem 1.25rem;            /* 📏 Espaciado de botones */
+        transition: all 0.3s ease;
+        border: none;
+      }
+
+      .btn-primary {
+        /* 🌈 Gradiente del botón principal */
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);          /* ✨ Efecto de elevación */
+        box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
+      }
+
+      /* ==========================================
+         📑 PESTAÑAS DE NAVEGACIÓN
+         ========================================== */
+      .nav-tabs {
+        border-bottom: 2px solid var(--border-color);
+        margin-bottom: 2rem;
+      }
+
+      .nav-tabs .nav-link {
+        border: none;
+        border-radius: 0.5rem 0.5rem 0 0;
+        padding: 0.875rem 1.5rem;             /* 📏 Espaciado de pestañas */
+        font-weight: 500;
+        color: var(--text-muted);
+        transition: all 0.3s ease;
+      }
+
+      .nav-tabs .nav-link.active {
+        background: var(--primary-color);     /* 🎨 Color de pestaña activa */
+        color: white;
+        border-bottom: 2px solid var(--primary-color);
+      }
+
+      /* ==========================================
+         📊 TABLAS
+         ========================================== */
+      .table {
+        border-radius: 0.75rem;               /* 📐 Redondez de tablas */
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .table thead th {
+        background: var(--bg-light);          /* 🎨 Fondo del header de tabla */
+        border: none;
+        font-weight: 600;
+        color: #374151;
+        padding: 1rem;                        /* 📏 Espaciado de celdas header */
+      }
+
+      .table tbody td {
+        border: none;
+        padding: 1rem;                        /* 📏 Espaciado de celdas */
+        vertical-align: middle;
+      }
+
+      .table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+      }
+
+      .table tbody tr:hover {
+        /* 🎨 Color hover de filas */
+        background: rgba(102, 126, 234, 0.04);
+      }
+
+      /* ==========================================
+         📋 MENÚS DESPLEGABLES
+         ========================================== */
+      .dropdown-menu {
+        border: none;
+        box-shadow: var(--shadow-lg);
+        border-radius: 0.75rem;               /* 📐 Redondez de dropdowns */
+        padding: 0.5rem;
+      }
+
+      .dropdown-item {
+        border-radius: 0.5rem;
+        padding: 0.625rem 1rem;               /* 📏 Espaciado de items */
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .dropdown-item:hover {
+        background: var(--bg-light);          /* 🎨 Color hover de items */
+      }
+
+      /* ==========================================
+         📱 DISEÑO RESPONSIVE - Adaptación móvil
+         ========================================== */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);       /* 📱 Ocultar sidebar en móvil */
+        }
+        
+        .sidebar.show {
+          transform: translateX(0);           /* 📱 Mostrar sidebar cuando sea necesario */
+        }
+        
+        .main-content {
+          margin-left: 0;                     /* 📱 Sin margen en móvil */
+        }
+        
+        .content-body {
+          padding: 1rem;                      /* 📱 Menos padding en móvil */
+        }
+      }
+
+      /* ==========================================
+         ✨ ANIMACIONES
+         ========================================== */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;   /* ⚡ Velocidad de animación */
+      }
+
+      /* ==========================================
+         📜 SCROLLBAR PERSONALIZADO
+         ========================================== */
+      .sidebar-nav::-webkit-scrollbar {
+        width: 4px;                          /* 📏 Grosor del scrollbar */
+      }
+
+      .sidebar-nav::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1); /* 🎨 Color de fondo del scrollbar */
+      }
+
+      .sidebar-nav::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3); /* 🎨 Color del thumb */
+        border-radius: 2px;
+      }
+
+      .sidebar-nav::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5); /* 🎨 Color hover del thumb */
       }
     </style>
   </head>
   <body>
-    <!-- Sidebar Bootstrap -->
+    <!-- Sidebar -->
     <div class="sidebar">
-      <div class="sidebar-header">Panel Administrador</div>
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          <a
-            class="nav-link {% if active_tab == 'inicio' %}active{% endif %}"
-            href="{% url 'admin_dashboard' %}"
-            >Inicio</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if active_tab == 'profesores' %}active{% endif %}"
-            href="{% url 'admin_profesores' %}"
-            >Profesores</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if active_tab == 'estudiantes' %}active{% endif %}"
-            href="{% url 'admin_estudiantes' %}"
-            >Estudiantes</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if active_tab == 'aulas' %}active{% endif %}"
-            href="{% url 'admin_aulas' %}"
-            >Aulas</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if active_tab == 'cursos' %}active{% endif %}"
-            href="{% url 'admin_cursos' %}"
-            >Cursos</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if active_tab == 'horarios' %}active{% endif %}"
-            href="{% url 'admin_clases' %}"
-            >Clases</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if active_tab == 'matriculas' %}active{% endif %}"
-            href="{% url 'admin_matriculas' %}"
-            >Matrículas</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if active_tab == 'pagos' %}active{% endif %}"
-            href="{% url 'admin_pagos' %}"
-            >Pagos</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if active_tab == 'asistencias' %}active{% endif %}"
-            href="{% url 'admin_asistencias' %}"
-            >Asistencias</a
-          >
-        </li>
-        <li class="nav-item">
-          <a
-            class="nav-link {% if active_tab == 'reportes' %}active{% endif %}"
-            href="{% url 'admin_reportes' %}"
-            >Reportes</a
-          >
-        </li>
-      </ul>
+      <div class="sidebar-header">
+        <a href="{% url 'admin_dashboard' %}" class="logo">
+          <i class="fas fa-music"></i>
+          <div>
+            <div>Academia Musical</div>
+            <small style="font-size: 0.75rem; opacity: 0.8;">Panel Admin</small>
+          </div>
+        </a>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a class="nav-link {% if active_tab == 'inicio' %}active{% endif %}" href="{% url 'admin_dashboard' %}">
+          <i class="fas fa-home"></i>
+          Dashboard
+        </a>
+        <a class="nav-link {% if active_tab == 'profesores' %}active{% endif %}" href="{% url 'admin_profesores' %}">
+          <i class="fas fa-chalkboard-teacher"></i>
+          Profesores
+        </a>
+        <a class="nav-link {% if active_tab == 'estudiantes' %}active{% endif %}" href="{% url 'admin_estudiantes' %}">
+          <i class="fas fa-user-graduate"></i>
+          Estudiantes
+        </a>
+        <a class="nav-link {% if active_tab == 'aulas' %}active{% endif %}" href="{% url 'admin_aulas' %}">
+          <i class="fas fa-door-open"></i>
+          Aulas
+        </a>
+        <a class="nav-link {% if active_tab == 'cursos' %}active{% endif %}" href="{% url 'admin_cursos' %}">
+          <i class="fas fa-book"></i>
+          Cursos
+        </a>
+        <a class="nav-link {% if active_tab == 'horarios' %}active{% endif %}" href="{% url 'admin_clases' %}">
+          <i class="fas fa-calendar-alt"></i>
+          Clases
+        </a>
+        <a class="nav-link {% if active_tab == 'matriculas' %}active{% endif %}" href="{% url 'admin_matriculas' %}">
+          <i class="fas fa-id-card"></i>
+          Matrículas
+        </a>
+        <a class="nav-link {% if active_tab == 'pagos' %}active{% endif %}" href="{% url 'admin_pagos' %}">
+          <i class="fas fa-credit-card"></i>
+          Pagos
+        </a>
+        <a class="nav-link {% if active_tab == 'asistencias' %}active{% endif %}" href="{% url 'admin_asistencias' %}">
+          <i class="fas fa-clipboard-check"></i>
+          Asistencias
+        </a>
+        <a class="nav-link {% if active_tab == 'reportes' %}active{% endif %}" href="{% url 'admin_reportes' %}">
+          <i class="fas fa-chart-bar"></i>
+          Reportes
+        </a>
+      </nav>
+
       <div class="sidebar-footer">
         <div class="dropdown">
-          <a
-            class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
-            href="#"
-            id="sidebarDropdown"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            <span class="me-2">{{ user.first_name }} {{ user.last_name }}</span>
+          <a class="user-dropdown dropdown-toggle" href="#" id="sidebarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="user-avatar">
+              {{ user.first_name|first|default:"A" }}
+            </div>
+            <div class="user-info">
+              <div class="user-name">{{ user.first_name }} {{ user.last_name }}</div>
+              <div class="user-role">Administrador</div>
+            </div>
           </a>
-          <ul
-            class="dropdown-menu dropdown-menu-end"
-            aria-labelledby="sidebarDropdown"
-          >
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sidebarDropdown">
             <li>
               <form method="POST" action="{% url 'logout' %}" style="margin: 0">
                 {% csrf_token %}
                 <button type="submit" class="dropdown-item">
-                  Cerrar sesión
+                  <i class="fas fa-sign-out-alt me-2"></i>
+                  Cerrar Sesión
                 </button>
               </form>
             </li>
@@ -152,12 +503,28 @@
       </div>
     </div>
 
-    <!-- Contenido principal -->
-
-    {% block content %}
-    <!-- El contenido cambiará según la vista -->
-    {% endblock %}
+    <!-- Main Content -->
+    <div class="main-content">
+      {% block content %}
+      <!-- El contenido cambiará según la vista -->
+      {% endblock %}
+    </div>
 
     <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+      // Add fade-in animation to content
+      document.addEventListener('DOMContentLoaded', function() {
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+          mainContent.classList.add('fade-in-up');
+        }
+      });
+
+      // Mobile sidebar toggle (if needed)
+      function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.toggle('show');
+      }
+    </script>
   </body>
 </html>

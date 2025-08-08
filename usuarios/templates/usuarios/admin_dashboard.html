@@ -1,248 +1,201 @@
 {% extends 'usuarios/base.html' %}
 {% load static %}
-{% block title %}Panel Administrador{% endblock %}
+{% block title %}Dashboard{% endblock %}
 {% block content %}
-    <div class="main-content">
-        <div class="container mt-5">
-            <h1 class="mb-4">Dashboard - Academia Musical</h1>
-            
-            <!-- Tarjetas de métricas principales -->
-            <div class="row mb-4">
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-primary shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                        Total Estudiantes
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_estudiantes|default:0 }}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-users fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="content-header">
+    <h1><i class="fas fa-tachometer-alt me-3"></i>Dashboard - Academia Musical</h1>
+</div>
 
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-success shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                        Total Profesores
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_profesores|default:0 }}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
+<div class="content-body">
+    <!-- Métricas principales -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary text-white rounded-3 p-3 me-3">
+                            <i class="fas fa-user-graduate fs-4"></i>
                         </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-info shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                        Cursos Activos
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_cursos|default:0 }}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-music fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-warning shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                        Matrículas Activas
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_matriculas|default:0 }}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
+                        <div>
+                            <h6 class="text-muted text-uppercase mb-1 fw-normal small">Total Estudiantes</h6>
+                            <h2 class="mb-0 fw-bold">{{ total_estudiantes|default:0 }}</h2>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Sección de accesos rápidos -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card shadow">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Accesos Rápidos</h6>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-success text-white rounded-3 p-3 me-3">
+                            <i class="fas fa-chalkboard-teacher fs-4"></i>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-2 col-sm-4 mb-3 text-center">
-                                    <a href="{% url 'admin_estudiantes' %}" class="btn btn-outline-primary btn-lg w-100">
-                                        <i class="fas fa-user-graduate fa-2x mb-2"></i><br>
-                                        <small>Estudiantes</small>
-                                    </a>
-                                </div>
-                                <div class="col-md-2 col-sm-4 mb-3 text-center">
-                                    <a href="{% url 'admin_profesores' %}" class="btn btn-outline-success btn-lg w-100">
-                                        <i class="fas fa-chalkboard-teacher fa-2x mb-2"></i><br>
-                                        <small>Profesores</small>
-                                    </a>
-                                </div>
-                                <div class="col-md-2 col-sm-4 mb-3 text-center">
-                                    <a href="{% url 'admin_cursos' %}" class="btn btn-outline-info btn-lg w-100">
-                                        <i class="fas fa-book-open fa-2x mb-2"></i><br>
-                                        <small>Cursos</small>
-                                    </a>
-                                </div>
-                                <div class="col-md-2 col-sm-4 mb-3 text-center">
-                                    <a href="{% url 'admin_clases' %}" class="btn btn-outline-warning btn-lg w-100">
-                                        <i class="fas fa-calendar-alt fa-2x mb-2"></i><br>
-                                        <small>Horarios</small>
-                                    </a>
-                                </div>
-                                <div class="col-md-2 col-sm-4 mb-3 text-center">
-                                    <a href="{% url 'admin_matriculas' %}" class="btn btn-outline-secondary btn-lg w-100">
-                                        <i class="fas fa-user-plus fa-2x mb-2"></i><br>
-                                        <small>Matrículas</small>
-                                    </a>
-                                </div>
-                                <div class="col-md-2 col-sm-4 mb-3 text-center">
-                                    <a href="{% url 'admin_asistencias' %}" class="btn btn-outline-dark btn-lg w-100">
-                                        <i class="fas fa-clipboard-check fa-2x mb-2"></i><br>
-                                        <small>Asistencias</small>
-                                    </a>
-                                </div>
-                            </div>
+                        <div>
+                            <h6 class="text-muted text-uppercase mb-1 fw-normal small">Total Profesores</h6>
+                            <h2 class="mb-0 fw-bold">{{ total_profesores|default:0 }}</h2>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Sección de resumen de actividad reciente -->
-            <div class="row">
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Pagos Pendientes</h6>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-info text-white rounded-3 p-3 me-3">
+                            <i class="fas fa-book fs-4"></i>
                         </div>
-                        <div class="card-body">
-                            {% if pagos_pendientes %}
-                                <div class="table-responsive">
-                                    <table class="table table-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Estudiante</th>
-                                                <th>Curso</th>
-                                                <th>Monto</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for pago in pagos_pendientes|slice:":5" %}
-                                            <tr>
-                                                <td>{{ pago.matricula.estudiante.get_full_name }}</td>
-                                                <td>{{ pago.matricula.clase.curso.nombre }}</td>
-                                                <td>${{ pago.monto }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="text-center">
-                                    <a href="{% url 'admin_pagos' %}" class="btn btn-sm btn-primary">Ver todos los pagos</a>
-                                </div>
-                            {% else %}
-                                <p class="text-muted text-center">No hay pagos pendientes</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Clases de Hoy</h6>
-                        </div>
-                        <div class="card-body">
-                            {% if clases_hoy %}
-                                <div class="table-responsive">
-                                    <table class="table table-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Curso</th>
-                                                <th>Hora</th>
-                                                <th>Aula</th>
-                                                <th>Profesor</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for clase in clases_hoy %}
-                                            <tr>
-                                                <td>{{ clase.curso.nombre }}</td>
-                                                <td>{{ clase.hora_inicio }}</td>
-                                                <td>{{ clase.aula }}</td>
-                                                <td>{{ clase.profesor.get_full_name }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="text-center">
-                                    <a href="{% url 'admin_clases' %}" class="btn btn-sm btn-primary">Ver todos los horarios</a>
-                                </div>
-                            {% else %}
-                                <p class="text-muted text-center">No hay clases programadas para hoy</p>
-                            {% endif %}
+                        <div>
+                            <h6 class="text-muted text-uppercase mb-1 fw-normal small">Total Cursos</h6>
+                            <h2 class="mb-0 fw-bold">{{ total_cursos|default:0 }}</h2>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="row">
-                <div class="col-12">
-                    <p class="text-muted text-center mt-4">
-                        Bienvenido, {{ user.get_full_name|default:user.username }}. 
-                        Última conexión: {{ user.last_login|date:"d/m/Y H:i" }}
-                    </p>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning text-dark rounded-3 p-3 me-3">
+                            <i class="fas fa-credit-card fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted text-uppercase mb-1 fw-normal small">Pagos Pendientes</h6>
+                            <h2 class="mb-0 fw-bold">{{ pagos_pendientes|default:0 }}</h2>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Font Awesome para iconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        .border-left-primary {
-            border-left: 0.25rem solid #4e73df !important;
-        }
-        .border-left-success {
-            border-left: 0.25rem solid #1cc88a !important;
-        }
-        .border-left-info {
-            border-left: 0.25rem solid #36b9cc !important;
-        }
-        .border-left-warning {
-            border-left: 0.25rem solid #f6c23e !important;
-        }
-        .text-gray-800 {
-            color: #5a5c69 !important;
-        }
-        .text-gray-300 {
-            color: #dddfeb !important;
-        }
-    </style>
+    <!-- Accesos rápidos -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-bolt me-2 text-primary"></i>Accesos Rápidos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <a href="{% url 'admin_estudiantes' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center text-decoration-none py-4">
+                                <i class="fas fa-user-plus fs-2 mb-2"></i>
+                                <span class="fw-medium small">Nuevo Estudiante</span>
+                            </a>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <a href="{% url 'admin_profesores' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center text-decoration-none py-4">
+                                <i class="fas fa-chalkboard-teacher fs-2 mb-2"></i>
+                                <span class="fw-medium small">Nuevo Profesor</span>
+                            </a>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <a href="{% url 'admin_cursos' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center text-decoration-none py-4">
+                                <i class="fas fa-book-open fs-2 mb-2"></i>
+                                <span class="fw-medium small">Nuevo Curso</span>
+                            </a>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <a href="{% url 'admin_clases' %}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center text-decoration-none py-4">
+                                <i class="fas fa-calendar-plus fs-2 mb-2"></i>
+                                <span class="fw-medium small">Nueva Clase</span>
+                            </a>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <a href="{% url 'admin_matriculas' %}" class="btn btn-outline-secondary w-100 h-100 d-flex flex-column align-items-center justify-content-center text-decoration-none py-4">
+                                <i class="fas fa-id-card fs-2 mb-2"></i>
+                                <span class="fw-medium small">Matrícula</span>
+                            </a>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-6">
+                            <a href="{% url 'admin_reportes' %}" class="btn btn-outline-dark w-100 h-100 d-flex flex-column align-items-center justify-content-center text-decoration-none py-4">
+                                <i class="fas fa-chart-line fs-2 mb-2"></i>
+                                <span class="fw-medium small">Reportes</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen de actividad -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Pagos Pendientes</h5>
+                </div>
+                <div class="card-body">
+                    {% if pagos_pendientes_lista %}
+                        <div class="list-group list-group-flush">
+                            {% for pago in pagos_pendientes_lista|slice:":5" %}
+                            <div class="list-group-item border-0 px-0 py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">{{ pago.matricula.estudiante.get_full_name }}</h6>
+                                        <small class="text-muted">{{ pago.matricula.curso.nombre }}</small>
+                                    </div>
+                                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">${{ pago.monto_restante }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if pagos_pendientes_lista|length > 5 %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'admin_pagos' %}" class="btn btn-outline-warning">Ver todos los pagos</a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle text-success display-4 mb-3"></i>
+                            <p class="text-muted fs-5">¡No hay pagos pendientes!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-clock me-2 text-info"></i>Clases de Hoy</h5>
+                </div>
+                <div class="card-body">
+                    {% if clases_hoy %}
+                        <div class="list-group list-group-flush">
+                            {% for clase in clases_hoy|slice:":5" %}
+                            <div class="list-group-item border-0 px-0 py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1 fw-bold">{{ clase.curso.nombre }}</h6>
+                                        <small class="text-muted">{{ clase.profesor.get_full_name }} - {{ clase.aula.nombre }}</small>
+                                    </div>
+                                    <span class="badge bg-info fs-6 px-3 py-2">{{ clase.hora_inicio }} - {{ clase.hora_fin }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if clases_hoy|length > 5 %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'admin_clases' %}" class="btn btn-outline-info">Ver todas las clases</a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times text-muted display-4 mb-3"></i>
+                            <p class="text-muted fs-5">No hay clases programadas para hoy</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

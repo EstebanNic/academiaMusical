@@ -1,169 +1,524 @@
 {% extends 'usuarios/base.html' %}
 {% load static %}
-{% block title %}Panel Administrador{% endblock %}
+{% block title %}Estudiantes{% endblock %}
 {% block content %}
 
-<div class="main-content">
-        <div class="container mt-5">
-            <!-- Tabs de navegación -->
-            <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="estudiantes-tab" data-bs-toggle="tab" data-bs-target="#estudiantes" type="button" role="tab" aria-controls="estudiantes" aria-selected="true">Estudiantes</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="add-estudiante-tab" data-bs-toggle="tab" data-bs-target="#add-estudiante" type="button" role="tab" aria-controls="add-estudiante" aria-selected="false">Añadir Estudiante</button>
-                </li>
-            </ul>
-            <div class="tab-content" id="adminTabsContent">
-                <div class="tab-pane fade show active" id="estudiantes" role="tabpanel" aria-labelledby="estudiantes-tab">
+<div class="content-header">
+    <h1><i class="fas fa-user-graduate me-3"></i>Gestión de Estudiantes</h1>
+</div>
+
+<div class="content-body">
+    <!-- Navbar de navegación -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav class="navbar navbar-expand-lg navbar-light bg-white border-0 shadow-lg rounded-4 p-0">
+                <div class="container-fluid px-4 py-2">
+                    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarEstudiante" aria-controls="navbarEstudiante" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    
+                    <div class="collapse navbar-collapse" id="navbarEstudiante">
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item me-2">
+                                <button class="nav-link btn btn-outline-primary rounded-pill px-4 py-2 fw-bold active-nav" id="estudiantes-nav" onclick="cambiarVista('estudiantes')" type="button">
+                                    <i class="fas fa-users me-2"></i>
+                                    <span class="d-none d-lg-inline">Lista de Estudiantes</span>
+                                    <span class="d-lg-none">Lista</span>
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link btn btn-outline-success rounded-pill px-4 py-2 fw-bold" id="add-estudiante-nav" onclick="cambiarVista('add-estudiante')" type="button">
+                                    <i class="fas fa-user-plus me-2"></i>
+                                    <span class="d-none d-lg-inline">Nuevo Estudiante</span>
+                                    <span class="d-lg-none">Nuevo</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <style>
+        /* Estilos modernos para el navbar */
+        .navbar {
+            backdrop-filter: blur(10px);
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,249,250,0.95)) !important;
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+            transform: translateY(-1px);
+        }
+        
+        /* Estilos para los botones de navegación */
+        .nav-link.btn {
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .nav-link.btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .nav-link.btn.active-nav {
+            background: linear-gradient(135deg, #0d6efd, #6610f2) !important;
+            color: white !important;
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.btn.active-nav:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.5);
+        }
+        
+        /* Animaciones para iconos */
+        .nav-link.btn i {
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .nav-link.btn:hover i {
+            transform: scale(1.1);
+        }
+        
+        .nav-link.btn.active-nav i {
+            transform: scale(1.1);
+        }
+        
+        /* Efectos de entrada */
+        .navbar {
+            animation: slideInFromTop 0.6s ease-out;
+        }
+        
+        @keyframes slideInFromTop {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Navbar toggler personalizado */
+        .navbar-toggler {
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-toggler:hover {
+            background-color: rgba(13, 110, 253, 0.1);
+            transform: scale(1.1);
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        /* Efectos hover para botones de acción en general */
+        .btn-group .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        /* Transiciones suaves para las tarjetas */
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+        }
+        
+        /* Efectos de contenido */
+        .vista-contenido {
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .vista-contenido.active {
+            display: block;
+        }
+        
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .nav-link.btn {
+                margin-bottom: 0.5rem;
+                width: 100%;
+            }
+        }
+    </style>
+    <div class="contenido-vistas">
+        <!-- VISTA: Lista de Estudiantes -->
+        <div class="vista-contenido active" id="estudiantes">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-search me-2 text-primary"></i>Buscar Estudiantes</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
                     <!-- Barra de búsqueda -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-search"></i>
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
                                 </span>
-                                <input type="text" class="form-control" id="buscarEstudiante" placeholder="Buscar estudiante por cédula...">
+                                <input type="text" class="form-control border-start-0 ps-0" id="buscarEstudiante" placeholder="Buscar estudiante por cédula...">
                                 <button class="btn btn-outline-secondary" type="button" id="limpiarBusqueda">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                            <small class="text-muted">Ingrese el número de cédula para buscar un estudiante específico</small>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Ingrese el número de cédula para buscar un estudiante específico
+                            </small>
                         </div>
-                        <div class="col-md-6 d-flex align-items-center">
-                            <span id="resultadosBusqueda" class="text-muted"></span>
+                        <div class="col-md-4 d-flex align-items-center justify-content-end">
+                            <div class="bg-light rounded-3 p-3">
+                                <span id="resultadosBusqueda" class="text-muted fw-medium"></span>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Tabla de Estudiantes -->
+            <!-- Tabla de Estudiantes -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-table me-2 text-success"></i>Lista de Estudiantes Registrados</h5>
+                </div>
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-striped" id="tablaEstudiantes">
-                            <thead>
+                        <table class="table table-hover mb-0" id="tablaEstudiantes">
+                            <thead class="bg-light">
                                 <tr>
-                                    <th>Nombre completo</th>
-                                    <th>Cédula</th>
-                                    <th>Email</th>
-                                    <th>Teléfono</th>
-                                    <th>Acciones</th>
+                                    <th class="fw-bold text-dark px-4 py-3">
+                                        <i class="fas fa-user me-2"></i>Nombre Completo
+                                    </th>
+                                    <th class="fw-bold text-dark px-4 py-3">
+                                        <i class="fas fa-id-card me-2"></i>Cédula
+                                    </th>
+                                    <th class="fw-bold text-dark px-4 py-3">
+                                        <i class="fas fa-envelope me-2"></i>Email
+                                    </th>
+                                    <th class="fw-bold text-dark px-4 py-3">
+                                        <i class="fas fa-phone me-2"></i>Teléfono
+                                    </th>
+                                    <th class="fw-bold text-dark px-4 py-3 text-center">
+                                        <i class="fas fa-cogs me-2"></i>Acciones
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="estudiantes-tbody">
                                 {% for estudiante in estudiantes %}
                                 <tr class="estudiante-row" data-cedula="{{ estudiante.cedula|default:'' }}">
-                                    <td>{{ estudiante.first_name }} {{ estudiante.last_name }}</td>
-                                    <td class="cedula-cell">{{ estudiante.cedula }}</td>
-                                    <td>{{ estudiante.email }}</td>
-                                    <td>{{ estudiante.telefono }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-info me-1 btn-ver-mas-estudiante"
-                                            data-estudiante-nombre="{{ estudiante.first_name }} {{ estudiante.last_name }}"
-                                            data-estudiante-cedula="{{ estudiante.cedula }}"
-                                            data-estudiante-email="{{ estudiante.email }}"
-                                            data-estudiante-telefono="{{ estudiante.telefono }}"
-                                            data-estudiante-direccion="{{ estudiante.direccion }}"
-                                            data-estudiante-estado="{% if estudiante.is_active %}Activo{% else %}Inactivo{% endif %}"
-                                        >Ver más</button>
-                                        <button class="btn btn-sm btn-warning me-1 btn-editar-estudiante"
-                                            data-estudiante-id="{{ estudiante.id }}"
-                                            data-estudiante-cedula="{{ estudiante.cedula }}"
-                                            data-estudiante-nombre="{{ estudiante.first_name }}"
-                                            data-estudiante-apellido="{{ estudiante.last_name }}"
-                                            data-estudiante-email="{{ estudiante.email }}"
-                                            data-estudiante-telefono="{{ estudiante.telefono }}"
-                                            data-estudiante-direccion="{{ estudiante.direccion }}"
-                                        >Editar</button>
-                                        <button class="btn btn-sm btn-danger btn-eliminar-estudiante"
-                                            data-estudiante-id="{{ estudiante.id }}"
-                                            data-estudiante-nombre="{{ estudiante.first_name }} {{ estudiante.last_name }}"
-                                        >Eliminar</button>
+                                    <td class="px-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <span class="fw-bold">{{ estudiante.first_name }} {{ estudiante.last_name }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="cedula-cell px-4 py-3">
+                                        <span class="badge bg-light text-dark fs-6 px-3 py-2">{{ estudiante.cedula }}</span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="text-muted">{{ estudiante.email }}</span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="text-muted">{{ estudiante.telefono }}</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-outline-info btn-sm btn-ver-mas-estudiante" 
+                                                data-estudiante-estado="{% if estudiante.is_active %}Activo{% else %}Inactivo{% endif %}"
+                                                data-estudiante-nombre="{{ estudiante.first_name }} {{ estudiante.last_name }}"
+                                                data-estudiante-cedula="{{ estudiante.cedula }}"
+                                                data-estudiante-email="{{ estudiante.email }}"
+                                                data-estudiante-telefono="{{ estudiante.telefono }}"
+                                                data-estudiante-direccion="{{ estudiante.direccion }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning btn-sm btn-editar-estudiante"
+                                                data-estudiante-id="{{ estudiante.id }}"
+                                                data-estudiante-cedula="{{ estudiante.cedula }}"
+                                                data-estudiante-nombre="{{ estudiante.first_name }}"
+                                                data-estudiante-apellido="{{ estudiante.last_name }}"
+                                                data-estudiante-email="{{ estudiante.email }}"
+                                                data-estudiante-telefono="{{ estudiante.telefono }}"
+                                                data-estudiante-direccion="{{ estudiante.direccion }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm btn-eliminar-estudiante"
+                                                data-estudiante-id="{{ estudiante.id }}"
+                                                data-estudiante-nombre="{{ estudiante.first_name }} {{ estudiante.last_name }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr id="no-estudiantes-row">
-                                    <td colspan="5" class="text-center">No hay estudiantes registrados.</td>
+                                    <td colspan="5" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="fas fa-users fa-3x mb-3 text-secondary"></i>
+                                            <h5>No hay estudiantes registrados</h5>
+                                            <p>Comience agregando un nuevo estudiante usando la pestaña "Nuevo Estudiante"</p>
+                                        </div>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Mensaje cuando no hay resultados de búsqueda -->
-                    <div id="sin-resultados" class="alert alert-info text-center d-none">
-                        <i class="fas fa-search me-2"></i>
-                        No se encontraron estudiantes con la cédula especificada.
-                    </div>
-
-                    <nav>
-                        <ul class="pagination justify-content-center" id="estudiantes-pagination">
-                            <!-- Paginación generada por JS -->
-                        </ul>
-                    </nav>
                 </div>
-                <div class="tab-pane fade" id="add-estudiante" role="tabpanel" aria-labelledby="add-estudiante-tab">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title mb-3">Registrar Estudiante</h5>
-                            <form method="POST" action="{% url 'admin_estudiantes' %}" id="form-add-estudiante">
-                                {% csrf_token %}
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="cedula" class="form-label">Cédula <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="cedula" name="cedula" required>
-                                        <div class="invalid-feedback">
-                                            La cédula es requerida y debe ser única.
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="first_name" class="form-label">Nombre <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="first_name" name="first_name" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="last_name" class="form-label">Apellido <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="last_name" name="last_name" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                                        <input type="email" class="form-control" id="email" name="email" required>
-                                        <div class="invalid-feedback">
-                                            El email es requerido y debe ser único.
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="telefono" class="form-label">Teléfono <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="telefono" name="telefono" required>
-                                        <div class="invalid-feedback">
-                                            El teléfono es requerido y debe ser único.
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="direccion" class="form-label">Dirección</label>
-                                        <input type="text" class="form-control" id="direccion" name="direccion">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
-                                        <input type="password" class="form-control" id="password" name="password" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="confirm_password" class="form-label">Confirmar Contraseña <span class="text-danger">*</span></label>
-                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                                        <div id="passwordHelp" class="form-text text-danger d-none">Las contraseñas no coinciden.</div>
-                                    </div>
+            </div>
+
+            <!-- Mensaje cuando no hay resultados de búsqueda -->
+            <div id="sin-resultados" class="alert alert-info border-0 shadow-sm text-center d-none mt-4">
+                <i class="fas fa-search fa-2x mb-3 text-info"></i>
+                <h5>No se encontraron estudiantes</h5>
+                <p class="mb-0">No se encontraron estudiantes con la cédula especificada.</p>
+            </div>
+
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center" id="estudiantes-pagination">
+                    <!-- Paginación generada por JS -->
+                </ul>
+            </nav>
+        </div>
+        <!-- VISTA: Nuevo Estudiante -->
+        <div class="vista-contenido" id="add-estudiante">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-user-plus me-2 text-success"></i>Registrar Nuevo Estudiante</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'admin_estudiantes' %}" id="form-add-estudiante">
+                        {% csrf_token %}
+                        
+                        <!-- Información Personal -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <label for="cedula" class="form-label fw-bold">
+                                    <i class="fas fa-id-card me-2 text-primary"></i>Cédula 
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="cedula" name="cedula" required 
+                                       placeholder="Ej: 1234567890">
+                                <div class="invalid-feedback">
+                                    La cédula es requerida y debe ser única.
                                 </div>
-                                <div class="mb-3">
-                                    <small class="text-muted">
-                                        <span class="text-danger">*</span> Campos obligatorios. 
-                                        La cédula, email y teléfono deben ser únicos en el sistema.
-                                    </small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label fw-bold">
+                                    <i class="fas fa-user me-2 text-info"></i>Nombre 
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="first_name" name="first_name" required 
+                                       placeholder="Ej: María José">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label fw-bold">
+                                    <i class="fas fa-user me-2 text-info"></i>Apellido 
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="last_name" name="last_name" required 
+                                       placeholder="Ej: González López">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label fw-bold">
+                                    <i class="fas fa-envelope me-2 text-warning"></i>Email 
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" class="form-control form-control-lg" id="email" name="email" required 
+                                       placeholder="Ej: estudiante@academia.com">
+                                <div class="invalid-feedback">
+                                    El email es requerido y debe ser único.
                                 </div>
-                                <input type="hidden" name="rol" value="ESTUDIANTE">
-                                <button type="submit" class="btn btn-primary">Registrar</button>
-                            </form>
+                            </div>
                         </div>
-                    </div>
+
+                        <!-- Información de Contacto -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <label for="telefono" class="form-label fw-bold">
+                                    <i class="fas fa-phone me-2 text-success"></i>Teléfono 
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="telefono" name="telefono" required 
+                                       placeholder="Ej: 0999123456">
+                                <div class="invalid-feedback">
+                                    El teléfono es requerido y debe ser único.
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="direccion" class="form-label fw-bold">
+                                    <i class="fas fa-map-marker-alt me-2 text-danger"></i>Dirección
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="direccion" name="direccion" 
+                                       placeholder="Ej: Av. Principal 123, Quito">
+                            </div>
+                        </div>
+
+                        <!-- Información de Seguridad -->
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label fw-bold">
+                                    <i class="fas fa-key me-2 text-secondary"></i>Contraseña 
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="password" class="form-control form-control-lg" id="password" name="password" required 
+                                       placeholder="Mínimo 8 caracteres">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Debe contener al menos 8 caracteres
+                                </small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="confirm_password" class="form-label fw-bold">
+                                    <i class="fas fa-check-circle me-2 text-secondary"></i>Confirmar Contraseña 
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="password" class="form-control form-control-lg" id="confirm_password" name="confirm_password" required 
+                                       placeholder="Repita la contraseña">
+                                <div id="passwordHelp" class="text-danger small mt-1 d-none">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    Las contraseñas no coinciden
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campos ocultos -->
+                        <input type="hidden" name="rol" value="ESTUDIANTE">
+
+                        <!-- Botones de acción -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-3 justify-content-end">
+                                    <button type="button" class="btn btn-outline-secondary btn-lg px-4" onclick="document.getElementById('form-add-estudiante').reset()">
+                                        <i class="fas fa-undo me-2"></i>Limpiar Formulario
+                                    </button>
+                                    <button type="submit" class="btn btn-success btn-lg px-5">
+                                        <i class="fas fa-user-plus me-2"></i>Registrar Estudiante
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <small class="text-muted d-block">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Nota:</strong> Los campos marcados con (*) son obligatorios. 
+                                Asegúrese de que la cédula, email y teléfono sean únicos en el sistema.
+                            </small>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<style>
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.375rem;
+        margin: 0 2px;
+    }
+    
+    .needs-validation .form-control:valid {
+        border-color: #28a745;
+    }
+    
+    .needs-validation .form-control:invalid {
+        border-color: #dc3545;
+    }
+</style>
+
+<script>
+    // Enhanced form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // Password toggle function
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = document.getElementById(fieldId + '-icon');
+        
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            field.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
 
     <!-- Modal Editar Estudiante -->
     <div class="modal fade" id="modalEditarEstudiante" tabindex="-1" aria-labelledby="modalEditarEstudianteLabel" aria-hidden="true">
@@ -327,11 +682,62 @@
           </div>
         </div>
       </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // Función para cambiar entre vistas del navbar
+        function cambiarVista(vistaId) {
+            // Ocultar todas las vistas
+            document.querySelectorAll('.vista-contenido').forEach(vista => {
+                vista.classList.remove('active');
+                vista.style.display = 'none';
+            });
+            
+            // Remover clase activa de todos los botones
+            document.querySelectorAll('.nav-link.btn').forEach(btn => {
+                btn.classList.remove('active-nav');
+                btn.classList.remove('btn-primary', 'btn-success');
+                if (btn.id === 'estudiantes-nav') {
+                    btn.classList.add('btn-outline-primary');
+                } else {
+                    btn.classList.add('btn-outline-success');
+                }
+            });
+            
+            // Mostrar la vista seleccionada
+            const vistaActiva = document.getElementById(vistaId);
+            if (vistaActiva) {
+                vistaActiva.classList.add('active');
+                vistaActiva.style.display = 'block';
+            }
+            
+            // Activar el botón correspondiente
+            const botonActivo = document.getElementById(vistaId + '-nav');
+            if (botonActivo) {
+                botonActivo.classList.add('active-nav');
+                botonActivo.classList.remove('btn-outline-primary', 'btn-outline-success');
+                if (vistaId === 'estudiantes') {
+                    botonActivo.classList.add('btn-primary');
+                } else {
+                    botonActivo.classList.add('btn-success');
+                }
+            }
+            
+            // Colapsar el navbar en móviles
+            const navbarCollapse = document.getElementById('navbarEstudiante');
+            if (navbarCollapse.classList.contains('show')) {
+                const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+                bsCollapse.hide();
+            }
+        }
+
         // Verificar si hay que mostrar los modales
         document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar la vista por defecto
+            cambiarVista('estudiantes');
             //{% if mostrar_modal_duplicado %}
                 var modalDuplicado = new bootstrap.Modal(document.getElementById('modalEstudianteDuplicado'));
                 modalDuplicado.show();
@@ -385,7 +791,7 @@
                             const cedulaOriginal = row.getAttribute('data-cedula');
                             const regex = new RegExp(`(${terminoBusqueda})`, 'gi');
                             const cedulaResaltada = cedulaOriginal.replace(regex, '<mark class="bg-warning">$1</mark>');
-                            cedulaCell.innerHTML = cedulaResaltada;
+                            cedulaCell.innerHTML = `<span class="badge bg-light text-dark fs-6 px-3 py-2">${cedulaResaltada}</span>`;
                         } else {
                             row.style.display = 'none';
                         }

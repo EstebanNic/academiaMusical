@@ -281,252 +281,6 @@
         });
     });
 </script>
-        <div class="tab-content" id="adminTabsContent">
-        <!-- VISTA: Lista de Cursos -->
-        <div class="vista-contenido active" id="cursos">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <h5 class="mb-0 fw-bold"><i class="fas fa-list me-2 text-primary"></i>Lista de Cursos</h5>
-                        </div>
-                        <div class="col-md-4 text-end">
-                            <span id="resultadosBusquedaCursos" class="text-muted small"></span>
-                        </div>
-                    </div>
-                    
-                    <!-- Barra de búsqueda -->
-                    <div class="row mt-3">
-                        <div class="col-md-4">
-                            <label for="buscarNombre" class="form-label small">Por Nombre:</label>
-                            <input type="text" class="form-control form-control-sm" id="buscarNombre" placeholder="Ej: Piano, Guitarra...">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="buscarNivel" class="form-label small">Por Nivel:</label>
-                            <select class="form-select form-select-sm" id="buscarNivel">
-                                <option value="">Todos los niveles</option>
-                                {% for key, value in curso_niveles %}
-                                    <option value="{{ value }}">{{ value }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button class="btn btn-outline-secondary btn-sm" type="button" id="limpiarBusquedaCursos">
-                                <i class="fas fa-times me-1"></i> Limpiar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mensaje cuando no hay resultados de búsqueda -->
-            <div id="sin-resultados-cursos" class="alert alert-info border-0 shadow-sm text-center d-none mt-4">
-                <i class="fas fa-search fa-2x mb-3 text-info"></i>
-                <h5>No se encontraron cursos</h5>
-                <p class="mb-0">No se encontraron cursos con los criterios especificados.</p>
-            </div>
-
-            <!-- Tabla de Cursos -->
-            <div class="card border-0 shadow-sm mt-4">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover mb-0" id="tablaCursos">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="fw-bold">Nombre</th>
-                                    <th class="fw-bold">Nivel</th>
-                                    <th class="fw-bold">Precio</th>
-                                    <th class="fw-bold text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cursos-tbody">
-                                {% for curso in cursos %}
-                                <tr class="curso-row" 
-                                    data-nombre="{{ curso.nombre|lower }}"
-                                    data-nivel="{{ curso.get_nivel_display }}">
-                                    <td class="nombre-cell">{{ curso.nombre }}</td>
-                                    <td class="nivel-cell">{{ curso.get_nivel_display }}</td>
-                                    <td>${{ curso.precio }}</td>
-                                    <td class="text-center">
-                                        <div class="btn-group" role="group">
-                                            <button class="btn btn-sm btn-info btn-ver-mas-curso"
-                                                data-curso-id="{{ curso.id }}"
-                                                data-curso-nombre="{{ curso.nombre }}"
-                                                data-curso-nivel="{{ curso.get_nivel_display }}"
-                                                data-curso-precio="{{ curso.precio }}"
-                                                data-bs-toggle="tooltip" 
-                                                data-bs-placement="top" 
-                                                title="Ver detalles">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-warning btn-editar-curso"
-                                                data-curso-id="{{ curso.id }}"
-                                                data-curso-nombre="{{ curso.nombre }}"
-                                                data-curso-nivel="{{ curso.nivel }}"
-                                                data-curso-precio="{{ curso.precio }}"
-                                                data-bs-toggle="tooltip" 
-                                                data-bs-placement="top" 
-                                                title="Editar curso">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-danger btn-eliminar-curso"
-                                                data-curso-id="{{ curso.id }}"
-                                                data-curso-nombre="{{ curso.nombre }}"
-                                                data-bs-toggle="tooltip" 
-                                                data-bs-placement="top" 
-                                                title="Eliminar curso">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr id="no-cursos-row">
-                                    <td colspan="4" class="text-center py-4 text-muted">
-                                        <i class="fas fa-book fa-2x mb-3"></i>
-                                        <br>No hay cursos registrados.
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <nav class="mt-4">
-                <ul class="pagination justify-content-center" id="cursos-pagination">
-                    <!-- Paginación generada por JS -->
-                </ul>
-            </nav>
-        </div>
-        
-        <!-- VISTA: Nuevo Curso -->
-        <div class="vista-contenido" id="add-curso">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-plus me-2 text-success"></i>Registrar Nuevo Curso</h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{% url 'admin_cursos' %}" id="form-add-curso" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="nombre" class="form-label">Curso <span class="text-danger">*</span></label>
-                                <select class="form-select" id="nombre" name="nombre" required>
-                                    <option value="" selected disabled>Seleccione un curso</option>
-                                    {% for curso in cursos_musicales %}
-                                        <option value="{{ curso }}">{{ curso }}</option>
-                                    {% endfor %}
-                                </select>
-                                <div class="invalid-feedback">
-                                    Por favor seleccione un curso.
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="nivel" class="form-label">Nivel <span class="text-danger">*</span></label>
-                                <select class="form-select" id="nivel" name="nivel" required>
-                                    <option value="" selected disabled>Seleccione un nivel</option>
-                                    {% for key, value in curso_niveles %}
-                                        <option value="{{ key }}">{{ value }}</option>
-                                    {% endfor %}
-                                </select>
-                                <div class="invalid-feedback">
-                                    Por favor seleccione un nivel.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label for="precio" class="form-label">Precio <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" class="form-control" id="precio" name="precio" min="0" step="0.01" required placeholder="0.00">
-                                    <div class="invalid-feedback">
-                                        Por favor ingrese un precio válido.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="alert alert-info border-0 mb-3">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Información importante:</strong>
-                            <ul class="mb-0 mt-2">
-                                <li>No se puede registrar el mismo curso con el mismo nivel</li>
-                                <li>Todos los campos marcados con <span class="text-danger">*</span> son obligatorios</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save me-2"></i>Registrar Curso
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('form-add-curso').reset()">
-                                <i class="fas fa-undo me-2"></i>Limpiar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-    
-    .btn-group .btn {
-        border-radius: 0.375rem;
-        margin: 0 2px;
-    }
-    
-    .needs-validation .form-control:valid {
-        border-color: #28a745;
-    }
-    
-    .needs-validation .form-control:invalid {
-        border-color: #dc3545;
-    }
-</style>
-
-<script>
-    // Enhanced form validation
-    (function() {
-        'use strict';
-        window.addEventListener('load', function() {
-            var forms = document.getElementsByClassName('needs-validation');
-            Array.prototype.filter.call(forms, function(form) {
-                form.addEventListener('submit', function(event) {
-                    if (form.checkValidity() === false) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        }, false);
-    })();
-
-    // Initialize tooltips
-    document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
-</script>
 
 <!-- Modal Editar Curso -->
 <div class="modal fade" id="modalEditarCurso" tabindex="-1" aria-labelledby="modalEditarCursoLabel" aria-hidden="true">
@@ -537,7 +291,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <form id="form-editar-curso" method="POST" action="#">
+        <form id="form-editar-curso" method="POST" action="{% url 'admin_cursos' %}">
             {% csrf_token %}
             <div class="row">
                 <div class="col-md-6 mb-3">
@@ -651,66 +405,65 @@
 </div>
 
 <script>
-    <script>
-        // Función para cambiar entre vistas del navbar
-        function cambiarVista(vistaId) {
-            // Ocultar todas las vistas
-            document.querySelectorAll('.vista-contenido').forEach(vista => {
-                vista.classList.remove('active');
-                vista.style.display = 'none';
-            });
-            
-            // Remover clase activa de todos los botones
-            document.querySelectorAll('.nav-link.btn').forEach(btn => {
-                btn.classList.remove('active-nav');
-                btn.classList.remove('btn-primary', 'btn-success');
-                if (btn.id === 'cursos-nav') {
-                    btn.classList.add('btn-outline-primary');
-                } else if (btn.id === 'add-curso-nav') {
-                    btn.classList.add('btn-outline-success');
-                }
-            });
-            
-            // Mostrar la vista seleccionada
-            const vistaActiva = document.getElementById(vistaId);
-            if (vistaActiva) {
-                vistaActiva.classList.add('active');
-                vistaActiva.style.display = 'block';
+    // Función para cambiar entre vistas del navbar
+    function cambiarVista(vistaId) {
+        // Ocultar todas las vistas
+        document.querySelectorAll('.vista-contenido').forEach(vista => {
+            vista.classList.remove('active');
+            vista.style.display = 'none';
+        });
+        
+        // Remover clase activa de todos los botones
+        document.querySelectorAll('.nav-link.btn').forEach(btn => {
+            btn.classList.remove('active-nav');
+            btn.classList.remove('btn-primary', 'btn-success');
+            if (btn.id === 'cursos-nav') {
+                btn.classList.add('btn-outline-primary');
+            } else if (btn.id === 'add-curso-nav') {
+                btn.classList.add('btn-outline-success');
             }
-            
-            // Activar el botón correspondiente
-            const botonActivo = document.getElementById(vistaId + '-nav');
-            if (botonActivo) {
-                botonActivo.classList.add('active-nav');
-                botonActivo.classList.remove('btn-outline-primary', 'btn-outline-success');
-                if (vistaId === 'cursos') {
-                    botonActivo.classList.add('btn-primary');
-                } else if (vistaId === 'add-curso') {
-                    botonActivo.classList.add('btn-success');
-                }
-            }
-            
-            // Colapsar el navbar en móviles
-            const navbarCollapse = document.getElementById('navbarCurso');
-            if (navbarCollapse && navbarCollapse.classList.contains('show')) {
-                const bsCollapse = new bootstrap.Collapse(navbarCollapse);
-                bsCollapse.hide();
+        });
+        
+        // Mostrar la vista seleccionada
+        const vistaActiva = document.getElementById(vistaId);
+        if (vistaActiva) {
+            vistaActiva.classList.add('active');
+            vistaActiva.style.display = 'block';
+        }
+        
+        // Activar el botón correspondiente
+        const botonActivo = document.getElementById(vistaId + '-nav');
+        if (botonActivo) {
+            botonActivo.classList.add('active-nav');
+            botonActivo.classList.remove('btn-outline-primary', 'btn-outline-success');
+            if (vistaId === 'cursos') {
+                botonActivo.classList.add('btn-primary');
+            } else if (vistaId === 'add-curso') {
+                botonActivo.classList.add('btn-success');
             }
         }
+        
+        // Colapsar el navbar en móviles
+        const navbarCollapse = document.getElementById('navbarCurso');
+        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+            const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+            bsCollapse.hide();
+        }
+    }
 
-        // Verificar si hay que mostrar los modales
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar la vista por defecto
-            cambiarVista('cursos');
-            
-            {% if mostrar_modal_duplicado_curso %}
-                var modalDuplicado = new bootstrap.Modal(document.getElementById('modalCursoDuplicado'));
-                modalDuplicado.show();
-            {% endif %}
+    // Verificar si hay que mostrar los modales
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar la vista por defecto
+        cambiarVista('cursos');
+        
+        {% if mostrar_modal_duplicado_curso %}
+            var modalDuplicado = new bootstrap.Modal(document.getElementById('modalCursoDuplicado'));
+            modalDuplicado.show();
+        {% endif %}
 
-            // Inicializar búsqueda de cursos
-            inicializarBusquedaCursos();
-        });
+        // Inicializar búsqueda de cursos
+        inicializarBusquedaCursos();
+    });
 
     // Función para inicializar la búsqueda de cursos
     function inicializarBusquedaCursos() {

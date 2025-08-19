@@ -1,83 +1,333 @@
 {% extends 'estudiantes/base.html' %}
 {% block content %}
-<div class="main-content">
-  <div class="container mt-5">
-    <h3>Mis Asistencias</h3>
-    <div class="mb-2">
-      <span class="fw-bold">Rango de fechas para el filtro:</span>
-      <span class="text-muted">Seleccione fecha de inicio, fecha de fin y escriba el código de clase para filtrar.</span>
+<div class="container">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="text-white mb-0">
+        <i class="fas fa-calendar-check me-3"></i>
+        Mis Asistencias
+      </h2>
+      <p class="text-white-50 mt-2 mb-0">
+        Consulta tu historial de asistencias por clase y fecha
+      </p>
     </div>
-    <form method="get" class="row mb-3" id="form-filtros-asistencias">
-      <div class="col-md-3">
-        <input type="date" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
-      </div>
-      <div class="col-md-3">
-        <input type="date" name="fecha_fin" class="form-control" value="{{ fecha_fin }}">
-      </div>
-      <div class="col-md-4">
-        <input type="text" name="codigo_clase" class="form-control" placeholder="Filtrar por código de clase" value="{{ codigo_clase_filtro }}">
-      </div>
-      <div class="col-md-2 d-flex gap-2">
-        <button type="submit" class="btn btn-primary">Filtrar</button>
-        <a href="{% url 'estudiante_asistencias' %}" class="btn btn-outline-secondary" id="btn-limpiar-filtros">Limpiar</a>
-      </div>
-    </form>
-    {% if fecha_inicio and fecha_fin and codigo_clase_filtro %}
-      {% if fila_asistencias and clase %}
-        <div class="table-responsive">
-          <table class="table table-bordered table-sm">
-            <thead>
-              <tr>
-                <th>Estudiante</th>
-                <th>Cédula</th>
-                <th>Horario</th>
-                <th>Clase</th>
-                <th>Código</th>
-                {% for fecha in fechas_rango %}
-                  <th>{{ fecha|date:"d-m" }}</th>
-                {% endfor %}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{{ estudiante.get_full_name }}</td>
-                <td>{{ estudiante.cedula }}</td>
-                <td>
-                  {{ clase.hora_inicio|time:"H:i" }} - {{ clase.hora_fin|time:"H:i" }}
-                </td>
-                <td>{{ clase.curso.nombre }}</td>
-                <td><span class="badge bg-secondary">{{ clase.codigo }}</span></td>
-                {% for asistencia in fila_asistencias %}
-                  {% if asistencia %}
-                    {% if asistencia.estado == 'PRESENTE' %}
-                      <td class="text-success text-center fw-bold">P</td>
-                    {% elif asistencia.estado == 'AUSENTE' %}
-                      <td class="text-danger text-center fw-bold">A</td>
-                    {% elif asistencia.estado == 'TARDE' %}
-                      <td class="text-warning text-center fw-bold">T</td>
-                    {% elif asistencia.estado == 'JUSTIFICADO' %}
-                      <td class="text-info text-center fw-bold">J</td>
-                    {% else %}
-                      <td class="text-secondary text-center fw-bold">?</td>
-                    {% endif %}
-                  {% else %}
-                    <td class="text-muted text-center">-</td>
-                  {% endif %}
-                {% endfor %}
-              </tr>
-            </tbody>
-          </table>
+  </div>
+
+  <!-- Filters Card -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-title mb-0">
+        <i class="fas fa-filter me-2 text-primary"></i>
+        Filtros de Búsqueda
+      </h5>
+    </div>
+    <div class="card-body">
+      <form method="get" id="form-filtros-asistencias">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="fecha_inicio" class="form-label fw-semibold">
+              <i class="fas fa-calendar-alt me-2 text-primary"></i>
+              Fecha de inicio
+            </label>
+            <input 
+              type="date" 
+              name="fecha_inicio" 
+              id="fecha_inicio"
+              class="form-control" 
+              value="{{ fecha_inicio }}"
+              required
+            >
+          </div>
+          <div class="col-md-4">
+            <label for="fecha_fin" class="form-label fw-semibold">
+              <i class="fas fa-calendar-alt me-2 text-primary"></i>
+              Fecha de fin
+            </label>
+            <input 
+              type="date" 
+              name="fecha_fin" 
+              id="fecha_fin"
+              class="form-control" 
+              value="{{ fecha_fin }}"
+              required
+            >
+          </div>
+          <div class="col-md-4">
+            <label for="codigo_clase" class="form-label fw-semibold">
+              <i class="fas fa-barcode me-2 text-primary"></i>
+              Código de clase
+            </label>
+            <input 
+              type="text" 
+              name="codigo_clase" 
+              id="codigo_clase"
+              class="form-control" 
+              placeholder="Ej: PIA-0001" 
+              value="{{ codigo_clase_filtro }}"
+              required
+            >
+          </div>
         </div>
-      {% else %}
-        <div class="alert alert-warning text-center mt-4">
-          No tienes asistencias registradas para este filtro.
+        
+        <div class="row mt-3">
+          <div class="col-md-8">
+            <div class="alert alert-info border-0 mb-0">
+              <i class="fas fa-info-circle me-2"></i>
+              <strong>Instrucciones:</strong> 
+              Complete todos los campos para consultar sus asistencias en el período seleccionado.
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="d-flex gap-2 justify-content-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search me-1"></i>
+                Consultar
+              </button>
+              <a href="{% url 'estudiante_asistencias' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-1"></i>
+                Limpiar
+              </a>
+            </div>
+          </div>
         </div>
-      {% endif %}
+      </form>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  {% if fecha_inicio and fecha_fin and codigo_clase_filtro %}
+    {% if fila_asistencias and clase %}
+      <!-- Attendance Table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-table me-2 text-success"></i>
+              Registro de Asistencias
+            </h5>
+            <div class="text-muted">
+              <small>
+                <i class="fas fa-calendar me-1"></i>
+                {{ fechas_rango|length }} día{{ fechas_rango|length|pluralize }} consultado{{ fechas_rango|length|pluralize }}
+              </small>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th class="fw-bold text-muted">ESTUDIANTE</th>
+                  <th class="fw-bold text-muted">CÉDULA</th>
+                  <th class="fw-bold text-muted">HORARIO</th>
+                  <th class="fw-bold text-muted">CLASE</th>
+                  <th class="fw-bold text-muted">CÓDIGO</th>
+                  {% for fecha in fechas_rango %}
+                    <th class="fw-bold text-muted text-center">{{ fecha|date:"d/m" }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="py-3">
+                    <div class="d-flex align-items-center">
+                      <div class="me-3">
+                        <div class="student-avatar">
+                          <i class="fas fa-user-graduate"></i>
+                        </div>
+                      </div>
+                      <div>
+                        <strong>{{ estudiante.get_full_name }}</strong>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3">
+                    <span class="badge bg-secondary fs-6 px-3 py-2">{{ estudiante.cedula }}</span>
+                  </td>
+                  <td class="py-3">
+                    <div class="d-flex flex-column">
+                      <strong>{{ clase.hora_inicio|time:"H:i" }} - {{ clase.hora_fin|time:"H:i" }}</strong>
+                      <small class="text-muted">Duración de clase</small>
+                    </div>
+                  </td>
+                  <td class="py-3">
+                    <span class="badge bg-primary fs-6 px-3 py-2">{{ clase.curso.nombre }}</span>
+                  </td>
+                  <td class="py-3">
+                    <span class="badge bg-info fs-6 px-3 py-2">{{ clase.codigo }}</span>
+                  </td>
+                  {% for asistencia in fila_asistencias %}
+                    <td class="text-center py-3">
+                      {% if asistencia %}
+                        {% if asistencia.estado == 'PRESENTE' %}
+                          <span class="badge bg-success fs-6 px-2 py-1" data-bs-toggle="tooltip" title="Presente">
+                            <i class="fas fa-check"></i>
+                          </span>
+                        {% elif asistencia.estado == 'AUSENTE' %}
+                          <span class="badge bg-danger fs-6 px-2 py-1" data-bs-toggle="tooltip" title="Ausente">
+                            <i class="fas fa-times"></i>
+                          </span>
+                        {% elif asistencia.estado == 'TARDE' %}
+                          <span class="badge bg-warning fs-6 px-2 py-1" data-bs-toggle="tooltip" title="Tardanza">
+                            <i class="fas fa-clock"></i>
+                          </span>
+                        {% elif asistencia.estado == 'JUSTIFICADO' %}
+                          <span class="badge bg-info fs-6 px-2 py-1" data-bs-toggle="tooltip" title="Justificado">
+                            <i class="fas fa-note-sticky"></i>
+                          </span>
+                        {% else %}
+                          <span class="badge bg-secondary fs-6 px-2 py-1" data-bs-toggle="tooltip" title="Sin datos">
+                            <i class="fas fa-question"></i>
+                          </span>
+                        {% endif %}
+                      {% else %}
+                        <span class="text-muted">
+                          <i class="fas fa-minus"></i>
+                        </span>
+                      {% endif %}
+                    </td>
+                  {% endfor %}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Legend -->
+      <div class="card mt-3">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3">
+            <i class="fas fa-info-circle me-2 text-info"></i>
+            Leyenda de Estados de Asistencia
+          </h6>
+          <div class="row g-3">
+            <div class="col-md-3">
+              <div class="d-flex align-items-center">
+                <span class="badge bg-success me-2">
+                  <i class="fas fa-check"></i>
+                </span>
+                <span>Presente</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="d-flex align-items-center">
+                <span class="badge bg-danger me-2">
+                  <i class="fas fa-times"></i>
+                </span>
+                <span>Ausente</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="d-flex align-items-center">
+                <span class="badge bg-warning me-2">
+                  <i class="fas fa-clock"></i>
+                </span>
+                <span>Tardanza</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="d-flex align-items-center">
+                <span class="badge bg-info me-2">
+                  <i class="fas fa-note-sticky"></i>
+                </span>
+                <span>Justificado</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     {% else %}
-      <div class="alert alert-info text-center mt-4">
-        Debe seleccionar fecha de inicio, fecha de fin y escribir el código de clase para ver tus asistencias.
+      <div class="card">
+        <div class="card-body text-center py-5">
+          <i class="fas fa-search fa-3x text-muted mb-3"></i>
+          <h5 class="text-muted">No hay asistencias registradas</h5>
+          <p class="text-muted mb-0">
+            No se encontraron asistencias para los criterios especificados. Verifique que el código de clase sea correcto.
+          </p>
+        </div>
       </div>
     {% endif %}
-  </div>
+  {% else %}
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <i class="fas fa-filter fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">Complete los Filtros</h5>
+        <p class="text-muted mb-0">
+          Complete todos los campos del filtro para consultar sus asistencias.
+        </p>
+      </div>
+    </div>
+  {% endif %}
 </div>
+
+<style>
+  .student-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #8e44ad, #7d3c98);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Form validation
+    const form = document.getElementById('form-filtros-asistencias');
+    const fechaInicio = document.getElementById('fecha_inicio');
+    const fechaFin = document.getElementById('fecha_fin');
+    const codigoClase = document.getElementById('codigo_clase');
+    
+    form.addEventListener('submit', function(e) {
+      let hasErrors = false;
+      
+      // Reset previous validation states
+      [fechaInicio, fechaFin, codigoClase].forEach(input => {
+        input.classList.remove('is-invalid');
+      });
+      
+      // Validate required fields
+      if (!fechaInicio.value) {
+        fechaInicio.classList.add('is-invalid');
+        hasErrors = true;
+      }
+      
+      if (!fechaFin.value) {
+        fechaFin.classList.add('is-invalid');
+        hasErrors = true;
+      }
+      
+      if (!codigoClase.value.trim()) {
+        codigoClase.classList.add('is-invalid');
+        hasErrors = true;
+      }
+      
+      // Validate date range
+      if (fechaInicio.value && fechaFin.value) {
+        if (new Date(fechaInicio.value) > new Date(fechaFin.value)) {
+          fechaFin.classList.add('is-invalid');
+          hasErrors = true;
+          alert('La fecha de fin debe ser posterior a la fecha de inicio');
+        }
+      }
+      
+      if (hasErrors) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>
 {% endblock %}

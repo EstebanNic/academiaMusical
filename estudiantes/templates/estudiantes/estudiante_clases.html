@@ -1,71 +1,206 @@
 {% extends 'estudiantes/base.html' %}
 {% block content %}
-<div class="main-content">
-  <div class="container mt-5">
-    <h3>Mis Clases</h3>
-    <div class="list-group" id="lista-clases-estudiante">
-      {% for matricula in matriculas %}
-      {% with clase=matricula.clase %}
-      <button type="button"
-        class="list-group-item list-group-item-action btn-ver-detalle-clase"
-        data-clase-nombre="{{ clase.curso.nombre }}"
-        data-clase-codigo="{{ clase.codigo }}"
-        data-clase-nivel="{{ clase.curso.get_nivel_display }}"
-        data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.get_full_name }}{% else %}Sin profesor{% endif %}"
-        data-clase-aula="{% if clase.aula %}{{ clase.aula.nombre }}{% else %}Sin aula{% endif %}"
-        data-clase-fecha-inicio="{{ clase.fecha_inicio|date:'Y-m-d' }}"
-        data-clase-fecha-fin="{{ clase.fecha_fin|date:'Y-m-d' }}"
-        data-clase-hora-inicio="{{ clase.hora_inicio|time:'H:i' }}"
-        data-clase-hora-fin="{{ clase.hora_fin|time:'H:i' }}"
-      >
-        <div class="d-flex w-100 justify-content-between">
-          <h6 class="mb-1">{{ clase.curso.nombre }}</h6>
-          <small>{{ clase.hora_inicio|time:"H:i" }} - {{ clase.hora_fin|time:"H:i" }}</small>
+<div class="container">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="text-white mb-0">
+        <i class="fas fa-book me-3"></i>
+        Mis Clases
+      </h2>
+      <p class="text-white-50 mt-2 mb-0">
+        Información detallada de todas tus clases matriculadas
+      </p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-graduation-cap me-2 text-primary"></i>
+            Clases Matriculadas
+          </h5>
         </div>
-        <p class="mb-1">
-          <span class="badge bg-secondary">{{ clase.codigo }}</span>
-          Aula: {% if clase.aula %}{{ clase.aula.nombre }}{% else %}Sin aula{% endif %}
-        </p>
-        <small>Fecha: {{ clase.fecha_inicio|date:"Y-m-d" }} a {{ clase.fecha_fin|date:"Y-m-d" }}</small>
-      </button>
-      {% endwith %}
-      {% empty %}
-      <div class="text-center text-muted">No tienes clases asignadas.</div>
-      {% endfor %}
+        <div class="card-body">
+          <div class="list-group" id="lista-clases-estudiante">
+            {% for matricula in matriculas %}
+            {% with clase=matricula.clase %}
+            <button type="button"
+              class="list-group-item list-group-item-action btn-ver-detalle-clase"
+              data-clase-nombre="{{ clase.curso.nombre }}"
+              data-clase-codigo="{{ clase.codigo }}"
+              data-clase-nivel="{{ clase.curso.get_nivel_display }}"
+              data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.get_full_name }}{% else %}Sin profesor{% endif %}"
+              data-clase-aula="{% if clase.aula %}{{ clase.aula.nombre }}{% else %}Sin aula{% endif %}"
+              data-clase-fecha-inicio="{{ clase.fecha_inicio|date:'Y-m-d' }}"
+              data-clase-fecha-fin="{{ clase.fecha_fin|date:'Y-m-d' }}"
+              data-clase-hora-inicio="{{ clase.hora_inicio|time:'H:i' }}"
+              data-clase-hora-fin="{{ clase.hora_fin|time:'H:i' }}"
+            >
+              <div class="d-flex w-100 align-items-center">
+                <div class="me-3">
+                  <div class="class-avatar">
+                    <i class="fas fa-music"></i>
+                  </div>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="d-flex w-100 justify-content-between align-items-start">
+                    <div>
+                      <h6 class="mb-2 fw-bold text-primary">{{ clase.curso.nombre }}</h6>
+                      <div class="mb-2">
+                        <span class="badge bg-secondary me-2">{{ clase.codigo }}</span>
+                        <span class="badge bg-info">
+                          <i class="fas fa-door-open me-1"></i>
+                          {% if clase.aula %}{{ clase.aula.nombre }}{% else %}Sin aula{% endif %}
+                        </span>
+                        <span class="badge bg-success ms-1">
+                          <i class="fas fa-layer-group me-1"></i>
+                          {{ clase.curso.get_nivel_display }}
+                        </span>
+                      </div>
+                      <div class="text-muted small">
+                        <div class="mb-1">
+                          <i class="fas fa-chalkboard-teacher me-1"></i>
+                          Profesor: {% if clase.profesor %}{{ clase.profesor.get_full_name }}{% else %}Sin profesor{% endif %}
+                        </div>
+                        <div class="mb-1">
+                          <i class="fas fa-calendar-alt me-1"></i>
+                          {{ clase.fecha_inicio|date:"d/m/Y" }} - {{ clase.fecha_fin|date:"d/m/Y" }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-end">
+                      <div class="d-flex flex-column align-items-end">
+                        <span class="badge bg-warning text-dark fs-6 px-3 py-2 mb-2">
+                          <i class="fas fa-clock me-1"></i>
+                          {{ clase.hora_inicio|time:"H:i" }} - {{ clase.hora_fin|time:"H:i" }}
+                        </span>
+                        <small class="text-muted">
+                          <i class="fas fa-calendar me-1"></i>
+                          Horario de clase
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </button>
+            {% endwith %}
+            {% empty %}
+            <div class="text-center text-muted py-5">
+              <i class="fas fa-book fa-3x mb-3 text-muted"></i>
+              <h5>No tienes clases matriculadas</h5>
+              <p class="mb-0">Cuando te matricules en alguna clase aparecerá aquí.</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Modal Detalle Clase -->
 <div class="modal fade" id="modalDetalleClase" tabindex="-1" aria-labelledby="modalDetalleClaseLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modalDetalleClaseLabel">Detalle de la Clase</h5>
+        <h5 class="modal-title" id="modalDetalleClaseLabel">
+          <i class="fas fa-info-circle me-2 text-primary"></i>
+          Detalle de la Clase
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <ul class="list-group">
-          <li class="list-group-item"><strong>Código:</strong> <span id="detalle-codigo"></span></li>
-          <li class="list-group-item"><strong>Curso:</strong> <span id="detalle-nombre"></span></li>
-          <li class="list-group-item"><strong>Nivel:</strong> <span id="detalle-nivel"></span></li>
-          <li class="list-group-item"><strong>Profesor:</strong> <span id="detalle-profesor"></span></li>
-          <li class="list-group-item"><strong>Aula:</strong> <span id="detalle-aula"></span></li>
-          <li class="list-group-item"><strong>Fecha Inicio:</strong> <span id="detalle-fecha-inicio"></span></li>
-          <li class="list-group-item"><strong>Fecha Fin:</strong> <span id="detalle-fecha-fin"></span></li>
-          <li class="list-group-item"><strong>Hora Inicio:</strong> <span id="detalle-hora-inicio"></span></li>
-          <li class="list-group-item"><strong>Hora Fin:</strong> <span id="detalle-hora-fin"></span></li>
-        </ul>
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">
+              <i class="fas fa-book me-2"></i>
+              Información del Curso
+            </h6>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item px-0 py-2">
+                <strong>Código:</strong> 
+                <span class="badge bg-secondary ms-2" id="detalle-codigo"></span>
+              </li>
+              <li class="list-group-item px-0 py-2">
+                <strong>Curso:</strong> 
+                <span id="detalle-nombre"></span>
+              </li>
+              <li class="list-group-item px-0 py-2">
+                <strong>Nivel:</strong> 
+                <span class="badge bg-success ms-2" id="detalle-nivel"></span>
+              </li>
+              <li class="list-group-item px-0 py-2">
+                <strong>Profesor:</strong> 
+                <span id="detalle-profesor"></span>
+              </li>
+              <li class="list-group-item px-0 py-2">
+                <strong>Aula:</strong> 
+                <span class="badge bg-info ms-2" id="detalle-aula"></span>
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3">
+              <i class="fas fa-calendar me-2"></i>
+              Horarios y Fechas
+            </h6>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item px-0 py-2">
+                <strong>Fecha Inicio:</strong> 
+                <span id="detalle-fecha-inicio"></span>
+              </li>
+              <li class="list-group-item px-0 py-2">
+                <strong>Fecha Fin:</strong> 
+                <span id="detalle-fecha-fin"></span>
+              </li>
+              <li class="list-group-item px-0 py-2">
+                <strong>Hora Inicio:</strong> 
+                <span class="badge bg-warning text-dark ms-2" id="detalle-hora-inicio"></span>
+              </li>
+              <li class="list-group-item px-0 py-2">
+                <strong>Hora Fin:</strong> 
+                <span class="badge bg-warning text-dark ms-2" id="detalle-hora-fin"></span>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-2"></i>
+          Cerrar
+        </button>
       </div>
     </div>
   </div>
 </div>
 
+<style>
+  .class-avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+</style>
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
     document.querySelectorAll('.btn-ver-detalle-clase').forEach(function(btn) {
       btn.addEventListener('click', function() {
         document.getElementById('detalle-codigo').textContent = btn.getAttribute('data-clase-codigo') || '';
@@ -77,6 +212,7 @@
         document.getElementById('detalle-fecha-fin').textContent = btn.getAttribute('data-clase-fecha-fin') || '';
         document.getElementById('detalle-hora-inicio').textContent = btn.getAttribute('data-clase-hora-inicio') || '';
         document.getElementById('detalle-hora-fin').textContent = btn.getAttribute('data-clase-hora-fin') || '';
+        
         var modal = new bootstrap.Modal(document.getElementById('modalDetalleClase'));
         modal.show();
       });

@@ -1,130 +1,405 @@
 {% extends 'usuarios/base.html' %}
 {% load static %}
-{% block title %}Panel Administrador - Reportes{% endblock %}
+{% block title %}Reportes{% endblock %}
 {% block content %}
 
-<div class="main-content">
-    <div class="container mt-5">
-        <h1 class="mb-4">Reportes del Sistema</h1>
-        
-        <div class="row">
-            <!-- Reporte de Pagos -->
-            <div class="col-lg-6 mb-4">
-                <div class="card shadow">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">
-                            <i class="fas fa-dollar-sign me-2"></i>
-                            Reporte de Pagos
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">Genere un reporte detallado de todos los pagos del sistema con filtros personalizables.</p>
-                        
-                        <form id="form-reporte-pagos" method="GET" action="{% url 'reporte_pagos_pdf' %}" target="_blank">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="fecha_inicio_pagos" class="form-label">Fecha Inicio</label>
-                                    <input type="date" class="form-control" id="fecha_inicio_pagos" name="fecha_inicio">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="fecha_fin_pagos" class="form-label">Fecha Fin</label>
-                                    <input type="date" class="form-control" id="fecha_fin_pagos" name="fecha_fin">
-                                </div>
-                                <div class="col-md-12 mb-3">
-                                    <label for="estado_pagos" class="form-label">Estado</label>
-                                    <select class="form-select" id="estado_pagos" name="estado">
-                                        <option value="">Todos los estados</option>
-                                        <option value="PENDIENTE">Pendientes</option>
-                                        <option value="PAGADO">Pagados</option>
-                                        <option value="CANCELADO">Cancelados</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-file-pdf me-1"></i>
-                                Generar PDF
+<div class="content-header">
+    <h1><i class="fas fa-chart-bar me-3"></i>Reportes del Sistema</h1>
+</div>
+
+<div class="content-body">
+    <!-- Navbar de navegación -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+                <div class="container-fluid px-0">
+                    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarReportes" aria-controls="navbarReportes" aria-expanded="false" aria-label="Toggle navigation">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarReportes">
+                        <div class="navbar-nav w-100 d-flex flex-row justify-content-center">
+                            <button type="button" class="nav-link btn btn-outline-primary mx-2 px-4 py-2 fw-bold active" id="reporte-pagos-nav" onclick="cambiarVista('reporte-pagos')">
+                                <i class="fas fa-dollar-sign me-2"></i>Reporte de Pagos
                             </button>
-                        </form>
+                            <button type="button" class="nav-link btn btn-outline-success mx-2 px-4 py-2 fw-bold" id="reporte-asistencias-nav" onclick="cambiarVista('reporte-asistencias')">
+                                <i class="fas fa-clipboard-check me-2"></i>Reporte de Asistencias
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </nav>
+        </div>
+    </div>
 
-            <!-- Reporte de Asistencias -->
-            <div class="col-lg-6 mb-4">
-                <div class="card shadow">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-success">
-                            <i class="fas fa-clipboard-check me-2"></i>
-                            Reporte de Asistencias
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">Genere un reporte de asistencias por fecha, clase o estado.</p>
-                        
-                        <form id="form-reporte-asistencias" method="GET" action="{% url 'reporte_asistencias_pdf' %}" target="_blank">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="fecha_inicio_asistencias" class="form-label">Fecha Inicio</label>
-                                    <input type="date" class="form-control" id="fecha_inicio_asistencias" name="fecha_inicio">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="fecha_fin_asistencias" class="form-label">Fecha Fin</label>
-                                    <input type="date" class="form-control" id="fecha_fin_asistencias" name="fecha_fin">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="clase_asistencias" class="form-label">Clase</label>
-                                    <select class="form-select" id="clase_asistencias" name="clase">
-                                        <option value="">Todas las clases</option>
-                                        {% for clase in clases %}
-                                            <option value="{{ clase.id }}">
-                                                {{ clase.curso.nombre }} - {{ clase.aula }} ({{ clase.hora_inicio }})
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="estado_asistencias" class="form-label">Estado</label>
-                                    <select class="form-select" id="estado_asistencias" name="estado">
-                                        <option value="">Todos los estados</option>
-                                        <option value="PRESENTE">Presentes</option>
-                                        <option value="TARDE">Tardanzas</option>
-                                        <option value="AUSENTE">Ausentes</option>
-                                        <option value="JUSTIFICADO">Justificados</option>
-                                    </select>
+    <div class="contenido-vistas">
+        <!-- VISTA: Reporte de Pagos -->
+        <div class="vista-contenido active" id="reporte-pagos">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-dollar-sign me-2 text-primary"></i>
+                        Generar Reporte de Pagos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Genere un reporte detallado de todos los pagos del sistema con filtros personalizables.</p>
+                    
+                    <form id="form-reporte-pagos" method="GET" action="{% url 'reporte_pagos_pdf' %}" target="_blank" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_inicio_pagos" class="form-label fw-semibold">
+                                    <i class="fas fa-calendar-alt me-2 text-primary"></i>Fecha Inicio
+                                </label>
+                                <input type="date" class="form-control" id="fecha_inicio_pagos" name="fecha_inicio" required>
+                                <div class="invalid-feedback">
+                                    Por favor seleccione una fecha de inicio.
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-file-pdf me-1"></i>
-                                Generar PDF
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_fin_pagos" class="form-label fw-semibold">
+                                    <i class="fas fa-calendar-alt me-2 text-primary"></i>Fecha Fin
+                                </label>
+                                <input type="date" class="form-control" id="fecha_fin_pagos" name="fecha_fin" required>
+                                <div class="invalid-feedback">
+                                    Por favor seleccione una fecha de fin.
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="estado_pagos" class="form-label fw-semibold">
+                                    <i class="fas fa-tags me-2 text-primary"></i>Estado del Pago
+                                </label>
+                                <select class="form-select" id="estado_pagos" name="estado">
+                                    <option value="">Todos los estados</option>
+                                    <option value="PENDIENTE">Pendientes</option>
+                                    <option value="PAGADO">Pagados</option>
+                                    <option value="CANCELADO">Cancelados</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold text-muted">Vista previa del reporte</label>
+                                <div class="p-3 bg-light rounded border">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        El reporte incluirá todos los pagos dentro del rango de fechas seleccionado
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-file-pdf me-2"></i>
+                                Generar Reporte PDF
                             </button>
-                        </form>
-                    </div>
+                            <div class="text-muted">
+                                <small>
+                                    <i class="fas fa-download me-1"></i>
+                                    El archivo se abrirá en una nueva pestaña
+                                </small>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
-        <!-- Información adicional -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="alert alert-info">
-                    <h6><i class="fas fa-info-circle me-2"></i>Información sobre los Reportes</h6>
-                    <ul class="mb-0">
-                        <li>Los reportes se generan en formato PDF para fácil distribución e impresión.</li>
-                        <li>Puede aplicar filtros por fechas, estados y clases según el tipo de reporte.</li>
-                        <li>Los archivos PDF se abren en una nueva pestaña.</li>
-                        <li>Todos los reportes incluyen estadísticas resumidas y la fecha de generación.</li>
-                    </ul>
+        <!-- VISTA: Reporte de Asistencias -->
+        <div class="vista-contenido" id="reporte-asistencias">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-clipboard-check me-2 text-success"></i>
+                        Generar Reporte de Asistencias
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Genere un reporte de asistencias por fecha, clase o estado con estadísticas detalladas.</p>
+                    
+                    <form id="form-reporte-asistencias" method="GET" action="{% url 'reporte_asistencias_pdf' %}" target="_blank" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_inicio_asistencias" class="form-label fw-semibold">
+                                    <i class="fas fa-calendar-alt me-2 text-success"></i>Fecha Inicio
+                                </label>
+                                <input type="date" class="form-control" id="fecha_inicio_asistencias" name="fecha_inicio" required>
+                                <div class="invalid-feedback">
+                                    Por favor seleccione una fecha de inicio.
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_fin_asistencias" class="form-label fw-semibold">
+                                    <i class="fas fa-calendar-alt me-2 text-success"></i>Fecha Fin
+                                </label>
+                                <input type="date" class="form-control" id="fecha_fin_asistencias" name="fecha_fin" required>
+                                <div class="invalid-feedback">
+                                    Por favor seleccione una fecha de fin.
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="clase_asistencias" class="form-label fw-semibold">
+                                    <i class="fas fa-chalkboard me-2 text-success"></i>Clase Específica
+                                </label>
+                                <select class="form-select" id="clase_asistencias" name="clase">
+                                    <option value="">Todas las clases</option>
+                                    {% for clase in clases %}
+                                        <option value="{{ clase.id }}">
+                                            {{ clase.curso.nombre }} - {{ clase.aula }} ({{ clase.hora_inicio }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="estado_asistencias" class="form-label fw-semibold">
+                                    <i class="fas fa-user-check me-2 text-success"></i>Estado de Asistencia
+                                </label>
+                                <select class="form-select" id="estado_asistencias" name="estado">
+                                    <option value="">Todos los estados</option>
+                                    <option value="PRESENTE">Presentes</option>
+                                    <option value="TARDE">Tardanzas</option>
+                                    <option value="AUSENTE">Ausentes</option>
+                                    <option value="JUSTIFICADO">Justificados</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <button type="submit" class="btn btn-success btn-lg px-5">
+                                <i class="fas fa-file-pdf me-2"></i>
+                                Generar Reporte PDF
+                            </button>
+                            <div class="text-muted">
+                                <small>
+                                    <i class="fas fa-download me-1"></i>
+                                    El archivo se abrirá en una nueva pestaña
+                                </small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body bg-light">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-info-circle me-2 text-info"></i>
+                        Información sobre los Reportes
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Los reportes se generan en formato PDF para fácil distribución e impresión
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Puede aplicar filtros por fechas, estados y clases según el tipo de reporte
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Los archivos PDF se abren automáticamente en una nueva pestaña
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Todos los reportes incluyen estadísticas resumidas y la fecha de generación
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    /* Estilos modernos para el navbar - copiados del template de pagos */
+    .navbar {
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        animation: slideInFromTop 0.8s ease-out;
+        margin-bottom: 2rem;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .navbar:hover {
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    
+    /* Estilos para los botones de navegación */
+    .nav-link.btn {
+        border-radius: 10px !important;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        min-width: 150px;
+    }
+    
+    .nav-link.btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+    
+    .nav-link.btn.active-nav {
+        background: linear-gradient(135deg, #007bff, #0056b3) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+    }
+    
+    .nav-link.btn.active-nav:hover {
+        background: linear-gradient(135deg, #0056b3, #004085) !important;
+        box-shadow: 0 8px 25px rgba(0,123,255,0.5);
+    }
+    
+    /* Animaciones para iconos */
+    .nav-link.btn i {
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link.btn:hover i {
+        transform: rotate(360deg) scale(1.2);
+    }
+    
+    .nav-link.btn.active-nav i {
+        animation: pulse 2s infinite;
+    }
+    
+    /* Efectos de entrada */
+    .navbar {
+        animation: slideInFromTop 0.8s ease-out;
+    }
+    
+    @keyframes slideInFromTop {
+        0% {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Navbar toggler personalizado */
+    .navbar-toggler {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 1.1rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .navbar-toggler:hover {
+        background: linear-gradient(135deg, #0056b3, #004085);
+        transform: scale(1.1);
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    
+    /* Efectos hover para botones de acción en general */
+    .btn-group .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    /* Transiciones suaves para las tarjetas */
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Efectos de contenido */
+    .vista-contenido {
+        display: none;
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .vista-contenido.active {
+        display: block;
+    }
+    
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .nav-link.btn {
+            margin: 0.25rem 0 !important;
+            width: 100%;
+        }
+    }
+    
+    /* Pulse animation for active nav icons */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
 
 <script>
-// Configurar fechas por defecto (último mes)
+// Enhanced form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        }, false);
+    });
+})();
+
+// Initialize tooltips and setup
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar la vista por defecto
+    cambiarVista('reporte-pagos');
+    
+    // Configurar fechas por defecto (último mes)
     const today = new Date();
     const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
     
@@ -141,6 +416,50 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('fecha_inicio_asistencias').value = formatDate(lastMonth);
     document.getElementById('fecha_fin_asistencias').value = formatDate(today);
 });
+
+// Función para cambiar entre vistas del navbar
+function cambiarVista(vistaId) {
+    // Ocultar todas las vistas
+    document.querySelectorAll('.vista-contenido').forEach(vista => {
+        vista.classList.remove('active');
+    });
+    
+    // Remover clase activa de todos los botones
+    document.querySelectorAll('.nav-link.btn').forEach(btn => {
+        btn.classList.remove('active-nav');
+        btn.classList.remove('btn-primary', 'btn-success');
+        if (btn.id === 'reporte-pagos-nav') {
+            btn.classList.add('btn-outline-primary');
+        } else if (btn.id === 'reporte-asistencias-nav') {
+            btn.classList.add('btn-outline-success');
+        }
+    });
+    
+    // Mostrar la vista seleccionada
+    const vistaActiva = document.getElementById(vistaId);
+    if (vistaActiva) {
+        vistaActiva.classList.add('active');
+    }
+    
+    // Activar el botón correspondiente
+    const botonActivo = document.getElementById(vistaId + '-nav');
+    if (botonActivo) {
+        botonActivo.classList.add('active-nav');
+        botonActivo.classList.remove('btn-outline-primary', 'btn-outline-success');
+        if (vistaId === 'reporte-pagos') {
+            botonActivo.classList.add('btn-primary');
+        } else if (vistaId === 'reporte-asistencias') {
+            botonActivo.classList.add('btn-success');
+        }
+    }
+    
+    // Colapsar el navbar en móviles
+    const navbarCollapse = document.getElementById('navbarReportes');
+    if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+        const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+        bsCollapse.hide();
+    }
+}
 </script>
 
 {% endblock %}

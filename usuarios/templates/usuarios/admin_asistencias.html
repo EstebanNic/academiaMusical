@@ -1,164 +1,303 @@
 {% extends 'usuarios/base.html' %}
 {% load static %}
-{% block title %}Panel Administrador - Asistencias{% endblock %}
+{% block title %}Asistencias{% endblock %}
 {% block content %}
 
-<div class="main-content">
-    <div class="container mt-5">
-        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="asistencias-tab" data-bs-toggle="tab" data-bs-target="#asistencias" type="button" role="tab" aria-controls="asistencias" aria-selected="true">Historial de Asistencias</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="tomar-asistencia-tab" data-bs-toggle="tab" data-bs-target="#tomar-asistencia" type="button" role="tab" aria-controls="tomar-asistencia" aria-selected="false">Tomar Asistencia por Clase</button>
-            </li>
-        </ul>
-        <div class="tab-content" id="adminTabsContent">
-            <!-- Tab: Historial de Asistencias -->
-            <div class="tab-pane fade show active" id="asistencias" role="tabpanel" aria-labelledby="asistencias-tab">
-                <!-- Filtros -->
-                <div class="row mb-3">
-                    <div class="col-md-8">
-                        <form method="GET" class="d-flex">
-                            <input type="date" class="form-control me-2" name="fecha_filtro" value="{{ fecha_filtro }}" placeholder="Filtrar por fecha">
-                            <input type="text" class="form-control me-2" name="codigo_filtro" placeholder="Filtrar por código de clase" value="{{ request.GET.codigo_filtro|default:'' }}">
-                            <button type="submit" class="btn btn-outline-primary me-2">Filtrar</button>
-                            <a href="{% url 'admin_asistencias' %}" class="btn btn-outline-secondary">Limpiar</a>
-                        </form>
+<div class="content-header">
+    <h1><i class="fas fa-clipboard-check me-3"></i>Gestión de Asistencias</h1>
+</div>
+
+<div class="content-body">
+    <!-- Navbar de navegación -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+                <div class="container-fluid px-0">
+                    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarAsistencias" aria-controls="navbarAsistencias" aria-expanded="false" aria-label="Toggle navigation">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarAsistencias">
+                        <div class="navbar-nav w-100 d-flex flex-row justify-content-center">
+                            <button type="button" class="nav-link btn btn-primary mx-2 px-4 py-2 fw-bold active-nav" id="historial-nav" onclick="cambiarVista('historial')">
+                                <i class="fas fa-history me-2"></i>Historial de Asistencias
+                            </button>
+                            <button type="button" class="nav-link btn btn-outline-success mx-2 px-4 py-2 fw-bold" id="tomar-asistencia-nav" onclick="cambiarVista('tomar-asistencia')">
+                                <i class="fas fa-user-check me-2"></i>Tomar Asistencia
+                            </button>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Tabla de clases con historial de asistencias -->
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Código de clase</th> <!-- NUEVA COLUMNA -->
-                                <th>Curso</th>
-                                <th>Clase (Aula)</th>
-                                <th>Horario</th>
-                                <th>Fecha</th>
-                                <th>Profesor</th>
-                                <th>Estudiantes</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for key, clase_info in historial_clases.items %}
-                            {% if not request.GET.codigo_filtro or clase_info.clase.codigo|default:''|upper == request.GET.codigo_filtro|upper %}
-                            <tr>
-                                <td>
-                                    <span class="badge bg-secondary">
-                                        {{ clase_info.clase.codigo }}
+            </nav>
+        </div>
+    </div>
+
+    <div class="contenido-vistas">
+        <!-- VISTA: Historial de Asistencias -->
+        <div class="vista-contenido active" id="historial">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-history me-2 text-primary"></i>Historial de Asistencias</h5>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-search text-muted"></i>
                                     </span>
-                                </td>
-                                <td>{{ clase_info.curso.nombre }}</td>
-                                <td>{{ clase_info.clase.aula }}</td>
-                                <td>{{ clase_info.clase.hora_inicio|time:"H:i" }} - {{ clase_info.clase.hora_fin|time:"H:i" }}</td>
-                                <td>{{ clase_info.fecha|date:"Y-m-d" }}</td>
-                                <td>{{ clase_info.profesor.get_full_name }}</td>
-                                <td>{{ clase_info.asistencias|length }}</td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-info" 
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalDetalleAsistencias"
-                                        data-clase="{{ clase_info.clase.id }}"
-                                        data-fecha="{{ clase_info.fecha|date:"Y-m-d" }}"
-                                        data-detalle="{{ forloop.counter0 }}">
-                                        Ver asistencias
+                                    <input type="text" class="form-control border-start-0 ps-0" id="buscarCodigoClase" placeholder="Buscar por código de clase...">
+                                    <button class="btn btn-outline-secondary" type="button" id="limpiarBusquedaHistorial">
+                                        <i class="fas fa-times"></i>
                                     </button>
-                                </td>
-                            </tr>
-                            {% endif %}
-                            {% empty %}
-                            <tr>
-                                <td colspan="8" class="text-center">No hay historial de asistencias.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Tab: Tomar Asistencia por Clase -->
-            <div class="tab-pane fade" id="tomar-asistencia" role="tabpanel" aria-labelledby="tomar-asistencia-tab">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Seleccionar Clase</h5>
-                                <!-- NUEVO FILTRO POR CÓDIGO DE CLASE -->
-                                <div class="mb-3">
-                                    <label for="filtroCodigoClase" class="form-label">Filtrar por código de clase</label>
-                                    <input type="text" class="form-control" id="filtroCodigoClase" placeholder="Ej: PIA-0001">
-                                </div>
-                                <!-- OCULTAR FECHA DE ASISTENCIA -->
-                                <div class="mb-3" style="display: none;">
-                                    <label for="fecha_clase" class="form-label">Fecha de Asistencia</label>
-                                    <input type="date" class="form-control" id="fecha_clase" value="{{ fecha_hoy }}">
-                                </div>
-                                <div class="list-group" id="lista-clases">
-                                    {% for clase in clases %}
-                                    <button type="button" class="list-group-item list-group-item-action btn-seleccionar-clase"
-                                        data-clase-id="{{ clase.id }}"
-                                        data-clase-codigo="{{ clase.codigo }}"
-                                        data-clase-nombre="{{ clase.curso.nombre }}"
-                                        data-clase-aula="{{ clase.aula }}"
-                                        data-clase-horario="{{ clase.hora_inicio|time:"H:i" }} - {{ clase.hora_fin|time:"H:i" }}"
-                                        data-clase-profesor="{{ clase.profesor.get_full_name }}">
-                                        <div class="d-flex w-100 justify-content-between">
-                                            <h6 class="mb-1">{{ clase.curso.nombre }}</h6>
-                                            <small>{{ clase.hora_inicio|time:"H:i" }}</small>
-                                        </div>
-                                        <p class="mb-1">
-                                            <span class="badge bg-secondary">{{ clase.codigo }}</span>
-                                            Aula: {{ clase.aula }}
-                                        </p>
-                                        <small>Profesor: {{ clase.profesor.get_full_name }}</small>
-                                        <span class="badge bg-secondary">{{ clase.total_estudiantes }} estudiantes</span>
-                                    </button>
-                                    {% empty %}
-                                    <div class="text-center text-muted">No hay clases con estudiantes matriculados</div>
-                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-8">
-                        <div class="card" id="card-asistencia" style="display: none;">
-                            <div class="card-body">
-                                <h5 class="card-title" id="titulo-clase">Tomar Asistencia</h5>
-                                <div class="alert alert-info" id="info-clase"></div>
-                                
-                                <form method="POST" id="form-asistencia-masiva">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="registrar_asistencias_clase" value="1">
-                                    <input type="hidden" name="clase_id" id="clase_id_selected">
-                                    <input type="hidden" name="fecha_asistencia" id="fecha_asistencia_hidden" value="{{ fecha_hoy }}">
-                                    
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered" id="tabla-estudiantes">
-                                            <thead>
-                                                <tr>
-                                                    <th>Estudiante</th>
-                                                    <th>Estado</th>
-                                                    <th style="display: none;">Observaciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="tbody-estudiantes">
-                                                <!-- Se llenará dinámicamente -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <button type="submit" class="btn btn-primary">Guardar Asistencias</button>
-                                            <button type="button" class="btn btn-secondary" onclick="cancelarAsistencia()">Cancelar</button>
+                    
+                    <!-- Filtros de historial -->
+                    <div class="row mt-3">
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-fecha-historial" class="form-label text-muted small">Filtrar por fecha</label>
+                            <input type="date" class="form-control form-control-sm" id="filtro-fecha-historial" value="{{ fecha_filtro }}">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-curso-historial" class="form-label text-muted small">Filtrar por curso</label>
+                            <select class="form-select form-select-sm" id="filtro-curso-historial">
+                                <option value="">Todos los cursos</option>
+                                {% for key, clase_info in historial_clases.items %}
+                                    <option value="{{ clase_info.curso.nombre }}">{{ clase_info.curso.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-profesor" class="form-label text-muted small">Filtrar por profesor</label>
+                            <select class="form-select form-select-sm" id="filtro-profesor">
+                                <option value="">Todos los profesores</option>
+                                {% for key, clase_info in historial_clases.items %}
+                                    <option value="{{ clase_info.profesor.get_full_name }}">{{ clase_info.profesor.get_full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-aula" class="form-label text-muted small">Filtrar por aula</label>
+                            <input type="text" class="form-control form-control-sm" id="filtro-aula" placeholder="Ej: Aula 1">
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <small class="text-muted" id="resultadosBusquedaHistorial">Cargando clases...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Historial -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="tablaHistorial">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 fw-bold text-muted">CÓDIGO</th>
+                                    <th class="border-0 fw-bold text-muted">CURSO</th>
+                                    <th class="border-0 fw-bold text-muted">AULA</th>
+                                    <th class="border-0 fw-bold text-muted">HORARIO</th>
+                                    <th class="border-0 fw-bold text-muted">FECHA</th>
+                                    <th class="border-0 fw-bold text-muted">PROFESOR</th>
+                                    <th class="border-0 fw-bold text-muted">ESTUDIANTES</th>
+                                    <th class="border-0 fw-bold text-muted text-center">ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historial-tbody">
+                                {% for key, clase_info in historial_clases.items %}
+                                <tr class="historial-row" 
+                                    data-codigo="{{ clase_info.clase.codigo }}"
+                                    data-curso="{{ clase_info.curso.nombre }}"
+                                    data-fecha="{{ clase_info.fecha|date:'Y-m-d' }}"
+                                    data-profesor="{{ clase_info.profesor.get_full_name }}"
+                                    data-aula="{{ clase_info.clase.aula }}">
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-3">
+                                                <i class="fas fa-chalkboard-teacher"></i>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-secondary fs-6 px-3 py-2">{{ clase_info.clase.codigo }}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                </form>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary text-white fs-6 px-3 py-2">{{ clase_info.curso.nombre }}</span>
+                                        <br>
+                                        <small class="text-muted mt-1">{{ clase_info.fecha|date:"d/m/Y" }}</small>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex flex-column">
+                                            <strong>{{ clase_info.clase.aula }}</strong>
+                                            <small class="text-muted">Salón de clases</small>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex flex-column">
+                                            <strong>{{ clase_info.clase.hora_inicio|time:"H:i" }} - {{ clase_info.clase.hora_fin|time:"H:i" }}</strong>
+                                            <small class="text-muted">Duración de clase</small>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex flex-column">
+                                            <strong>{{ clase_info.fecha|date:"d/m/Y" }}</strong>
+                                            <small class="text-muted">{{ clase_info.fecha|date:"l" }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex flex-column">
+                                            <strong>{{ clase_info.profesor.get_full_name }}</strong>
+                                            <small class="text-muted">Instructor</small>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-info text-white fs-6 px-3 py-2">{{ clase_info.asistencias|length }}</span>
+                                        <br>
+                                        <small class="text-muted mt-1">Registros</small>
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-info"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalDetalleAsistencias"
+                                                data-clase="{{ clase_info.clase.id }}"
+                                                data-fecha="{{ clase_info.fecha|date:"Y-m-d" }}"
+                                                data-detalle="{{ forloop.counter0 }}"
+                                                data-bs-toggle="tooltip" title="Ver detalle de asistencias">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="fas fa-clipboard-check fa-3x mb-3"></i>
+                                            <h5>No hay historial de asistencias</h5>
+                                            <p>Las asistencias aparecerán aquí cuando sean registradas.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje cuando no hay resultados de búsqueda -->
+            <div id="sin-resultados-historial" class="alert alert-info border-0 shadow-sm text-center d-none mt-4">
+                <i class="fas fa-search fa-2x mb-3 text-info"></i>
+                <h5>No se encontraron clases</h5>
+                <p class="mb-0">No se encontraron clases con los criterios especificados.</p>
+            </div>
+
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center" id="historial-pagination">
+                    <!-- Paginación generada por JS -->
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- VISTA: Tomar Asistencia -->
+        <div class="vista-contenido" id="tomar-asistencia">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0 fw-bold">
+                                <i class="fas fa-list me-2 text-success"></i>Seleccionar Clase
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Filtro por código de clase -->
+                            <div class="mb-3">
+                                <label for="filtroCodigoClase" class="form-label fw-semibold">
+                                    <i class="fas fa-filter me-2"></i>Filtrar por código
+                                </label>
+                                <input type="text" class="form-control" id="filtroCodigoClase" placeholder="Ej: PIA-0001">
                             </div>
+                            
+                            <!-- Lista de clases -->
+                            <div class="list-group" id="lista-clases">
+                                {% for clase in clases %}
+                                <button type="button" class="list-group-item list-group-item-action btn-seleccionar-clase"
+                                    data-clase-id="{{ clase.id }}"
+                                    data-clase-codigo="{{ clase.codigo }}"
+                                    data-clase-nombre="{{ clase.curso.nombre }}"
+                                    data-clase-aula="{{ clase.aula }}"
+                                    data-clase-horario="{{ clase.hora_inicio|time:"H:i" }} - {{ clase.hora_fin|time:"H:i" }}"
+                                    data-clase-profesor="{{ clase.profesor.get_full_name }}">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ clase.curso.nombre }}</h6>
+                                        <small>{{ clase.hora_inicio|time:"H:i" }}</small>
+                                    </div>
+                                    <p class="mb-1">
+                                        <span class="badge bg-secondary">{{ clase.codigo }}</span>
+                                        <span class="ms-2">Aula: {{ clase.aula }}</span>
+                                    </p>
+                                    <small>Profesor: {{ clase.profesor.get_full_name }}</small>
+                                    <span class="badge bg-info ms-2">{{ clase.total_estudiantes }} estudiantes</span>
+                                </button>
+                                {% empty %}
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-chalkboard fa-2x mb-3"></i>
+                                    <h6>No hay clases disponibles</h6>
+                                    <p class="mb-0">No hay clases con estudiantes matriculados</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm" id="card-asistencia" style="display: none;">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="card-title mb-0 fw-bold" id="titulo-clase">
+                                <i class="fas fa-user-check me-2 text-success"></i>Tomar Asistencia
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info border-0" id="info-clase"></div>
+                            
+                            <form method="POST" id="form-asistencia-masiva" class="needs-validation" novalidate>
+                                {% csrf_token %}
+                                <input type="hidden" name="registrar_asistencias_clase" value="1">
+                                <input type="hidden" name="clase_id" id="clase_id_selected">
+                                <input type="hidden" name="fecha_asistencia" id="fecha_asistencia_hidden" value="{{ fecha_hoy }}">
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="tabla-estudiantes">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="border-0 fw-bold text-muted">ESTUDIANTE</th>
+                                                <th class="border-0 fw-bold text-muted">ESTADO DE ASISTENCIA</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbody-estudiantes">
+                                            <!-- Se llenará dinámicamente -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="submit" class="btn btn-success btn-lg px-5">
+                                        <i class="fas fa-save me-2"></i>Guardar Asistencias
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="cancelarAsistencia()">
+                                        <i class="fas fa-times me-2"></i>Cancelar
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -172,7 +311,9 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modalDetalleAsistenciasLabel">Detalle de Asistencias</h5>
+        <h5 class="modal-title" id="modalDetalleAsistenciasLabel">
+          <i class="fas fa-clipboard-list me-2"></i>Detalle de Asistencias
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
@@ -180,9 +321,194 @@
           <!-- Se llenará por JS -->
         </div>
       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
     </div>
   </div>
 </div>
+
+<style>
+    /* Estilos modernos para el navbar - copiados del template de pagos */
+    .navbar {
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        animation: slideInFromTop 0.8s ease-out;
+        margin-bottom: 2rem;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .navbar:hover {
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    
+    /* Estilos para los botones de navegación */
+    .nav-link.btn {
+        border-radius: 10px !important;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        min-width: 150px;
+    }
+    
+    .nav-link.btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+    
+    .nav-link.btn.active-nav {
+        background: linear-gradient(135deg, #007bff, #0056b3) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+    }
+    
+    .nav-link.btn.active-nav:hover {
+        background: linear-gradient(135deg, #0056b3, #004085) !important;
+        box-shadow: 0 8px 25px rgba(0,123,255,0.5);
+    }
+    
+    /* Animaciones para iconos */
+    .nav-link.btn i {
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link.btn:hover i {
+        transform: rotate(360deg) scale(1.2);
+    }
+    
+    .nav-link.btn.active-nav i {
+        animation: pulse 2s infinite;
+    }
+    
+    /* Efectos de entrada */
+    .navbar {
+        animation: slideInFromTop 0.8s ease-out;
+    }
+    
+    @keyframes slideInFromTop {
+        0% {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Navbar toggler personalizado */
+    .navbar-toggler {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 1.1rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .navbar-toggler:hover {
+        background: linear-gradient(135deg, #0056b3, #004085);
+        transform: scale(1.1);
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    
+    /* Efectos hover para botones de acción en general */
+    .btn-group .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    /* Transiciones suaves para las tarjetas */
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Efectos de contenido */
+    .vista-contenido {
+        display: none;
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .vista-contenido.active {
+        display: block;
+    }
+    
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Avatar para asistencias */
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #28a745, #ffc107);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.375rem;
+        margin: 0 2px;
+    }
+    
+    .needs-validation .form-control:valid {
+        border-color: #28a745;
+    }
+    
+    .needs-validation .form-control:invalid {
+        border-color: #dc3545;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .nav-link.btn {
+            margin: 0.25rem 0 !important;
+            width: 100%;
+        }
+    }
+    
+    /* Pulse animation for active nav icons */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
 
 <script>
 let claseSeleccionada = null;
@@ -436,6 +762,170 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     filtrarClasesPorCodigo();
 });
+
+// Enhanced form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        }, false);
+    });
+})();
+
+// Initialize tooltips and setup
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // DON'T call cambiarVista here since the button is already active in HTML
+    // cambiarVista('historial'); // REMOVED
+    
+    // Inicializar búsqueda de historial
+    inicializarBusquedaHistorial();
+    
+    // ...existing code...
+});
+
+// Función para cambiar entre vistas del navbar
+function cambiarVista(vistaId) {
+    // Ocultar todas las vistas
+    document.querySelectorAll('.vista-contenido').forEach(vista => {
+        vista.classList.remove('active');
+    });
+    
+    // Remover clase activa de todos los botones
+    document.querySelectorAll('.nav-link.btn').forEach(btn => {
+        btn.classList.remove('active-nav');
+        btn.classList.remove('btn-primary', 'btn-success');
+        if (btn.id === 'historial-nav') {
+            btn.classList.add('btn-outline-primary');
+        } else if (btn.id === 'tomar-asistencia-nav') {
+            btn.classList.add('btn-outline-success');
+        }
+    });
+    
+    // Mostrar la vista seleccionada
+    const vistaActiva = document.getElementById(vistaId);
+    if (vistaActiva) {
+        vistaActiva.classList.add('active');
+    }
+    
+    // Activar el botón correspondiente
+    const botonActivo = document.getElementById(vistaId + '-nav');
+    if (botonActivo) {
+        botonActivo.classList.add('active-nav');
+        botonActivo.classList.remove('btn-outline-primary', 'btn-outline-success');
+        if (vistaId === 'historial') {
+            botonActivo.classList.add('btn-primary');
+        } else if (vistaId === 'tomar-asistencia') {
+            botonActivo.classList.add('btn-success');
+        }
+    }
+    
+    // Colapsar el navbar en móviles
+    const navbarCollapse = document.getElementById('navbarAsistencias');
+    if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+        const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+        bsCollapse.hide();
+    }
+}
+
+// Función para inicializar la búsqueda de historial
+function inicializarBusquedaHistorial() {
+    const buscarCodigo = document.getElementById('buscarCodigoClase');
+    const limpiarBtn = document.getElementById('limpiarBusquedaHistorial');
+    const historialRows = document.querySelectorAll('.historial-row');
+    const resultadosSpan = document.getElementById('resultadosBusquedaHistorial');
+    const totalClases = historialRows.length;
+
+    // Actualizar contador inicial
+    actualizarContadorHistorial(totalClases, totalClases);
+
+    function filtrarHistorial() {
+        const termino = buscarCodigo.value.trim().toUpperCase();
+        let visibles = 0;
+        
+        historialRows.forEach(row => {
+            const codigo = row.getAttribute('data-codigo') || '';
+            
+            if (!termino || codigo.toUpperCase().includes(termino)) {
+                row.style.display = '';
+                visibles++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Mostrar mensaje si no hay resultados
+        const sinResultadosDiv = document.getElementById('sin-resultados-historial');
+        if (visibles === 0 && termino !== '') {
+            sinResultadosDiv.classList.remove('d-none');
+        } else {
+            sinResultadosDiv.classList.add('d-none');
+        }
+        
+        actualizarContadorHistorial(visibles, totalClases);
+    }
+
+    function actualizarContadorHistorial(visibles, total) {
+        if (visibles === total) {
+            resultadosSpan.textContent = `Mostrando ${total} clase${total !== 1 ? 's' : ''}`;
+        } else {
+            resultadosSpan.textContent = `Mostrando ${visibles} de ${total} clase${total !== 1 ? 's' : ''}`;
+        }
+    }
+
+    function limpiarBusquedaHistorial() {
+        buscarCodigo.value = '';
+        filtrarHistorial();
+        buscarCodigo.focus();
+    }
+
+    // Event listeners
+    if (buscarCodigo) buscarCodigo.addEventListener('input', filtrarHistorial);
+    if (limpiarBtn) limpiarBtn.addEventListener('click', limpiarBusquedaHistorial);
+    
+    if (buscarCodigo) {
+        buscarCodigo.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                limpiarBusquedaHistorial();
+            }
+        });
+    }
+}
+
+function aplicarFiltrosHistorial() {
+    // Implementar lógica de filtros adicionales
+    console.log('Aplicando filtros de historial');
+}
+
+function limpiarFiltrosHistorial() {
+    document.getElementById('filtro-fecha-historial').value = '';
+    document.getElementById('filtro-curso-historial').value = '';
+    document.getElementById('buscarCodigoClase').value = '';
+    
+    // Mostrar todas las filas
+    document.querySelectorAll('.historial-row').forEach(row => {
+        row.style.display = '';
+    });
+    
+    // Actualizar contador
+    const totalClases = document.querySelectorAll('.historial-row').length;
+    document.getElementById('resultadosBusquedaHistorial').textContent = `Mostrando ${totalClases} clase${totalClases !== 1 ? 's' : ''}`;
+    
+    // Ocultar mensaje de sin resultados
+    document.getElementById('sin-resultados-historial').classList.add('d-none');
+}
 </script>
 
 {% endblock %}

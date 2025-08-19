@@ -1,281 +1,387 @@
-{% extends 'usuarios/base.html' %} {% load static %} {% block title %}Panel
-Administrador - Horarios{% endblock %} {% block content %}
+{% extends 'usuarios/base.html' %}
+{% load static %}
+{% block title %}Clases{% endblock %}
+{% block content %}
 
-<div class="main-content">
-  <div class="container mt-5">
-    <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link active"
-          id="clases-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#clases"
-          type="button"
-          role="tab"
-          aria-controls="clases"
-          aria-selected="true"
-        >
-          Clases
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button
-          class="nav-link"
-          id="add-clase-tab"
-          data-bs-toggle="tab"
-          data-bs-target="#add-clase"
-          type="button"
-          role="tab"
-          aria-controls="add-clase"
-          aria-selected="false"
-        >
-          Añadir Clase
-        </button>
-      </li>
-    </ul>
-    <div class="tab-content" id="adminTabsContent">
-      <div
-        class="tab-pane fade show active"
-        id="clases"
-        role="tabpanel"
-        aria-labelledby="clases-tab"
-      >
-        <div class="row mb-3">
-          <div class="col-md-4">
-            <label for="buscarCodigoClase" class="form-label small"
-              >Filtrar por código de clase:</label
-            >
-            <input
-              type="text"
-              class="form-control form-control-sm"
-              id="buscarCodigoClase"
-              placeholder="Ej: PIA-0001"
-            />
-          </div>
-          <div class="col-md-8 d-flex align-items-end">
-            <span
-              id="resultadosBusquedaClases"
-              class="text-muted small"
-            ></span>
-            <button
-              class="btn btn-outline-secondary btn-sm ms-2"
-              type="button"
-              id="limpiarBusquedaClases"
-            >
-              <i class="fas fa-times"></i> Limpiar
-            </button>
-          </div>
+<div class="content-header">
+    <h1><i class="fas fa-calendar-alt me-3"></i>Gestión de Clases</h1>
+</div>
+
+<div class="content-body">
+    <!-- Navbar de navegación -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+                <div class="container-fluid px-0">
+                    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarClase" aria-controls="navbarClase" aria-expanded="false" aria-label="Toggle navigation">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarClase">
+                        <div class="navbar-nav w-100 d-flex flex-row justify-content-center">
+                            <button type="button" class="nav-link btn btn-outline-primary mx-2 px-4 py-2 fw-bold" id="clases-nav" onclick="cambiarVista('clases')">
+                                <i class="fas fa-list me-2"></i>Lista de Clases
+                            </button>
+                            <button type="button" class="nav-link btn btn-outline-success mx-2 px-4 py-2 fw-bold" id="add-clase-nav" onclick="cambiarVista('add-clase')">
+                                <i class="fas fa-plus me-2"></i>Nueva Clase
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
         </div>
-        <div class="table-responsive">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Curso</th>
-                <th>Profesor</th>
-                <th>Aula</th>
-                <th>Fecha Inicio</th>
-                <th>Fecha Fin</th>
-                <th>Hora Inicio</th>
-                <th>Hora Fin</th>
-                <th>Cupos</th>
-                <th>Cupos disponibles</th> <!-- NUEVA COLUMNA -->
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="clases-tbody">
-              {% for clase in clases %}
-              <tr class="clase-row" data-codigo="{{ clase.codigo }}">
-                <td>
-                  <span class="badge bg-secondary">{{ clase.codigo }}</span>
-                </td>
-                <td>{{ clase.curso.nombre }}</td>
-                <td>
-                  {% if clase.profesor %}
-                    {{ clase.profesor.first_name }}{% if clase.profesor.last_name %} {{ clase.profesor.last_name }}{% else %} <span class="text-muted">Sin apellido</span>{% endif %}
-                  {% else %}
-                    <span class="text-muted">Sin profesor</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if clase.aula %}{{ clase.aula.nombre }}{% else %}<span
-                    class="text-muted"
-                    >Sin aula</span
-                  >{% endif %}
-                </td>
-                <td>{{ clase.fecha_inicio }}</td>
-                <td>{{ clase.fecha_fin }}</td>
-                <td>{{ clase.hora_inicio|time:"H:i" }}</td>
-                <td>{{ clase.hora_fin|time:"H:i" }}</td>
-                <td>{{ clase.cupos }}</td>
-                <td>
-                  {% if clase.cupos_disponibles is not None %}
-                    <span class="{% if clase.cupos_disponibles <= 0 %}text-danger{% elif clase.cupos_disponibles < 5 %}text-warning{% else %}text-success{% endif %}">
-                      {{ clase.cupos_disponibles }}
-                    </span>
-                  {% else %}
-                    <span class="text-muted">-</span>
-                  {% endif %}
-                </td>
-                <td>
-                  <button
-                    class="btn btn-sm btn-info me-1 btn-ver-mas-clase"
-                    data-clase-codigo="{{ clase.codigo }}"
-                    data-clase-curso="{{ clase.curso.nombre }}"
-                    data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.first_name }}{% if clase.profesor.last_name %} {{ clase.profesor.last_name }}{% else %} Sin apellido{% endif %}{% else %}Sin profesor{% endif %}"
-                    data-clase-aula="{% if clase.aula %}{{ clase.aula.nombre }}{% endif %}"
-                    data-clase-hora-inicio="{{ clase.hora_inicio }}"
-                    data-clase-hora-fin="{{ clase.hora_fin }}"
-                    data-clase-fecha-inicio="{{ clase.fecha_inicio }}"
-                    data-clase-fecha-fin="{{ clase.fecha_fin }}"
-                  >
-                    Ver más
-                  </button>
-                  <button
-                    class="btn btn-sm btn-warning me-1 btn-editar-clase"
-                    data-clase-id="{{ clase.id }}"
-                    data-clase-curso="{{ clase.curso.id }}"
-                    data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.id }}{% endif %}"
-                    data-clase-aula="{% if clase.aula %}{{ clase.aula.id }}{% endif %}"
-                    data-clase-hora-inicio="{{ clase.hora_inicio|time:'H:i' }}"
-                    data-clase-hora-fin="{{ clase.hora_fin|time:'H:i' }}"
-                    data-clase-fecha-inicio="{{ clase.fecha_inicio|date:'Y-m-d' }}"
-                    data-clase-fecha-fin="{{ clase.fecha_fin|date:'Y-m-d' }}"
-                    data-clase-cupos="{{ clase.cupos }}"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    class="btn btn-sm btn-danger btn-eliminar-clase"
-                    data-clase-id="{{ clase.id }}"
-                    data-clase-codigo="{{ clase.codigo }}"
-                  >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="10" class="text-center">
-                  No hay clases registradas.
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div
-        class="tab-pane fade"
-        id="add-clase"
-        role="tabpanel"
-        aria-labelledby="add-clase-tab"
-      >
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title mb-3">Registrar Clase</h5>
-            <form
-              method="POST"
-              action="{% url 'admin_clases' %}"
-              id="add-clase-form"
-            >
-              {% csrf_token %}
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="curso" class="form-label"
-                    >Curso <span class="text-danger">*</span></label
-                  >
-                  <select class="form-select" id="curso" name="curso" required>
-                    <option value="" selected disabled>
-                      Seleccione un curso
-                    </option>
-                    {% for curso in cursos %}
-                    <option value="{{ curso.id }}">
-                      {{ curso.nombre }} - {{ curso.get_nivel_display }}
-                    </option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label for="profesor" class="form-label">Profesor</label>
-                  <select class="form-select" id="profesor" name="profesor">
-                    <option value="" selected>Sin profesor</option>
-                    {% for profesor in profesores %}
-                    <option value="{{ profesor.id }}">
-                      {{ profesor.first_name }} {{ profesor.last_name }}
-                    </option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label for="aula" class="form-label">Aula</label>
-                  <select class="form-select" id="aula" name="aula">
-                    <option value="" selected>Sin aula</option>
-                    {% for aula in aulas %}
-                    <option value="{{ aula.id }}">
-                      {{ aula.nombre }} - {{ aula.ubicacion_completa }}
-                    </option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label for="fecha_inicio" class="form-label"
-                    >Fecha Inicio <span class="text-danger">*</span></label
-                  >
-                  <input
-                    type="date"
-                    class="form-control"
-                    id="fecha_inicio"
-                    name="fecha_inicio"
-                    required
-                  />
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label for="fecha_fin" class="form-label"
-                    >Fecha Fin <span class="text-danger">*</span></label
-                  >
-                  <input
-                    type="date"
-                    class="form-control"
-                    id="fecha_fin"
-                    name="fecha_fin"
-                    required
-                  />
-                </div>
-                <div class="col-md-3 mb-3">
-                  <label for="hora_inicio" class="form-label"
-                    >Hora Inicio <span class="text-danger">*</span></label
-                  >
-                  <select
-                    class="form-select"
-                    id="hora_inicio"
-                    name="hora_inicio"
-                    required
-                  ></select>
-                </div>
-                <div class="col-md-3 mb-3">
-                  <label for="hora_fin" class="form-label"
-                    >Hora Fin <span class="text-danger">*</span></label
-                  >
-                  <select
-                    class="form-select"
-                    id="hora_fin"
-                    name="hora_fin"
-                    required
-                  ></select>
-                </div>
-                <div class="col-md-3 mb-3">
-                  <label for="cupos" class="form-label">Cupos <span class="text-danger">*</span></label>
-                  <input type="number" class="form-control" id="cupos" name="cupos" min="1" max="50" value="15" required>
-                </div>
-              </div>
-              <button type="submit" class="btn btn-primary">Registrar</button>
-            </form>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
+
+    <div class="contenido-vistas">
+        <!-- VISTA: Lista de Clases -->
+        <div class="vista-contenido active" id="clases">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-calendar-alt me-2 text-primary"></i>Clases Registradas</h5>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0 ps-0" id="buscarCodigoClase" placeholder="Buscar por código...">
+                                    <button class="btn btn-outline-secondary" type="button" id="limpiarBusquedaClases">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtros de clases -->
+                    <div class="row mt-3">
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-curso" class="form-label text-muted small">Filtrar por curso</label>
+                            <select class="form-select form-select-sm" id="filtro-curso">
+                                <option value="">Todos los cursos</option>
+                                {% for curso in cursos %}
+                                <option value="{{ curso.nombre }}">{{ curso.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-profesor" class="form-label text-muted small">Filtrar por profesor</label>
+                            <select class="form-select form-select-sm" id="filtro-profesor">
+                                <option value="">Todos los profesores</option>
+                                {% for profesor in profesores %}
+                                <option value="{{ profesor.first_name }} {{ profesor.last_name }}">{{ profesor.first_name }} {{ profesor.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-aula" class="form-label text-muted small">Filtrar por aula</label>
+                            <select class="form-select form-select-sm" id="filtro-aula">
+                                <option value="">Todas las aulas</option>
+                                {% for aula in aulas %}
+                                <option value="{{ aula.nombre }}">{{ aula.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-cupos" class="form-label text-muted small">Cupos disponibles</label>
+                            <select class="form-select form-select-sm" id="filtro-cupos">
+                                <option value="">Todos</option>
+                                <option value="disponible">Con cupos</option>
+                                <option value="lleno">Sin cupos</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <small class="text-muted" id="resultadosBusquedaClases">Cargando clases...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Clases -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="tablaClases">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 fw-bold text-muted">CÓDIGO</th>
+                                    <th class="border-0 fw-bold text-muted">CURSO</th>
+                                    <th class="border-0 fw-bold text-muted">PROFESOR</th>
+                                    <th class="border-0 fw-bold text-muted">AULA</th>
+                                    <th class="border-0 fw-bold text-muted">HORARIO</th>
+                                    <th class="border-0 fw-bold text-muted">CUPOS</th>
+                                    <th class="border-0 fw-bold text-muted text-center">ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clases-tbody">
+                                {% for clase in clases %}
+                                <tr class="clase-row" 
+                                    data-codigo="{{ clase.codigo }}"
+                                    data-curso="{{ clase.curso.nombre }}"
+                                    data-profesor="{% if clase.profesor %}{{ clase.profesor.first_name }} {{ clase.profesor.last_name }}{% else %}Sin profesor{% endif %}"
+                                    data-aula="{% if clase.aula %}{{ clase.aula.nombre }}{% else %}Sin aula{% endif %}"
+                                    data-cupos="{{ clase.cupos_disponibles|default:0 }}">
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-3">
+                                                <i class="fas fa-calendar"></i>
+                                            </div>
+                                            <div>
+                                                <strong class="codigo-cell">{{ clase.codigo }}</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary text-white fs-6 px-3 py-2">{{ clase.curso.nombre }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if clase.profesor %}
+                                            <span class="badge bg-info text-white fs-6 px-3 py-2">
+                                                {{ clase.profesor.first_name }}{% if clase.profesor.last_name %} {{ clase.profesor.last_name }}{% endif %}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary text-white fs-6 px-3 py-2">Sin profesor</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3">
+                                        {% if clase.aula %}
+                                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">{{ clase.aula.nombre }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary text-white fs-6 px-3 py-2">Sin aula</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex flex-column">
+                                            <small class="text-muted">{{ clase.fecha_inicio }} - {{ clase.fecha_fin }}</small>
+                                            <small class="fw-bold">{{ clase.hora_inicio|time:"H:i" }} - {{ clase.hora_fin|time:"H:i" }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if clase.cupos_disponibles is not None %}
+                                            {% if clase.cupos_disponibles <= 0 %}
+                                                <span class="badge bg-danger text-white fs-6 px-3 py-2">Lleno ({{ clase.cupos_disponibles }}/{{ clase.cupos }})</span>
+                                            {% elif clase.cupos_disponibles < 5 %}
+                                                <span class="badge bg-warning text-dark fs-6 px-3 py-2">Pocos ({{ clase.cupos_disponibles }}/{{ clase.cupos }})</span>
+                                            {% else %}
+                                                <span class="badge bg-success text-white fs-6 px-3 py-2">Disponible ({{ clase.cupos_disponibles }}/{{ clase.cupos }})</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-secondary text-white fs-6 px-3 py-2">{{ clase.cupos }} cupos</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-info btn-ver-mas-clase"
+                                                data-clase-codigo="{{ clase.codigo }}"
+                                                data-clase-curso="{{ clase.curso.nombre }}"
+                                                data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.first_name }}{% if clase.profesor.last_name %} {{ clase.profesor.last_name }}{% else %} Sin apellido{% endif %}{% else %}Sin profesor{% endif %}"
+                                                data-clase-aula="{% if clase.aula %}{{ clase.aula.nombre }}{% endif %}"
+                                                data-clase-hora-inicio="{{ clase.hora_inicio }}"
+                                                data-clase-hora-fin="{{ clase.hora_fin }}"
+                                                data-clase-fecha-inicio="{{ clase.fecha_inicio }}"
+                                                data-clase-fecha-fin="{{ clase.fecha_fin }}"
+                                                data-clase-cupos="{{ clase.cupos }}"
+                                                data-bs-toggle="tooltip" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning btn-editar-clase"
+                                                data-clase-id="{{ clase.id }}"
+                                                data-clase-curso="{{ clase.curso.id }}"
+                                                data-clase-profesor="{% if clase.profesor %}{{ clase.profesor.id }}{% endif %}"
+                                                data-clase-aula="{% if clase.aula %}{{ clase.aula.id }}{% endif %}"
+                                                data-clase-hora-inicio="{{ clase.hora_inicio|time:'H:i' }}"
+                                                data-clase-hora-fin="{{ clase.hora_fin|time:'H:i' }}"
+                                                data-clase-fecha-inicio="{{ clase.fecha_inicio|date:'Y-m-d' }}"
+                                                data-clase-fecha-fin="{{ clase.fecha_fin|date:'Y-m-d' }}"
+                                                data-clase-cupos="{{ clase.cupos }}"
+                                                data-bs-toggle="tooltip" title="Editar clase">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger btn-eliminar-clase"
+                                                data-clase-id="{{ clase.id }}"
+                                                data-clase-codigo="{{ clase.codigo }}"
+                                                data-bs-toggle="tooltip" title="Eliminar clase">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="fas fa-calendar-alt fa-3x mb-3"></i>
+                                            <h5>No hay clases registradas</h5>
+                                            <p>Comience agregando una nueva clase al sistema.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje cuando no hay resultados de búsqueda -->
+            <div id="sin-resultados-clases" class="alert alert-info border-0 shadow-sm text-center d-none mt-4">
+                <i class="fas fa-search fa-2x mb-3 text-info"></i>
+                <h5>No se encontraron clases</h5>
+                <p class="mb-0">No se encontraron clases con los criterios especificados.</p>
+            </div>
+
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center" id="clases-pagination">
+                    <!-- Paginación generada por JS -->
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- VISTA: Nueva Clase -->
+        <div class="vista-contenido" id="add-clase">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-plus me-2 text-success"></i>Registrar Nueva Clase</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'admin_clases' %}" id="form-add-clase" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Información Básica de la Clase -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3"><i class="fas fa-info-circle me-2"></i>Información Básica</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="curso" class="form-label fw-bold">
+                                    <i class="fas fa-book me-2 text-primary"></i>Curso
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="curso" name="curso" required>
+                                    <option value="" selected disabled>Seleccione un curso</option>
+                                    {% for curso in cursos %}
+                                    <option value="{{ curso.id }}">{{ curso.nombre }} - {{ curso.get_nivel_display }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">Por favor seleccione un curso válido.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="cupos" class="form-label fw-bold">
+                                    <i class="fas fa-users me-2 text-success"></i>Cupos
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="cupos" name="cupos" min="1" max="50" value="15" required>
+                                <div class="invalid-feedback">Los cupos deben estar entre 1 y 50 estudiantes.</div>
+                            </div>
+                        </div>
+
+                        <!-- Información del Personal y Ubicación -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3"><i class="fas fa-map-marker-alt me-2"></i>Personal y Ubicación</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="profesor" class="form-label fw-bold">
+                                    <i class="fas fa-chalkboard-teacher me-2 text-info"></i>Profesor
+                                </label>
+                                <select class="form-select" id="profesor" name="profesor">
+                                    <option value="" selected>Sin profesor asignado</option>
+                                    {% for profesor in profesores %}
+                                    <option value="{{ profesor.id }}">{{ profesor.first_name }} {{ profesor.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="aula" class="form-label fw-bold">
+                                    <i class="fas fa-door-open me-2 text-warning"></i>Aula
+                                </label>
+                                <select class="form-select" id="aula" name="aula">
+                                    <option value="" selected>Sin aula asignada</option>
+                                    {% for aula in aulas %}
+                                    <option value="{{ aula.id }}">{{ aula.nombre }} - {{ aula.ubicacion_completa }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Información de Fechas y Horarios -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3"><i class="fas fa-calendar-alt me-2"></i>Fechas y Horarios</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_inicio" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-plus me-2 text-success"></i>Fecha Inicio
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
+                                <div class="invalid-feedback">Por favor seleccione una fecha de inicio válida.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha_fin" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-minus me-2 text-danger"></i>Fecha Fin
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required>
+                                <div class="invalid-feedback">Por favor seleccione una fecha de fin válida.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="hora_inicio" class="form-label fw-bold">
+                                    <i class="fas fa-clock me-2 text-primary"></i>Hora Inicio
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="hora_inicio" name="hora_inicio" required>
+                                    <!-- Opciones generadas por JS -->
+                                </select>
+                                <div class="invalid-feedback">Por favor seleccione una hora de inicio válida.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="hora_fin" class="form-label fw-bold">
+                                    <i class="fas fa-clock me-2 text-secondary"></i>Hora Fin
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="hora_fin" name="hora_fin" required>
+                                    <!-- Opciones generadas por JS -->
+                                </select>
+                                <div class="invalid-feedback">Por favor seleccione una hora de fin válida.</div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <button type="button" class="btn btn-secondary" onclick="cambiarVista('clases')">
+                                        <i class="fas fa-arrow-left me-2"></i>Volver a la lista
+                                    </button>
+                                    <button type="submit" class="btn btn-success px-5">
+                                        <i class="fas fa-save me-2"></i>Registrar Clase
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <small class="text-muted d-block">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Información importante:</strong> 
+                                <ul class="mb-0 mt-2">
+                                    <li>Todos los campos marcados con <span class="text-danger">*</span> son obligatorios</li>
+                                    <li>La fecha de fin debe ser posterior a la fecha de inicio</li>
+                                    <li>El horario laboral es de 08:00 a 20:00 horas</li>
+                                </ul>
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal Editar Clase -->
@@ -499,248 +605,526 @@ Administrador - Horarios{% endblock %} {% block content %}
   </div>
 </div>
 
+<style>
+    /* Estilos modernos para el navbar */
+    .navbar {
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        animation: slideInFromTop 0.8s ease-out;
+        margin-bottom: 2rem;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .navbar:hover {
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    
+    /* Estilos para los botones de navegación */
+    .nav-link.btn {
+        border-radius: 10px !important;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        min-width: 150px;
+    }
+    
+    .nav-link.btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+    
+    .nav-link.btn.active-nav {
+        background: linear-gradient(135deg, #007bff, #0056b3) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+    }
+    
+    .nav-link.btn.active-nav:hover {
+        background: linear-gradient(135deg, #0056b3, #004085) !important;
+        box-shadow: 0 8px 25px rgba(0,123,255,0.5);
+    }
+    
+    /* Animaciones para iconos */
+    .nav-link.btn i {
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link.btn:hover i {
+        transform: rotate(360deg) scale(1.2);
+    }
+    
+    .nav-link.btn.active-nav i {
+        animation: pulse 2s infinite;
+    }
+    
+    /* Efectos de entrada */
+    .navbar {
+        animation: slideInFromTop 0.8s ease-out;
+    }
+    
+    @keyframes slideInFromTop {
+        0% {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Navbar toggler personalizado */
+    .navbar-toggler {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 1.1rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .navbar-toggler:hover {
+        background: linear-gradient(135deg, #0056b3, #004085);
+        transform: scale(1.1);
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    
+    /* Efectos hover para botones de acción en general */
+    .btn-group .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    /* Transiciones suaves para las tarjetas */
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Efectos de contenido */
+    .vista-contenido {
+        display: none;
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .vista-contenido.active {
+        display: block;
+    }
+    
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Avatar para clases */
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.375rem;
+        margin: 0 2px;
+    }
+    
+    .needs-validation .form-control:valid {
+        border-color: #28a745;
+    }
+    
+    .needs-validation .form-control:invalid {
+        border-color: #dc3545;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .nav-link.btn {
+            margin: 0.25rem 0 !important;
+            width: 100%;
+        }
+    }
+</style>
+
 <script>
-  // Formatea una fecha a YYYY-MM-DD si es necesario
-  function formatDateToInput(dateStr) {
-    if (!dateStr) return "";
-    // Si ya está en formato YYYY-MM-DD, retorna igual
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    // Si está en formato DD/MM/YYYY o similar, conviértelo
-    var parts = dateStr.split("-");
-    if (parts.length === 3) {
-      // Si es YYYY-MM-DD, retorna igual
-      return dateStr;
-    }
-    parts = dateStr.split("/");
-    if (parts.length === 3) {
-      // Asume DD/MM/YYYY
-      return parts[2] + "-" + parts[1].padStart(2, "0") + "-" + parts[0].padStart(2, "0");
-    }
-    return dateStr;
-  }
+    // Enhanced form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
 
-  // Modal Editar Clase
-  document.querySelectorAll(".btn-editar-clase").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      document.getElementById("edit_clase_id").value =
-        btn.getAttribute("data-clase-id") || "";
-      document.getElementById("edit_curso").value =
-        btn.getAttribute("data-clase-curso") || "";
-      document.getElementById("edit_profesor").value =
-        btn.getAttribute("data-clase-profesor") || "";
-      document.getElementById("edit_aula").value =
-        btn.getAttribute("data-clase-aula") || "";
-
-      // Formatear fechas antes de asignar
-      var fechaInicio = formatDateToInput(btn.getAttribute("data-clase-fecha-inicio"));
-      var fechaFin = formatDateToInput(btn.getAttribute("data-clase-fecha-fin"));
-      document.getElementById("edit_fecha_inicio").value = fechaInicio;
-      document.getElementById("edit_fecha_fin").value = fechaFin;
-
-      document.getElementById("edit_cupos").value =
-        btn.getAttribute("data-clase-cupos") || "";
-
-      // Generar opciones de hora y seleccionar el valor actual
-      generarOpcionesHoras(
-        "edit_hora_inicio",
-        btn.getAttribute("data-clase-hora-inicio")
-      );
-      generarOpcionesHoras(
-        "edit_hora_fin",
-        btn.getAttribute("data-clase-hora-fin")
-      );
-
-      var horaInicio = btn.getAttribute("data-clase-hora-inicio");
-      var horaFin = btn.getAttribute("data-clase-hora-fin");
-      var selectInicio = document.getElementById("edit_hora_inicio");
-      var selectFin = document.getElementById("edit_hora_fin");
-      if (selectInicio && horaInicio) {
-        selectInicio.value = horaInicio;
-      }
-      if (selectFin && horaFin) {
-        selectFin.value = horaFin;
-      }
-
-      var modal = new bootstrap.Modal(
-        document.getElementById("modalEditarClase")
-      );
-      modal.show();
+    // Initialize tooltips and setup
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Inicializar la vista por defecto
+        cambiarVista('clases');
+        
+        // Inicializar búsqueda de clases
+        inicializarBusquedaClases();
+        
+        // Inicializar event listeners para los botones
+        inicializarEventListeners();
+        
+        // Inicializar horarios
+        generarOpcionesHoras("hora_inicio");
+        generarOpcionesHoras("hora_fin");
+        generarOpcionesHoras("edit_hora_inicio");
+        generarOpcionesHoras("edit_hora_fin");
+        
+        // Configurar fechas mínimas
+        configurarFechas();
     });
-  });
 
-  // Modal Ver Más Clase
-  document.querySelectorAll(".btn-ver-mas-clase").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      document.getElementById("vermas-codigo").textContent =
-        btn.getAttribute("data-clase-codigo") || "";
-      document.getElementById("vermas-curso").textContent =
-        btn.getAttribute("data-clase-curso") || "";
-      document.getElementById("vermas-profesor").textContent =
-        btn.getAttribute("data-clase-profesor") || "Sin profesor";
-      document.getElementById("vermas-aula").textContent =
-        btn.getAttribute("data-clase-aula") || "Sin aula";
-      document.getElementById("vermas-hora-inicio").textContent =
-        btn.getAttribute("data-clase-hora-inicio") || "";
-      document.getElementById("vermas-hora-fin").textContent =
-        btn.getAttribute("data-clase-hora-fin") || "";
-      document.getElementById("vermas-fecha-inicio").textContent =
-        btn.getAttribute("data-clase-fecha-inicio") || "";
-      document.getElementById("vermas-fecha-fin").textContent =
-        btn.getAttribute("data-clase-fecha-fin") || "";
-      document.getElementById("vermas-cupos").textContent =
-        btn.getAttribute("data-clase-cupos") || "";
-      var modal = new bootstrap.Modal(
-        document.getElementById("modalVerMasClase")
-      );
-      modal.show();
-    });
-  });
-
-  // Modal Confirmar Eliminación
-  document.querySelectorAll(".btn-eliminar-clase").forEach(function (btn) {
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      document.getElementById("eliminar-codigo-clase").textContent =
-        btn.getAttribute("data-clase-codigo") || "";
-      document.getElementById("eliminar_clase_id").value =
-        btn.getAttribute("data-clase-id") || "";
-      var modal = new bootstrap.Modal(
-        document.getElementById("modalConfirmarEliminarClase")
-      );
-      modal.show();
-    });
-  });
-
-  // Horario laboral: 08:00 a 20:00, intervalos de 30 minutos
-  function generarOpcionesHoras(selectId, valorSeleccionado) {
-    var select = document.getElementById(selectId);
-    if (!select) return;
-    select.innerHTML = "";
-    var startHour = 8;
-    var endHour = 20;
-    for (var h = startHour; h <= endHour; h++) {
-      for (var m = 0; m < 60; m += 30) {
-        var hour = String(h).padStart(2, "0");
-        var min = String(m).padStart(2, "0");
-        var value = hour + ":" + min;
-        var option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        if (valorSeleccionado && valorSeleccionado === value) {
-          option.selected = true;
+    // Función para cambiar entre vistas del navbar
+    function cambiarVista(vistaId) {
+        // Ocultar todas las vistas
+        document.querySelectorAll('.vista-contenido').forEach(vista => {
+            vista.classList.remove('active');
+        });
+        
+        // Remover clase activa de todos los botones
+        document.querySelectorAll('.nav-link.btn').forEach(btn => {
+            btn.classList.remove('active-nav');
+            btn.classList.remove('btn-primary', 'btn-success');
+            if (btn.id === 'clases-nav') {
+                btn.classList.add('btn-outline-primary');
+            } else if (btn.id === 'add-clase-nav') {
+                btn.classList.add('btn-outline-success');
+            }
+        });
+        
+        // Mostrar la vista seleccionada
+        const vistaActiva = document.getElementById(vistaId);
+        if (vistaActiva) {
+            vistaActiva.classList.add('active');
         }
-        select.appendChild(option);
-      }
-    }
-  }
-
-  // Inicializar selects de hora en formulario de añadir clase
-  document.addEventListener("DOMContentLoaded", function () {
-    generarOpcionesHoras("hora_inicio");
-    generarOpcionesHoras("hora_fin");
-    generarOpcionesHoras("edit_hora_inicio");
-    generarOpcionesHoras("edit_hora_fin");
-
-    // Set min date for "fecha_inicio" input to today (Añadir Clase)
-    var fechaInicioAdd = document.getElementById("fecha_inicio");
-    var fechaFinAdd = document.getElementById("fecha_fin");
-    if (fechaInicioAdd) {
-      var today = new Date();
-      var yyyy = today.getFullYear();
-      var mm = String(today.getMonth() + 1).padStart(2, "0");
-      var dd = String(today.getDate()).padStart(2, "0");
-      var minDate = yyyy + "-" + mm + "-" + dd;
-      fechaInicioAdd.setAttribute("min", minDate);
-
-      // Cuando cambia fecha_inicio, actualizar min de fecha_fin
-      fechaInicioAdd.addEventListener("change", function () {
-        fechaFinAdd.setAttribute("min", fechaInicioAdd.value);
-      });
-    }
-    if (fechaFinAdd && fechaInicioAdd) {
-      // Al cargar, asegurar que min de fecha_fin sea igual a fecha_inicio
-      fechaFinAdd.setAttribute(
-        "min",
-        fechaInicioAdd.value || fechaFinAdd.getAttribute("min")
-      );
-    }
-
-    // Set min date for "edit_fecha_inicio" input to today (Editar Clase)
-    var fechaInicioEdit = document.getElementById("edit_fecha_inicio");
-    var fechaFinEdit = document.getElementById("edit_fecha_fin");
-    if (fechaInicioEdit) {
-      var today = new Date();
-      var yyyy = today.getFullYear();
-      var mm = String(today.getMonth() + 1).padStart(2, "0");
-      var dd = String(today.getDate()).padStart(2, "0");
-      var minDate = yyyy + "-" + mm + "-" + dd;
-      fechaInicioEdit.setAttribute("min", minDate);
-
-      // Cuando cambia fecha_inicio, actualizar min de fecha_fin
-      fechaInicioEdit.addEventListener("change", function () {
-        fechaFinEdit.setAttribute("min", fechaInicioEdit.value);
-      });
-    }
-    if (fechaFinEdit && fechaInicioEdit) {
-      // Al cargar, asegurar que min de fecha_fin sea igual a fecha_inicio
-      fechaFinEdit.setAttribute(
-        "min",
-        fechaInicioEdit.value || fechaFinEdit.getAttribute("min")
-      );
-    }
-  });
-
-  // Set min date for "fecha" input to today
-  document.addEventListener("DOMContentLoaded", function () {
-    var fechaInput = document.getElementById("fecha");
-    if (fechaInput) {
-      var today = new Date();
-      var yyyy = today.getFullYear();
-      var mm = String(today.getMonth() + 1).padStart(2, "0");
-      var dd = String(today.getDate()).padStart(2, "0");
-      var minDate = yyyy + "-" + mm + "-" + dd;
-      fechaInput.setAttribute("min", minDate);
-    }
-  });
-
-  // Filtro por código de clase
-  document.addEventListener('DOMContentLoaded', function() {
-    const buscarCodigo = document.getElementById('buscarCodigoClase');
-    const limpiarBtn = document.getElementById('limpiarBusquedaClases');
-    const claseRows = document.querySelectorAll('.clase-row');
-    const resultadosSpan = document.getElementById('resultadosBusquedaClases');
-    const totalClases = claseRows.length;
-
-    function filtrarClases() {
-      const termino = buscarCodigo.value.trim().toUpperCase();
-      let visibles = 0;
-      claseRows.forEach(row => {
-        const codigo = row.getAttribute('data-codigo').toUpperCase();
-        if (!termino || codigo.includes(termino)) {
-          row.style.display = '';
-          visibles++;
-        } else {
-          row.style.display = 'none';
+        
+        // Activar el botón correspondiente
+        const botonActivo = document.getElementById(vistaId + '-nav');
+        if (botonActivo) {
+            botonActivo.classList.add('active-nav');
+            botonActivo.classList.remove('btn-outline-primary', 'btn-outline-success');
+            if (vistaId === 'clases') {
+                botonActivo.classList.add('btn-primary');
+            } else if (vistaId === 'add-clase') {
+                botonActivo.classList.add('btn-success');
+            }
         }
-      });
-      resultadosSpan.textContent = visibles === totalClases
-        ? `Mostrando ${totalClases} clase${totalClases !== 1 ? 's' : ''}`
-        : `Mostrando ${visibles} de ${totalClases} clase${totalClases !== 1 ? 's' : ''}`;
+        
+        // Colapsar el navbar en móviles
+        const navbarCollapse = document.getElementById('navbarClase');
+        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+            const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+            bsCollapse.hide();
+        }
     }
-    buscarCodigo.addEventListener('input', filtrarClases);
-    limpiarBtn.addEventListener('click', function() {
-      buscarCodigo.value = '';
-      filtrarClases();
-      buscarCodigo.focus();
-    });
-    buscarCodigo.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        limpiarBtn.click();
+
+    // Función para inicializar event listeners de botones
+    function inicializarEventListeners() {
+        // Modal Editar Clase
+        document.querySelectorAll(".btn-editar-clase").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                document.getElementById("edit_clase_id").value =
+                    btn.getAttribute("data-clase-id") || "";
+                document.getElementById("edit_curso").value =
+                    btn.getAttribute("data-clase-curso") || "";
+                document.getElementById("edit_profesor").value =
+                    btn.getAttribute("data-clase-profesor") || "";
+                document.getElementById("edit_aula").value =
+                    btn.getAttribute("data-clase-aula") || "";
+
+                // Formatear fechas antes de asignar
+                var fechaInicio = formatDateToInput(btn.getAttribute("data-clase-fecha-inicio"));
+                var fechaFin = formatDateToInput(btn.getAttribute("data-clase-fecha-fin"));
+                document.getElementById("edit_fecha_inicio").value = fechaInicio;
+                document.getElementById("edit_fecha_fin").value = fechaFin;
+
+                document.getElementById("edit_cupos").value =
+                    btn.getAttribute("data-clase-cupos") || "";
+
+                // Generar opciones de hora y seleccionar el valor actual
+                generarOpcionesHoras(
+                    "edit_hora_inicio",
+                    btn.getAttribute("data-clase-hora-inicio")
+                );
+                generarOpcionesHoras(
+                    "edit_hora_fin",
+                    btn.getAttribute("data-clase-hora-fin")
+                );
+
+                var horaInicio = btn.getAttribute("data-clase-hora-inicio");
+                var horaFin = btn.getAttribute("data-clase-hora-fin");
+                var selectInicio = document.getElementById("edit_hora_inicio");
+                var selectFin = document.getElementById("edit_hora_fin");
+                if (selectInicio && horaInicio) {
+                    selectInicio.value = horaInicio;
+                }
+                if (selectFin && horaFin) {
+                    selectFin.value = horaFin;
+                }
+
+                var modal = new bootstrap.Modal(
+                    document.getElementById("modalEditarClase")
+                );
+                modal.show();
+            });
+        });
+
+        // Modal Ver Más Clase
+        document.querySelectorAll(".btn-ver-mas-clase").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                document.getElementById("vermas-codigo").textContent =
+                    btn.getAttribute("data-clase-codigo") || "";
+                document.getElementById("vermas-curso").textContent =
+                    btn.getAttribute("data-clase-curso") || "";
+                document.getElementById("vermas-profesor").textContent =
+                    btn.getAttribute("data-clase-profesor") || "Sin profesor";
+                document.getElementById("vermas-aula").textContent =
+                    btn.getAttribute("data-clase-aula") || "Sin aula";
+                document.getElementById("vermas-hora-inicio").textContent =
+                    btn.getAttribute("data-clase-hora-inicio") || "";
+                document.getElementById("vermas-hora-fin").textContent =
+                    btn.getAttribute("data-clase-hora-fin") || "";
+                document.getElementById("vermas-fecha-inicio").textContent =
+                    btn.getAttribute("data-clase-fecha-inicio") || "";
+                document.getElementById("vermas-fecha-fin").textContent =
+                    btn.getAttribute("data-clase-fecha-fin") || "";
+                document.getElementById("vermas-cupos").textContent =
+                    btn.getAttribute("data-clase-cupos") || "";
+                var modal = new bootstrap.Modal(
+                    document.getElementById("modalVerMasClase")
+                );
+                modal.show();
+            });
+        });
+
+        // Modal Confirmar Eliminación
+        document.querySelectorAll(".btn-eliminar-clase").forEach(function (btn) {
+            btn.addEventListener("click", function (e) {
+                e.preventDefault();
+                document.getElementById("eliminar-codigo-clase").textContent =
+                    btn.getAttribute("data-clase-codigo") || "";
+                document.getElementById("eliminar_clase_id").value =
+                    btn.getAttribute("data-clase-id") || "";
+                var modal = new bootstrap.Modal(
+                    document.getElementById("modalConfirmarEliminarClase")
+                );
+                modal.show();
+            });
+        });
+    }
+
+    // Función para inicializar la búsqueda de clases
+    function inicializarBusquedaClases() {
+        const buscarCodigo = document.getElementById('buscarCodigoClase');
+        const limpiarBtn = document.getElementById('limpiarBusquedaClases');
+        const claseRows = document.querySelectorAll('.clase-row');
+        const resultadosSpan = document.getElementById('resultadosBusquedaClases');
+        const totalClases = claseRows.length;
+
+        // Actualizar contador inicial
+        actualizarContadorClases(totalClases, totalClases);
+
+        function filtrarClases() {
+            const termino = buscarCodigo.value.trim().toUpperCase();
+            let visibles = 0;
+            
+            claseRows.forEach(row => {
+                const codigo = row.getAttribute('data-codigo').toUpperCase();
+                const codigoCell = row.querySelector('.codigo-cell');
+                
+                if (!termino || codigo.includes(termino)) {
+                    row.style.display = '';
+                    visibles++;
+                    
+                    // Resaltar coincidencias
+                    if (termino !== '') {
+                        const codigoOriginal = row.getAttribute('data-codigo');
+                        const regex = new RegExp(`(${termino})`, 'gi');
+                        const codigoResaltado = codigoOriginal.replace(regex, '<mark class="bg-warning">$1</mark>');
+                        codigoCell.innerHTML = codigoResaltado;
+                    } else {
+                        codigoCell.innerHTML = row.getAttribute('data-codigo');
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Mostrar mensaje si no hay resultados
+            const sinResultadosDiv = document.getElementById('sin-resultados-clases');
+            if (visibles === 0 && termino !== '') {
+                sinResultadosDiv.classList.remove('d-none');
+            } else {
+                sinResultadosDiv.classList.add('d-none');
+            }
+            
+            actualizarContadorClases(visibles, totalClases);
+        }
+
+        function actualizarContadorClases(visibles, total) {
+            if (visibles === total) {
+                resultadosSpan.textContent = `Mostrando ${total} clase${total !== 1 ? 's' : ''}`;
+            } else {
+                resultadosSpan.textContent = `Mostrando ${visibles} de ${total} clase${total !== 1 ? 's' : ''}`;
+            }
+        }
+
+        function limpiarBusquedaClases() {
+            buscarCodigo.value = '';
+            filtrarClases();
+            buscarCodigo.focus();
+        }
+
+        // Event listeners
+        if (buscarCodigo) buscarCodigo.addEventListener('input', filtrarClases);
+        if (limpiarBtn) limpiarBtn.addEventListener('click', limpiarBusquedaClases);
+        
+        if (buscarCodigo) {
+            buscarCodigo.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    limpiarBusquedaClases();
+                }
+            });
+        }
+    }
+
+    // Formatea una fecha a YYYY-MM-DD si es necesario
+    function formatDateToInput(dateStr) {
+        if (!dateStr) return "";
+        // Si ya está en formato YYYY-MM-DD, retorna igual
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+        // Si está en formato DD/MM/YYYY o similar, conviértelo
+        var parts = dateStr.split("-");
+        if (parts.length === 3) {
+          // Si es YYYY-MM-DD, retorna igual
+          return dateStr;
+        }
+        parts = dateStr.split("/");
+        if (parts.length === 3) {
+          // Asume DD/MM/YYYY
+          return parts[2] + "-" + parts[1].padStart(2, "0") + "-" + parts[0].padStart(2, "0");
+        }
+        return dateStr;
       }
-    });
-    filtrarClases();
-  });
-</script>
+
+    // Horario laboral: 08:00 a 20:00, intervalos de 30 minutos
+    function generarOpcionesHoras(selectId, valorSeleccionado) {
+        var select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = "";
+        var startHour = 8;
+        var endHour = 20;
+        for (var h = startHour; h <= endHour; h++) {
+          for (var m = 0; m < 60; m += 30) {
+            var hour = String(h).padStart(2, "0");
+            var min = String(m).padStart(2, "0");
+            var value = hour + ":" + min;
+            var option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            if (valorSeleccionado && valorSeleccionado === value) {
+              option.selected = true;
+            }
+            select.appendChild(option);
+          }
+        }
+      }
+
+    // Configurar fechas mínimas para los inputs de fecha
+    function configurarFechas() {
+        // Set min date for "fecha_inicio" input to today (Añadir Clase)
+        var fechaInicioAdd = document.getElementById("fecha_inicio");
+        var fechaFinAdd = document.getElementById("fecha_fin");
+        if (fechaInicioAdd) {
+          var today = new Date();
+          var yyyy = today.getFullYear();
+          var mm = String(today.getMonth() + 1).padStart(2, "0");
+          var dd = String(today.getDate()).padStart(2, "0");
+          var minDate = yyyy + "-" + mm + "-" + dd;
+          fechaInicioAdd.setAttribute("min", minDate);
+
+          // Cuando cambia fecha_inicio, actualizar min de fecha_fin
+          fechaInicioAdd.addEventListener("change", function () {
+            fechaFinAdd.setAttribute("min", fechaInicioAdd.value);
+          });
+        }
+        if (fechaFinAdd && fechaInicioAdd) {
+          // Al cargar, asegurar que min de fecha_fin sea igual a fecha_inicio
+          fechaFinAdd.setAttribute(
+            "min",
+            fechaInicioAdd.value || fechaFinAdd.getAttribute("min")
+          );
+        }
+
+        // Set min date for "edit_fecha_inicio" input to today (Editar Clase)
+        var fechaInicioEdit = document.getElementById("edit_fecha_inicio");
+        var fechaFinEdit = document.getElementById("edit_fecha_fin");
+        if (fechaInicioEdit) {
+          var today = new Date();
+          var yyyy = today.getFullYear();
+          var mm = String(today.getMonth() + 1).padStart(2, "0");
+          var dd = String(today.getDate()).padStart(2, "0");
+          var minDate = yyyy + "-" + mm + "-" + dd;
+          fechaInicioEdit.setAttribute("min", minDate);
+
+          // Cuando cambia fecha_inicio, actualizar min de fecha_fin
+          fechaInicioEdit.addEventListener("change", function () {
+            fechaFinEdit.setAttribute("min", fechaInicioEdit.value);
+          });
+        }
+        if (fechaFinEdit && fechaInicioEdit) {
+          // Al cargar, asegurar que min de fecha_fin sea igual a fecha_inicio
+          fechaFinEdit.setAttribute(
+            "min",
+            fechaInicioEdit.value || fechaFinEdit.getAttribute("min")
+          );
+        }
+      }
+  </script>
 
 {% endblock %}
 

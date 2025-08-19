@@ -1,131 +1,394 @@
 {% extends 'usuarios/base.html' %}
 {% load static %}
-{% block title %}Panel Administrador{% endblock %}
+{% block title %}Matrículas{% endblock %}
 {% block content %}
 
-<div class="main-content">
-    <div class="container mt-5">
-        <!-- Tabs de navegación -->
-        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="matriculas-tab" data-bs-toggle="tab" data-bs-target="#matriculas" type="button" role="tab" aria-controls="matriculas" aria-selected="true">Matrículas</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="add-matricula-tab" data-bs-toggle="tab" data-bs-target="#add-matricula" type="button" role="tab" aria-controls="add-matricula" aria-selected="false">Añadir Matrícula</button>
-            </li>
-        </ul>
+<div class="content-header">
+    <h1><i class="fas fa-graduation-cap me-3"></i>Gestión de Matrículas</h1>
+</div>
 
-        <div class="tab-content" id="adminTabsContent">
-            <!-- Vista general de matrículas -->
-            <div class="tab-pane fade show active" id="matriculas" role="tabpanel" aria-labelledby="matriculas-tab">
-                <div class="row mb-3">
-                  <div class="col-md-4">
-                    <label for="buscarCedulaMatricula" class="form-label small">Filtrar por cédula del estudiante:</label>
-                    <input type="text" class="form-control form-control-sm" id="buscarCedulaMatricula" placeholder="Ej: 0102030405">
-                  </div>
-                  <div class="col-md-8 d-flex align-items-end">
-                    <span id="resultadosBusquedaMatriculas" class="text-muted small"></span>
-                    <button class="btn btn-outline-secondary btn-sm ms-2" type="button" id="limpiarBusquedaMatriculas">
-                      <i class="fas fa-times"></i> Limpiar
+<div class="content-body">
+    <!-- Navbar de navegación -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+                <div class="container-fluid px-0">
+                    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMatricula" aria-controls="navbarMatricula" aria-expanded="false" aria-label="Toggle navigation">
+                        <i class="fas fa-bars"></i>
                     </button>
-                  </div>
+                    <div class="collapse navbar-collapse" id="navbarMatricula">
+                        <div class="navbar-nav w-100 d-flex flex-row justify-content-center">
+                            <button type="button" class="nav-link btn btn-outline-primary mx-2 px-4 py-2 fw-bold" id="matriculas-nav" onclick="cambiarVista('matriculas')">
+                                <i class="fas fa-list me-2"></i>Lista de Matrículas
+                            </button>
+                            <button type="button" class="nav-link btn btn-outline-success mx-2 px-4 py-2 fw-bold" id="add-matricula-nav" onclick="cambiarVista('add-matricula')">
+                                <i class="fas fa-plus me-2"></i>Nueva Matrícula
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Estudiante</th>
-                                <th>Cédula</th> <!-- NUEVA COLUMNA -->
-                                <th>Horario</th>
-                                <th>Curso</th>
-                                <th>Profesor</th>
-                                <th>Fecha Matrícula</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="matriculas-tbody">
-                            {% for matricula in matriculas %}
-                            <tr class="matricula-row" data-cedula="{{ matricula.estudiante.cedula|default:'' }}">
-                                <td>{{ matricula.estudiante.first_name }} {{ matricula.estudiante.last_name }}</td>
-                                <td>{{ matricula.estudiante.cedula }}</td>
-                                <td>
-                                    {{ matricula.clase.fecha_inicio|date:"Y-m-d" }} {{ matricula.clase.hora_inicio|time:"H:i" }}-{{ matricula.clase.hora_fin|time:"H:i" }}<br>
-                                    Aula: {{ matricula.clase.aula }}
-                                </td>
-                                <td>{{ matricula.clase.curso.nombre }}</td>
-                                <td>
-                                    {% if matricula.clase.profesor %}
-                                        {{ matricula.clase.profesor.first_name }} {{ matricula.clase.profesor.last_name }}
-                                    {% else %}
-                                        Sin profesor
-                                    {% endif %}
-                                </td>
-                                <td>{{ matricula.fecha_matricula|date:"Y-m-d" }}</td>
-                                <td>{{ matricula.get_estado_display }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-danger btn-eliminar-matricula"
-                                            data-matricula-id="{{ matricula.id }}"
-                                            data-estudiante-nombre="{{ matricula.estudiante.get_full_name }}">
-                                        Eliminar
+            </nav>
+        </div>
+    </div>
+
+    <div class="contenido-vistas">
+        <!-- VISTA: Lista de Matrículas -->
+        <div class="vista-contenido active" id="matriculas">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-graduation-cap me-2 text-primary"></i>Matrículas Registradas</h5>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0 ps-0" id="buscarCedulaMatricula" placeholder="Buscar por cédula...">
+                                    <button class="btn btn-outline-secondary" type="button" id="limpiarBusquedaMatriculas">
+                                        <i class="fas fa-times"></i>
                                     </button>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center">No hay matrículas registradas.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtros de matrículas -->
+                    <div class="row mt-3">
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-curso" class="form-label text-muted small">Filtrar por curso</label>
+                            <select class="form-select form-select-sm" id="filtro-curso">
+                                <option value="">Todos los cursos</option>
+                                {% for matricula in matriculas %}
+                                    <option value="{{ matricula.clase.curso.nombre }}">{{ matricula.clase.curso.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-estado" class="form-label text-muted small">Filtrar por estado</label>
+                            <select class="form-select form-select-sm" id="filtro-estado">
+                                <option value="">Todos los estados</option>
+                                <option value="Activa">Activa</option>
+                                <option value="Suspendida">Suspendida</option>
+                                <option value="Cancelada">Cancelada</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-profesor" class="form-label text-muted small">Filtrar por profesor</label>
+                            <select class="form-select form-select-sm" id="filtro-profesor">
+                                <option value="">Todos los profesores</option>
+                                {% for matricula in matriculas %}
+                                    {% if matricula.clase.profesor %}
+                                        <option value="{{ matricula.clase.profesor.first_name }} {{ matricula.clase.profesor.last_name }}">{{ matricula.clase.profesor.first_name }} {{ matricula.clase.profesor.last_name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-fecha" class="form-label text-muted small">Filtrar por fecha</label>
+                            <input type="date" class="form-control form-control-sm" id="filtro-fecha">
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <small class="text-muted" id="resultadosBusquedaMatriculas">Cargando matrículas...</small>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Formulario para registrar matrícula -->
-            <div class="tab-pane fade" id="add-matricula" role="tabpanel" aria-labelledby="add-matricula-tab">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">Registrar Matrícula</h5>
-                        <form method="POST" action="{% url 'admin_matriculas' %}">
-                            {% csrf_token %}
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="estudiante" class="form-label">Estudiante</label>
-                                    <select class="form-select" id="estudiante" name="estudiante" required>
-                                        <option value="" selected disabled>Seleccione un estudiante</option>
-                                        {% for estudiante in estudiantes %}
-                                            <option value="{{ estudiante.id }}">{{ estudiante.first_name }} {{ estudiante.last_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="clase" class="form-label">Clase</label>
-                                    <select class="form-select" id="clase" name="clase" required>
-                                      <option value="" selected disabled>Seleccione una clase</option>
-                                      {% for clase in clases %}
-                                        {% if clase.cupos_disponibles > 0 %}
-                                          <option value="{{ clase.id }}">
-                                            {{ clase.curso.nombre }} | ${{ clase.curso.precio }} | {{ clase.fecha_inicio|date:"Y-m-d" }} {{ clase.hora_inicio|time:"H:i" }}-{{ clase.hora_fin|time:"H:i" }} | Aula: {{ clase.aula.nombre }} | {{ clase.cupos_disponibles }} cupos disponibles
-                                          </option>
+            <!-- Tabla de Matrículas -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="tablaMatriculas">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 fw-bold text-muted">ESTUDIANTE</th>
+                                    <th class="border-0 fw-bold text-muted">CURSO</th>
+                                    <th class="border-0 fw-bold text-muted">PROFESOR</th>
+                                    <th class="border-0 fw-bold text-muted">HORARIO</th>
+                                    <th class="border-0 fw-bold text-muted">ESTADO</th>
+                                    <th class="border-0 fw-bold text-muted text-center">ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matriculas-tbody">
+                                {% for matricula in matriculas %}
+                                <tr class="matricula-row" 
+                                    data-cedula="{{ matricula.estudiante.cedula|default:'' }}"
+                                    data-curso="{{ matricula.clase.curso.nombre }}"
+                                    data-estado="{{ matricula.get_estado_display }}"
+                                    data-profesor="{% if matricula.clase.profesor %}{{ matricula.clase.profesor.first_name }} {{ matricula.clase.profesor.last_name }}{% else %}Sin profesor{% endif %}"
+                                    data-fecha="{{ matricula.fecha_matricula|date:'Y-m-d' }}">
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-3">
+                                                <i class="fas fa-user-graduate"></i>
+                                            </div>
+                                            <div>
+                                                <strong class="estudiante-cell">{{ matricula.estudiante.first_name }} {{ matricula.estudiante.last_name }}</strong>
+                                                <br>
+                                                <small class="text-muted cedula-cell">{{ matricula.estudiante.cedula }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary text-white fs-6 px-3 py-2">{{ matricula.clase.curso.nombre }}</span>
+                                        <br>
+                                        <small class="text-muted mt-1">${{ matricula.clase.curso.precio }}</small>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if matricula.clase.profesor %}
+                                            <span class="badge bg-info text-white fs-6 px-3 py-2">
+                                                {{ matricula.clase.profesor.first_name }} {{ matricula.clase.profesor.last_name }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary text-white fs-6 px-3 py-2">Sin profesor</span>
                                         {% endif %}
-                                      {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-12 mb-3">
-                                    <label for="observaciones" class="form-label">Observaciones</label>
-                                    <textarea class="form-control" id="observaciones" name="observaciones" rows="3"></textarea>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex flex-column">
+                                            <small class="text-muted">{{ matricula.clase.fecha_inicio|date:"d/m/Y" }}</small>
+                                            <small class="fw-bold">{{ matricula.clase.hora_inicio|time:"H:i" }} - {{ matricula.clase.hora_fin|time:"H:i" }}</small>
+                                            {% if matricula.clase.aula %}
+                                                <small class="text-muted">Aula: {{ matricula.clase.aula.nombre }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if matricula.get_estado_display == 'Activa' %}
+                                            <span class="badge bg-success text-white fs-6 px-3 py-2">{{ matricula.get_estado_display }}</span>
+                                        {% elif matricula.get_estado_display == 'Suspendida' %}
+                                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">{{ matricula.get_estado_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger text-white fs-6 px-3 py-2">{{ matricula.get_estado_display }}</span>
+                                        {% endif %}
+                                        <br>
+                                        <small class="text-muted mt-1">{{ matricula.fecha_matricula|date:"d/m/Y" }}</small>
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-info btn-ver-mas-matricula"
+                                                data-estudiante-nombre="{{ matricula.estudiante.first_name }} {{ matricula.estudiante.last_name }}"
+                                                data-estudiante-cedula="{{ matricula.estudiante.cedula }}"
+                                                data-curso-nombre="{{ matricula.clase.curso.nombre }}"
+                                                data-curso-precio="{{ matricula.clase.curso.precio }}"
+                                                data-profesor-nombre="{% if matricula.clase.profesor %}{{ matricula.clase.profesor.first_name }} {{ matricula.clase.profesor.last_name }}{% else %}Sin profesor{% endif %}"
+                                                data-clase-fecha="{{ matricula.clase.fecha_inicio|date:'d/m/Y' }}"
+                                                data-clase-hora="{{ matricula.clase.hora_inicio|time:'H:i' }} - {{ matricula.clase.hora_fin|time:'H:i' }}"
+                                                data-clase-aula="{% if matricula.clase.aula %}{{ matricula.clase.aula.nombre }}{% else %}Sin aula{% endif %}"
+                                                data-matricula-fecha="{{ matricula.fecha_matricula|date:'d/m/Y' }}"
+                                                data-matricula-estado="{{ matricula.get_estado_display }}"
+                                                data-matricula-observaciones="{{ matricula.observaciones|default:'Sin observaciones' }}"
+                                                data-bs-toggle="tooltip" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger btn-eliminar-matricula"
+                                                data-matricula-id="{{ matricula.id }}"
+                                                data-estudiante-nombre="{{ matricula.estudiante.get_full_name }}"
+                                                data-bs-toggle="tooltip" title="Eliminar matrícula">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="fas fa-graduation-cap fa-3x mb-3"></i>
+                                            <h5>No hay matrículas registradas</h5>
+                                            <p>Comience agregando una nueva matrícula al sistema.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje cuando no hay resultados de búsqueda -->
+            <div id="sin-resultados-matriculas" class="alert alert-info border-0 shadow-sm text-center d-none mt-4">
+                <i class="fas fa-search fa-2x mb-3 text-info"></i>
+                <h5>No se encontraron matrículas</h5>
+                <p class="mb-0">No se encontraron matrículas con los criterios especificados.</p>
+            </div>
+
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center" id="matriculas-pagination">
+                    <!-- Paginación generada por JS -->
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- VISTA: Nueva Matrícula -->
+        <div class="vista-contenido" id="add-matricula">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-plus me-2 text-success"></i>Registrar Nueva Matrícula</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'admin_matriculas' %}" id="form-add-matricula" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Información del Estudiante -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3"><i class="fas fa-user-graduate me-2"></i>Información del Estudiante</h6>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="estudiante" class="form-label fw-bold">
+                                    <i class="fas fa-user me-2 text-primary"></i>Estudiante
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="estudiante" name="estudiante" required>
+                                    <option value="" selected disabled>Seleccione un estudiante</option>
+                                    {% for estudiante in estudiantes %}
+                                        <option value="{{ estudiante.id }}">{{ estudiante.first_name }} {{ estudiante.last_name }} - {{ estudiante.cedula }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">Por favor seleccione un estudiante válido.</div>
+                            </div>
+                        </div>
+
+                        <!-- Información de la Clase -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3"><i class="fas fa-calendar-alt me-2"></i>Información de la Clase</h6>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="clase" class="form-label fw-bold">
+                                    <i class="fas fa-chalkboard me-2 text-info"></i>Clase
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="clase" name="clase" required>
+                                    <option value="" selected disabled>Seleccione una clase</option>
+                                    {% for clase in clases %}
+                                        {% if clase.cupos_disponibles > 0 %}
+                                            <option value="{{ clase.id }}">
+                                                {{ clase.curso.nombre }} | ${{ clase.curso.precio }} | {{ clase.fecha_inicio|date:"d/m/Y" }} {{ clase.hora_inicio|time:"H:i" }}-{{ clase.hora_fin|time:"H:i" }} | Aula: {{ clase.aula.nombre }} | {{ clase.cupos_disponibles }} cupos disponibles
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">Por favor seleccione una clase válida.</div>
+                                <div class="form-text">Solo se muestran las clases con cupos disponibles.</div>
+                            </div>
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted mb-3"><i class="fas fa-sticky-note me-2"></i>Observaciones Adicionales</h6>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label for="observaciones" class="form-label fw-bold">
+                                    <i class="fas fa-comment-alt me-2 text-warning"></i>Observaciones
+                                </label>
+                                <textarea class="form-control" id="observaciones" name="observaciones" rows="4" placeholder="Ingrese cualquier observación relevante sobre la matrícula..."></textarea>
+                                <div class="form-text">Campo opcional para notas adicionales.</div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <button type="button" class="btn btn-secondary" onclick="cambiarVista('matriculas')">
+                                        <i class="fas fa-arrow-left me-2"></i>Volver a la lista
+                                    </button>
+                                    <button type="submit" class="btn btn-success px-5">
+                                        <i class="fas fa-save me-2"></i>Registrar Matrícula
+                                    </button>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Registrar Matrícula</button>
-                        </form>
-                    </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <small class="text-muted d-block">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Información importante:</strong> 
+                                <ul class="mb-0 mt-2">
+                                    <li>Todos los campos marcados con <span class="text-danger">*</span> son obligatorios</li>
+                                    <li>Solo se pueden matricular estudiantes en clases con cupos disponibles</li>
+                                    <li>Cada estudiante solo puede estar matriculado una vez por clase</li>
+                                </ul>
+                            </small>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Confirmar Eliminación (futuro) -->
+<!-- Modal Ver Más Matrícula -->
+<div class="modal fade" id="modalVerMasMatricula" tabindex="-1" aria-labelledby="modalVerMasMatriculaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalVerMasMatriculaLabel">
+          <i class="fas fa-graduation-cap me-2"></i>Detalles de la Matrícula
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3"><i class="fas fa-user me-2"></i>Información del Estudiante</h6>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item px-0"><strong>Nombre:</strong> <span id="vermas-estudiante-nombre"></span></li>
+              <li class="list-group-item px-0"><strong>Cédula:</strong> <span id="vermas-estudiante-cedula"></span></li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3"><i class="fas fa-book me-2"></i>Información del Curso</h6>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item px-0"><strong>Curso:</strong> <span id="vermas-curso-nombre"></span></li>
+              <li class="list-group-item px-0"><strong>Precio:</strong> $<span id="vermas-curso-precio"></span></li>
+              <li class="list-group-item px-0"><strong>Profesor:</strong> <span id="vermas-profesor-nombre"></span></li>
+            </ul>
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3"><i class="fas fa-calendar-alt me-2"></i>Información de la Clase</h6>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item px-0"><strong>Fecha:</strong> <span id="vermas-clase-fecha"></span></li>
+              <li class="list-group-item px-0"><strong>Horario:</strong> <span id="vermas-clase-hora"></span></li>
+              <li class="list-group-item px-0"><strong>Aula:</strong> <span id="vermas-clase-aula"></span></li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-muted mb-3"><i class="fas fa-clipboard me-2"></i>Información de la Matrícula</h6>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item px-0"><strong>Fecha Matrícula:</strong> <span id="vermas-matricula-fecha"></span></li>
+              <li class="list-group-item px-0"><strong>Estado:</strong> <span id="vermas-matricula-estado"></span></li>
+            </ul>
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-12">
+            <h6 class="text-muted mb-3"><i class="fas fa-comment-alt me-2"></i>Observaciones</h6>
+            <p class="text-muted" id="vermas-matricula-observaciones"></p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmar Eliminación -->
 <div class="modal fade" id="modalConfirmarEliminarMatricula" tabindex="-1" aria-labelledby="modalConfirmarEliminarMatriculaLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -149,55 +412,361 @@
   </div>
 </div>
 
-<script>
-    // Modal Confirmar Eliminación
-    document.querySelectorAll('.btn-eliminar-matricula').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('eliminar-nombre-estudiante').textContent = btn.getAttribute('data-estudiante-nombre') || '';
-            document.getElementById('eliminar_matricula_id').value = btn.getAttribute('data-matricula-id') || '';
-            var modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminarMatricula'));
-            modal.show();
-        });
-    });
-
-    // Filtro por cédula de estudiante en matrículas
-    document.addEventListener('DOMContentLoaded', function() {
-      const buscarCedula = document.getElementById('buscarCedulaMatricula');
-      const limpiarBtn = document.getElementById('limpiarBusquedaMatriculas');
-      const matriculaRows = document.querySelectorAll('.matricula-row');
-      const resultadosSpan = document.getElementById('resultadosBusquedaMatriculas');
-      const totalMatriculas = matriculaRows.length;
-
-      function filtrarMatriculas() {
-        const termino = buscarCedula.value.trim();
-        let visibles = 0;
-        matriculaRows.forEach(row => {
-          const cedula = row.getAttribute('data-cedula') || '';
-          if (!termino || cedula.includes(termino)) {
-            row.style.display = '';
-            visibles++;
-          } else {
-            row.style.display = 'none';
-          }
-        });
-        resultadosSpan.textContent = visibles === totalMatriculas
-          ? `Mostrando ${totalMatriculas} matrícula${totalMatriculas !== 1 ? 's' : ''}`
-          : `Mostrando ${visibles} de ${totalMatriculas} matrícula${totalMatriculas !== 1 ? 's' : ''}`;
-      }
-      buscarCedula.addEventListener('input', filtrarMatriculas);
-      limpiarBtn.addEventListener('click', function() {
-        buscarCedula.value = '';
-        filtrarMatriculas();
-        buscarCedula.focus();
-      });
-      buscarCedula.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          limpiarBtn.click();
+<style>
+    /* Estilos modernos para el navbar */
+    .navbar {
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        animation: slideInFromTop 0.8s ease-out;
+        margin-bottom: 2rem;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .navbar:hover {
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    
+    /* Estilos para los botones de navegación */
+    .nav-link.btn {
+        border-radius: 10px !important;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        min-width: 150px;
+    }
+    
+    .nav-link.btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+    
+    .nav-link.btn.active-nav {
+        background: linear-gradient(135deg, #007bff, #0056b3) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+    }
+    
+    .nav-link.btn.active-nav:hover {
+        background: linear-gradient(135deg, #0056b3, #004085) !important;
+        box-shadow: 0 8px 25px rgba(0,123,255,0.5);
+    }
+    
+    /* Animaciones para iconos */
+    .nav-link.btn i {
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link.btn:hover i {
+        transform: rotate(360deg) scale(1.2);
+    }
+    
+    .nav-link.btn.active-nav i {
+        animation: pulse 2s infinite;
+    }
+    
+    /* Efectos de entrada */
+    .navbar {
+        animation: slideInFromTop 0.8s ease-out;
+    }
+    
+    @keyframes slideInFromTop {
+        0% {
+            opacity: 0;
+            transform: translateY(-50px);
         }
-      });
-      filtrarMatriculas();
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Navbar toggler personalizado */
+    .navbar-toggler {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 1.1rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .navbar-toggler:hover {
+        background: linear-gradient(135deg, #0056b3, #004085);
+        transform: scale(1.1);
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    
+    /* Efectos hover para botones de acción en general */
+    .btn-group .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    /* Transiciones suaves para las tarjetas */
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Efectos de contenido */
+    .vista-contenido {
+        display: none;
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .vista-contenido.active {
+        display: block;
+    }
+    
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Avatar para matrículas */
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #fd7e14, #e63946);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.375rem;
+        margin: 0 2px;
+    }
+    
+    .needs-validation .form-control:valid {
+        border-color: #28a745;
+    }
+    
+    .needs-validation .form-control:invalid {
+        border-color: #dc3545;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .nav-link.btn {
+            margin: 0.25rem 0 !important;
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    // Enhanced form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // Initialize tooltips and setup
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Inicializar la vista por defecto
+        cambiarVista('matriculas');
+        
+        // Inicializar búsqueda de matrículas
+        inicializarBusquedaMatriculas();
+        
+        // Inicializar event listeners para los botones
+        inicializarEventListeners();
     });
+
+    // Función para cambiar entre vistas del navbar
+    function cambiarVista(vistaId) {
+        // Ocultar todas las vistas
+        document.querySelectorAll('.vista-contenido').forEach(vista => {
+            vista.classList.remove('active');
+        });
+        
+        // Remover clase activa de todos los botones
+        document.querySelectorAll('.nav-link.btn').forEach(btn => {
+            btn.classList.remove('active-nav');
+            btn.classList.remove('btn-primary', 'btn-success');
+            if (btn.id === 'matriculas-nav') {
+                btn.classList.add('btn-outline-primary');
+            } else if (btn.id === 'add-matricula-nav') {
+                btn.classList.add('btn-outline-success');
+            }
+        });
+        
+        // Mostrar la vista seleccionada
+        const vistaActiva = document.getElementById(vistaId);
+        if (vistaActiva) {
+            vistaActiva.classList.add('active');
+        }
+        
+        // Activar el botón correspondiente
+        const botonActivo = document.getElementById(vistaId + '-nav');
+        if (botonActivo) {
+            botonActivo.classList.add('active-nav');
+            botonActivo.classList.remove('btn-outline-primary', 'btn-outline-success');
+            if (vistaId === 'matriculas') {
+                botonActivo.classList.add('btn-primary');
+            } else if (vistaId === 'add-matricula') {
+                botonActivo.classList.add('btn-success');
+            }
+        }
+        
+        // Colapsar el navbar en móviles
+        const navbarCollapse = document.getElementById('navbarMatricula');
+        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+            const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+            bsCollapse.hide();
+        }
+    }
+
+    // Función para inicializar event listeners de botones
+    function inicializarEventListeners() {
+        // Modal Ver Más Matrícula
+        document.querySelectorAll('.btn-ver-mas-matricula').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.getElementById('vermas-estudiante-nombre').textContent = btn.getAttribute('data-estudiante-nombre') || '';
+                document.getElementById('vermas-estudiante-cedula').textContent = btn.getAttribute('data-estudiante-cedula') || '';
+                document.getElementById('vermas-curso-nombre').textContent = btn.getAttribute('data-curso-nombre') || '';
+                document.getElementById('vermas-curso-precio').textContent = btn.getAttribute('data-curso-precio') || '';
+                document.getElementById('vermas-profesor-nombre').textContent = btn.getAttribute('data-profesor-nombre') || '';
+                document.getElementById('vermas-clase-fecha').textContent = btn.getAttribute('data-clase-fecha') || '';
+                document.getElementById('vermas-clase-hora').textContent = btn.getAttribute('data-clase-hora') || '';
+                document.getElementById('vermas-clase-aula').textContent = btn.getAttribute('data-clase-aula') || '';
+                document.getElementById('vermas-matricula-fecha').textContent = btn.getAttribute('data-matricula-fecha') || '';
+                document.getElementById('vermas-matricula-estado').textContent = btn.getAttribute('data-matricula-estado') || '';
+                document.getElementById('vermas-matricula-observaciones').textContent = btn.getAttribute('data-matricula-observaciones') || '';
+                var modal = new bootstrap.Modal(document.getElementById('modalVerMasMatricula'));
+                modal.show();
+            });
+        });
+
+        // Modal Confirmar Eliminación
+        document.querySelectorAll('.btn-eliminar-matricula').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('eliminar-nombre-estudiante').textContent = btn.getAttribute('data-estudiante-nombre') || '';
+                document.getElementById('eliminar_matricula_id').value = btn.getAttribute('data-matricula-id') || '';
+                var modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminarMatricula'));
+                modal.show();
+            });
+        });
+    }
+
+    // Función para inicializar la búsqueda de matrículas
+    function inicializarBusquedaMatriculas() {
+        const buscarCedula = document.getElementById('buscarCedulaMatricula');
+        const limpiarBtn = document.getElementById('limpiarBusquedaMatriculas');
+        const matriculaRows = document.querySelectorAll('.matricula-row');
+        const resultadosSpan = document.getElementById('resultadosBusquedaMatriculas');
+        const totalMatriculas = matriculaRows.length;
+
+        // Actualizar contador inicial
+        actualizarContadorMatriculas(totalMatriculas, totalMatriculas);
+
+        function filtrarMatriculas() {
+            const termino = buscarCedula.value.trim();
+            let visibles = 0;
+            
+            matriculaRows.forEach(row => {
+                const cedula = row.getAttribute('data-cedula') || '';
+                const cedulaCell = row.querySelector('.cedula-cell');
+                
+                if (!termino || cedula.includes(termino)) {
+                    row.style.display = '';
+                    visibles++;
+                    
+                    // Resaltar coincidencias
+                    if (termino !== '') {
+                        const cedulaOriginal = row.getAttribute('data-cedula');
+                        const regex = new RegExp(`(${termino})`, 'gi');
+                        const cedulaResaltada = cedulaOriginal.replace(regex, '<mark class="bg-warning">$1</mark>');
+                        cedulaCell.innerHTML = cedulaResaltada;
+                    } else {
+                        cedulaCell.innerHTML = row.getAttribute('data-cedula');
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Mostrar mensaje si no hay resultados
+            const sinResultadosDiv = document.getElementById('sin-resultados-matriculas');
+            if (visibles === 0 && termino !== '') {
+                sinResultadosDiv.classList.remove('d-none');
+            } else {
+                sinResultadosDiv.classList.add('d-none');
+            }
+            
+            actualizarContadorMatriculas(visibles, totalMatriculas);
+        }
+
+        function actualizarContadorMatriculas(visibles, total) {
+            if (visibles === total) {
+                resultadosSpan.textContent = `Mostrando ${total} matrícula${total !== 1 ? 's' : ''}`;
+            } else {
+                resultadosSpan.textContent = `Mostrando ${visibles} de ${total} matrícula${total !== 1 ? 's' : ''}`;
+            }
+        }
+
+        function limpiarBusquedaMatriculas() {
+            buscarCedula.value = '';
+            filtrarMatriculas();
+            buscarCedula.focus();
+        }
+
+        // Event listeners
+        if (buscarCedula) buscarCedula.addEventListener('input', filtrarMatriculas);
+        if (limpiarBtn) limpiarBtn.addEventListener('click', limpiarBusquedaMatriculas);
+        
+        if (buscarCedula) {
+            buscarCedula.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    limpiarBusquedaMatriculas();
+                }
+            });
+        }
+    }
 </script>
 
 {% endblock %}

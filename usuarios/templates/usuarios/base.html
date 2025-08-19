@@ -19,8 +19,8 @@
         --secondary-color: #764ba2;      /* Color secundario (púrpura) */
         
         /* 📏 Dimensiones del layout */
-        --sidebar-width: 280px;          /* Ancho del sidebar (cambiar para hacer más/menos ancho) */
-        --header-height: 70px;           /* Altura del header */
+        --sidebar-width: 260px;          /* Ancho del sidebar (reducido de 280px) */
+        --header-height: 60px;           /* Altura del header (reducido de 70px) */
         
         /* 🌈 Colores de fondo y texto */
         --bg-light: #f8fafc;             /* Color de fondo principal */
@@ -71,7 +71,7 @@
          🏢 HEADER DEL SIDEBAR - Logo y título
          ========================================== */
       .sidebar-header {
-        padding: 2rem 1.5rem 1.5rem;
+        padding: 1.25rem 1rem 1rem;             /* Reducido de 2rem 1.5rem 1.5rem */
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         background: rgba(255, 255, 255, 0.05);  /* 🎨 Fondo semi-transparente */
       }
@@ -79,15 +79,15 @@
       .sidebar-header .logo {
         display: flex;
         align-items: center;
-        font-size: 1.5rem;                      /* 📏 Tamaño del título */
+        font-size: 1.25rem;                      /* Reducido de 1.5rem */
         font-weight: 700;
         color: white;
         text-decoration: none;
       }
 
       .sidebar-header .logo i {
-        font-size: 2rem;                        /* 📏 Tamaño del icono musical */
-        margin-right: 0.75rem;
+        font-size: 1.5rem;                        /* Reducido de 2rem */
+        margin-right: 0.5rem;                     /* Reducido de 0.75rem */
         /* 🌈 Gradiente del icono musical */
         background: linear-gradient(45deg, #fff, #e2e8f0);
         -webkit-background-clip: text;
@@ -100,29 +100,30 @@
          ========================================== */
       .sidebar-nav {
         flex: 1;
-        padding: 1rem 0;
+        padding: 0.75rem 0;                      /* Reducido de 1rem 0 */
         overflow-y: auto;
       }
 
       .sidebar-nav .nav-link {
         display: flex;
         align-items: center;
-        padding: 0.875rem 1.5rem;              /* 📏 Espaciado de los links */
-        color: rgba(255, 255, 255, 0.8);       /* 🎨 Color de links inactivos */
+        padding: 0.625rem 1rem;                  /* Reducido de 0.875rem 1.5rem */
+        color: rgba(255, 255, 255, 0.8);        /* 🎨 Color de links inactivos */
         text-decoration: none;
         font-weight: 500;
-        transition: all 0.3s ease;             /* ⚡ Velocidad de transición */
+        font-size: 0.875rem;                     /* Añadido para texto más pequeño */
+        transition: all 0.3s ease;              /* ⚡ Velocidad de transición */
         border: none;
         background: none;
-        margin: 0.125rem 0.75rem;
-        border-radius: 0.75rem;                /* 📐 Redondez de los botones */
+        margin: 0.075rem 0.5rem;                 /* Reducido de 0.125rem 0.75rem */
+        border-radius: 0.5rem;                   /* Reducido de 0.75rem */
         position: relative;
       }
 
       .sidebar-nav .nav-link i {
-        width: 20px;
-        margin-right: 0.75rem;
-        font-size: 1.125rem;                   /* 📏 Tamaño de iconos */
+        width: 18px;                             /* Reducido de 20px */
+        margin-right: 0.5rem;                    /* Reducido de 0.75rem */
+        font-size: 1rem;                         /* Reducido de 1.125rem */
         text-align: center;
       }
 
@@ -145,8 +146,8 @@
         left: 0;
         top: 50%;
         transform: translateY(-50%);
-        width: 4px;                            /* 📏 Grosor del indicador */
-        height: 24px;                          /* 📏 Altura del indicador */
+        width: 3px;                            /* Reducido de 4px */
+        height: 20px;                          /* Reducido de 24px */
         background: white;                     /* 🎨 Color del indicador */
         border-radius: 0 4px 4px 0;
       }
@@ -155,7 +156,7 @@
          👤 FOOTER DEL SIDEBAR - Información del usuario
          ========================================== */
       .sidebar-footer {
-        padding: 1.5rem;
+        padding: 1rem;                           /* Reducido de 1.5rem */
         border-top: 1px solid rgba(255, 255, 255, 0.1);
         background: rgba(0, 0, 0, 0.1);
       }
@@ -163,9 +164,9 @@
       .user-dropdown {
         display: flex;
         align-items: center;
-        padding: 0.75rem;
+        padding: 0.5rem;                         /* Reducido de 0.75rem */
         background: rgba(255, 255, 255, 0.1);   /* 🎨 Fondo del área de usuario */
-        border-radius: 0.75rem;
+        border-radius: 0.5rem;                   /* Reducido de 0.75rem */
         color: white;
         text-decoration: none;
         transition: all 0.3s ease;
@@ -177,16 +178,17 @@
       }
 
       .user-avatar {
-        width: 40px;                            /* 📏 Tamaño del avatar */
-        height: 40px;
+        width: 32px;                            /* Reducido de 40px */
+        height: 32px;                           /* Reducido de 40px */
         /* 🌈 Gradiente del avatar */
         background: linear-gradient(45deg, #fff, #e2e8f0);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 0.75rem;
+        margin-right: 0.5rem;                   /* Reducido de 0.75rem */
         font-weight: 600;
+        font-size: 0.75rem;                     /* Añadido para texto más pequeño */
         color: var(--primary-color);
       }
 
@@ -196,12 +198,12 @@
 
       .user-name {
         font-weight: 600;
-        font-size: 0.875rem;                    /* 📏 Tamaño del nombre */
+        font-size: 0.8rem;                      /* Reducido de 0.875rem */
         line-height: 1.2;
       }
 
       .user-role {
-        font-size: 0.75rem;                     /* 📏 Tamaño del rol */
+        font-size: 0.7rem;                      /* Reducido de 0.75rem */
         opacity: 0.8;
       }
 
@@ -216,7 +218,7 @@
 
       .content-header {
         background: white;                      /* 🎨 Fondo del header */
-        padding: 1.5rem 2rem;                  /* 📏 Espaciado del header */
+        padding: 1.25rem 2rem;                  /* Reducido de 1.5rem 2rem */
         border-bottom: 1px solid var(--border-color);
         box-shadow: var(--shadow-sm);
         position: sticky;
@@ -226,13 +228,13 @@
 
       .content-header h1 {
         margin: 0;
-        font-size: 1.875rem;                   /* 📏 Tamaño del título principal */
+        font-size: 1.75rem;                     /* Reducido de 1.875rem */
         font-weight: 700;
         color: #1e293b;
       }
 
       .content-body {
-        padding: 2rem;                         /* 📏 Espaciado del contenido */
+        padding: 1.5rem;                        /* Reducido de 2rem */
       }
 
       /* ==========================================
@@ -429,7 +431,7 @@
           <i class="fas fa-music"></i>
           <div>
             <div>Academia Musical</div>
-            <small style="font-size: 0.75rem; opacity: 0.8;">Panel Admin</small>
+            <small style="font-size: 0.65rem; opacity: 0.8;">Panel Admin</small>
           </div>
         </a>
       </div>

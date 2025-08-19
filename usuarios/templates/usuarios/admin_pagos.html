@@ -1,80 +1,267 @@
 {% extends 'usuarios/base.html' %}
 {% load static %}
-{% block title %}Panel Administrador - Pagos{% endblock %}
+{% block title %}Pagos{% endblock %}
 {% block content %}
 
-<div class="main-content">
-    <div class="container mt-5">
-        <h2 class="mb-4">Pagos</h2>
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <label for="buscarCedulaPago" class="form-label small">Filtrar por cédula del estudiante:</label>
-                <input type="text" class="form-control form-control-sm" id="buscarCedulaPago" placeholder="Ej: 0102030405">
-            </div>
-            <div class="col-md-8 d-flex align-items-end">
-                <span id="resultadosBusquedaPagos" class="text-muted small"></span>
-                <button class="btn btn-outline-secondary btn-sm ms-2" type="button" id="limpiarBusquedaPagos">
-                    <i class="fas fa-times"></i> Limpiar
-                </button>
-            </div>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Estudiante</th>
-                        <th>Cédula</th>
-                        <th>Curso</th>
-                        <th>Fecha Matrícula</th>
-                        <th>Monto</th>
-                        <th>Monto restante</th> <!-- NUEVA COLUMNA -->
-                        <th>Fecha Pago</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="pagos-tbody">
-                    {% for pago in pagos %}
-                    <tr class="pago-row" data-cedula="{{ pago.matricula.estudiante.cedula|default:'' }}">
-                        <td>{{ pago.matricula.estudiante.get_full_name }}</td>
-                        <td>{{ pago.matricula.estudiante.cedula }}</td>
-                        <td>{{ pago.matricula.clase.curso.nombre }}</td>
-                        <td>{{ pago.matricula.fecha_matricula }}</td>
-                        <td>${{ pago.monto }}</td>
-                        <td>
-                            ${{ pago.saldo_pendiente|floatformat:2 }}
-                        </td>
-                        <td>{{ pago.fecha_pago }}</td>
-                        <td>
-                            <span class="badge {% if pago.estado == 'PAGADO' %}bg-success{% elif pago.estado == 'CANCELADO' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
-                                {{ pago.get_estado_display }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if pago.estado == 'PENDIENTE' %}
-                                <button class="btn btn-sm btn-success btn-procesar-pago"
-                                        data-pago-id="{{ pago.id }}"
-                                        data-matricula-id="{{ pago.matricula.id }}"
-                                        data-monto-pendiente="{{ pago.saldo_pendiente|floatformat:2 }}"
-                                        data-estudiante="{{ pago.matricula.estudiante.get_full_name }}"
-                                        data-cedula="{{ pago.matricula.estudiante.cedula }}"
-                                        data-curso="{{ pago.matricula.clase.curso.nombre }}">
-                                    Procesar
-                                </button>
-                            {% endif %}
-                            <button class="btn btn-sm btn-info btn-ver-mas-pago"
-                                    data-pago-id="{{ pago.id }}">
-                                Ver más
+<div class="content-header">
+    <h1><i class="fas fa-credit-card me-3"></i>Gestión de Pagos</h1>
+</div>
+
+<div class="content-body">
+    <!-- Navbar de navegación -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+                <div class="container-fluid px-0">
+                    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPago" aria-controls="navbarPago" aria-expanded="false" aria-label="Toggle navigation">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarPago">
+                        <div class="navbar-nav w-100 d-flex flex-row justify-content-center">
+                            <button type="button" class="nav-link btn btn-outline-primary mx-2 px-4 py-2 fw-bold" id="pagos-nav" onclick="cambiarVista('pagos')">
+                                <i class="fas fa-list me-2"></i>Lista de Pagos
                             </button>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="9" class="text-center">No hay pagos registrados.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            <button type="button" class="nav-link btn btn-outline-success mx-2 px-4 py-2 fw-bold" id="reportes-nav" onclick="cambiarVista('reportes')">
+                                <i class="fas fa-chart-bar me-2"></i>Reportes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <div class="contenido-vistas">
+        <!-- VISTA: Lista de Pagos -->
+        <div class="vista-contenido active" id="pagos">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-credit-card me-2 text-primary"></i>Pagos Registrados</h5>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0 ps-0" id="buscarCedulaPago" placeholder="Buscar por cédula...">
+                                    <button class="btn btn-outline-secondary" type="button" id="limpiarBusquedaPagos">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtros de pagos -->
+                    <div class="row mt-3">
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-estado" class="form-label text-muted small">Filtrar por estado</label>
+                            <select class="form-select form-select-sm" id="filtro-estado">
+                                <option value="">Todos los estados</option>
+                                <option value="PENDIENTE">Pendiente</option>
+                                <option value="PAGADO">Pagado</option>
+                                <option value="CANCELADO">Cancelado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-curso" class="form-label text-muted small">Filtrar por curso</label>
+                            <select class="form-select form-select-sm" id="filtro-curso">
+                                <option value="">Todos los cursos</option>
+                                {% for pago in pagos %}
+                                    <option value="{{ pago.matricula.clase.curso.nombre }}">{{ pago.matricula.clase.curso.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-monto-min" class="form-label text-muted small">Monto mínimo</label>
+                            <input type="number" class="form-control form-control-sm" id="filtro-monto-min" min="0" step="0.01" placeholder="Ej: 50.00">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtro-fecha" class="form-label text-muted small">Fecha de pago</label>
+                            <input type="date" class="form-control form-control-sm" id="filtro-fecha">
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <small class="text-muted" id="resultadosBusquedaPagos">Cargando pagos...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Pagos -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="tablaPagos">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 fw-bold text-muted">ESTUDIANTE</th>
+                                    <th class="border-0 fw-bold text-muted">CURSO</th>
+                                    <th class="border-0 fw-bold text-muted">MONTOS</th>
+                                    <th class="border-0 fw-bold text-muted">FECHA PAGO</th>
+                                    <th class="border-0 fw-bold text-muted">ESTADO</th>
+                                    <th class="border-0 fw-bold text-muted text-center">ACCIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pagos-tbody">
+                                {% for pago in pagos %}
+                                <tr class="pago-row" 
+                                    data-cedula="{{ pago.matricula.estudiante.cedula|default:'' }}"
+                                    data-estado="{{ pago.estado }}"
+                                    data-curso="{{ pago.matricula.clase.curso.nombre }}"
+                                    data-monto="{{ pago.monto }}"
+                                    data-fecha="{{ pago.fecha_pago|date:'Y-m-d' }}">
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-3">
+                                                <i class="fas fa-user-graduate"></i>
+                                            </div>
+                                            <div>
+                                                <strong class="estudiante-cell">{{ pago.matricula.estudiante.get_full_name }}</strong>
+                                                <br>
+                                                <small class="text-muted cedula-cell">{{ pago.matricula.estudiante.cedula }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-primary text-white fs-6 px-3 py-2">{{ pago.matricula.clase.curso.nombre }}</span>
+                                        <br>
+                                        <small class="text-muted mt-1">{{ pago.matricula.fecha_matricula|date:"d/m/Y" }}</small>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex flex-column">
+                                            <span class="badge bg-success text-white fs-6 px-3 py-2 mb-1">${{ pago.monto }}</span>
+                                            <small class="text-muted">Restante: ${{ pago.saldo_pendiente|floatformat:2 }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex flex-column">
+                                            <strong>{{ pago.fecha_pago|date:"d/m/Y" }}</strong>
+                                            <small class="text-muted">{{ pago.fecha_pago|time:"H:i" }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if pago.estado == 'PAGADO' %}
+                                            <span class="badge bg-success text-white fs-6 px-3 py-2">{{ pago.get_estado_display }}</span>
+                                        {% elif pago.estado == 'CANCELADO' %}
+                                            <span class="badge bg-danger text-white fs-6 px-3 py-2">{{ pago.get_estado_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">{{ pago.get_estado_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-info btn-ver-mas-pago"
+                                                data-pago-id="{{ pago.id }}"
+                                                data-bs-toggle="tooltip" title="Ver historial">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {% if pago.estado == 'PENDIENTE' %}
+                                                <button class="btn btn-sm btn-outline-success btn-procesar-pago"
+                                                    data-pago-id="{{ pago.id }}"
+                                                    data-matricula-id="{{ pago.matricula.id }}"
+                                                    data-monto-pendiente="{{ pago.saldo_pendiente|floatformat:2 }}"
+                                                    data-estudiante="{{ pago.matricula.estudiante.get_full_name }}"
+                                                    data-cedula="{{ pago.matricula.estudiante.cedula }}"
+                                                    data-curso="{{ pago.matricula.clase.curso.nombre }}"
+                                                    data-bs-toggle="tooltip" title="Procesar pago">
+                                                    <i class="fas fa-dollar-sign"></i>
+                                                </button>
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-outline-primary btn-generar-factura"
+                                                onclick="window.open('/reportes/factura_pago/{{ pago.id }}/', '_blank')"
+                                                data-bs-toggle="tooltip" title="Generar factura">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="fas fa-credit-card fa-3x mb-3"></i>
+                                            <h5>No hay pagos registrados</h5>
+                                            <p>Los pagos aparecerán automáticamente cuando se registren matrículas.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje cuando no hay resultados de búsqueda -->
+            <div id="sin-resultados-pagos" class="alert alert-info border-0 shadow-sm text-center d-none mt-4">
+                <i class="fas fa-search fa-2x mb-3 text-info"></i>
+                <h5>No se encontraron pagos</h5>
+                <p class="mb-0">No se encontraron pagos con los criterios especificados.</p>
+            </div>
+
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center" id="pagos-pagination">
+                    <!-- Paginación generada por JS -->
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- VISTA: Reportes -->
+        <div class="vista-contenido" id="reportes">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-chart-bar me-2 text-success"></i>Reportes de Pagos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                                    <h5>Total Recaudado</h5>
+                                    <h3>${{ total_recaudado|floatformat:2 }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-warning text-dark">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-clock fa-2x mb-2"></i>
+                                    <h5>Pagos Pendientes</h5>
+                                    <h3>{{ pagos_pendientes }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                    <h5>Pagos Completados</h5>
+                                    <h3>{{ pagos_completados }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <small class="text-muted d-block">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Información de reportes:</strong> 
+                            <ul class="mb-0 mt-2">
+                                <li>Los reportes se actualizan en tiempo real</li>
+                                <li>Puede generar facturas individuales desde la lista de pagos</li>
+                                <li>Los pagos pendientes requieren procesamiento manual</li>
+                            </ul>
+                        </small>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -86,31 +273,56 @@
       <form method="POST" action="{% url 'admin_pagos' %}" id="form-procesar-pago">
         {% csrf_token %}
         <div class="modal-header">
-          <h5 class="modal-title" id="modalProcesarPagoLabel">Procesar Pago</h5>
+          <h5 class="modal-title" id="modalProcesarPagoLabel">
+            <i class="fas fa-dollar-sign me-2"></i>Procesar Pago
+          </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" name="matricula" id="modal_matricula_id">
           <input type="hidden" name="pago_id" id="modal_pago_id">
-          <div class="mb-2">
-            <strong>Estudiante:</strong> <span id="modal_estudiante"></span><br>
-            <strong>Cédula:</strong> <span id="modal_cedula"></span><br>
-            <strong>Curso:</strong> <span id="modal_curso"></span>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <h6 class="text-muted mb-3"><i class="fas fa-user me-2"></i>Información del Estudiante</h6>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item px-0"><strong>Nombre:</strong> <span id="modal_estudiante"></span></li>
+                <li class="list-group-item px-0"><strong>Cédula:</strong> <span id="modal_cedula"></span></li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-muted mb-3"><i class="fas fa-book me-2"></i>Información del Curso</h6>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item px-0"><strong>Curso:</strong> <span id="modal_curso"></span></li>
+                <li class="list-group-item px-0"><strong>Pendiente:</strong> $<span id="modal_monto_pendiente"></span></li>
+              </ul>
+            </div>
           </div>
+          
+          <hr>
+          
           <div class="mb-3">
-            <label for="modal_monto" class="form-label">Monto a pagar</label>
-            <input type="number" class="form-control" id="modal_monto" name="monto" min="0" step="0.01" required>
-            <div class="form-text text-muted">Monto pendiente: $<span id="modal_monto_pendiente"></span></div>
+            <label for="modal_monto" class="form-label fw-bold">
+              <i class="fas fa-money-bill-wave me-2 text-success"></i>Monto a pagar
+              <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" class="form-control" id="modal_monto" name="monto" min="0" step="0.01" required>
+            </div>
+            <div class="form-text text-success">Monto pendiente: $<span id="modal_monto_pendiente_text"></span></div>
           </div>
+          
           <div class="mb-3 d-none">
-  <label for="modal_observaciones" class="form-label">Observaciones</label>
-  <textarea class="form-control" id="modal_observaciones" name="observaciones"></textarea>
-</div>
-
+            <label for="modal_observaciones" class="form-label">Observaciones</label>
+            <textarea class="form-control" id="modal_observaciones" name="observaciones" rows="3" placeholder="Observaciones adicionales sobre el pago..."></textarea>
+          </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Procesar Pago</button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-check me-2"></i>Procesar Pago
+          </button>
         </div>
       </form>
     </div>
@@ -122,7 +334,9 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modalVerMasPagoLabel">Historial de Pagos</h5>
+        <h5 class="modal-title" id="modalVerMasPagoLabel">
+          <i class="fas fa-history me-2"></i>Historial de Pagos
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
@@ -176,136 +390,424 @@
     }
 </script>
 
-<script>
-    // Filtro por cédula de estudiante en pagos
-    document.addEventListener('DOMContentLoaded', function() {
-      const buscarCedula = document.getElementById('buscarCedulaPago');
-      const limpiarBtn = document.getElementById('limpiarBusquedaPagos');
-      const pagoRows = document.querySelectorAll('.pago-row');
-      const resultadosSpan = document.getElementById('resultadosBusquedaPagos');
-      const totalPagos = pagoRows.length;
-
-      function filtrarPagos() {
-        const termino = buscarCedula.value.trim();
-        let visibles = 0;
-        pagoRows.forEach(row => {
-          const cedula = row.getAttribute('data-cedula') || '';
-          if (!termino || cedula.includes(termino)) {
-            row.style.display = '';
-            visibles++;
-          } else {
-            row.style.display = 'none';
-          }
-        });
-        resultadosSpan.textContent = visibles === totalPagos
-          ? `Mostrando ${totalPagos} pago${totalPagos !== 1 ? 's' : ''}`
-          : `Mostrando ${visibles} de ${totalPagos} pago${totalPagos !== 1 ? 's' : ''}`;
-      }
-      buscarCedula.addEventListener('input', filtrarPagos);
-      limpiarBtn.addEventListener('click', function() {
-        buscarCedula.value = '';
-        filtrarPagos();
-        buscarCedula.focus();
-      });
-      buscarCedula.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-          limpiarBtn.click();
+<style>
+    /* Estilos modernos para el navbar */
+    .navbar {
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        animation: slideInFromTop 0.8s ease-out;
+        margin-bottom: 2rem;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .navbar:hover {
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+    
+    /* Estilos para los botones de navegación */
+    .nav-link.btn {
+        border-radius: 10px !important;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        min-width: 150px;
+    }
+    
+    .nav-link.btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+    
+    .nav-link.btn.active-nav {
+        background: linear-gradient(135deg, #007bff, #0056b3) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+    }
+    
+    .nav-link.btn.active-nav:hover {
+        background: linear-gradient(135deg, #0056b3, #004085) !important;
+        box-shadow: 0 8px 25px rgba(0,123,255,0.5);
+    }
+    
+    /* Animaciones para iconos */
+    .nav-link.btn i {
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link.btn:hover i {
+        transform: rotate(360deg) scale(1.2);
+    }
+    
+    .nav-link.btn.active-nav i {
+        animation: pulse 2s infinite;
+    }
+    
+    /* Efectos de entrada */
+    .navbar {
+        animation: slideInFromTop 0.8s ease-out;
+    }
+    
+    @keyframes slideInFromTop {
+        0% {
+            opacity: 0;
+            transform: translateY(-50px);
         }
-      });
-      filtrarPagos();
-    });
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Navbar toggler personalizado */
+    .navbar-toggler {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 1.1rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .navbar-toggler:hover {
+        background: linear-gradient(135deg, #0056b3, #004085);
+        transform: scale(1.1);
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    
+    /* Efectos hover para botones de acción en general */
+    .btn-group .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    /* Transiciones suaves para las tarjetas */
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Efectos de contenido */
+    .vista-contenido {
+        display: none;
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    .vista-contenido.active {
+        display: block;
+    }
+    
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Avatar para pagos */
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #28a745, #ffc107);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.375rem;
+        margin: 0 2px;
+    }
+    
+    .needs-validation .form-control:valid {
+        border-color: #28a745;
+    }
+    
+    .needs-validation .form-control:invalid {
+        border-color: #dc3545;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .nav-link.btn {
+            margin: 0.25rem 0 !important;
+            width: 100%;
+        }
+    }
+</style>
 
-    // Procesar pago desde la tabla (abre modal)
-    document.querySelectorAll('.btn-procesar-pago').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            document.getElementById('modal_pago_id').value = btn.getAttribute('data-pago-id');
-            document.getElementById('modal_matricula_id').value = btn.getAttribute('data-matricula-id');
-            document.getElementById('modal_estudiante').textContent = btn.getAttribute('data-estudiante');
-            document.getElementById('modal_cedula').textContent = btn.getAttribute('data-cedula');
-            document.getElementById('modal_curso').textContent = btn.getAttribute('data-curso');
-            document.getElementById('modal_monto').value = btn.getAttribute('data-monto-pendiente');
-            document.getElementById('modal_monto_pendiente').textContent = btn.getAttribute('data-monto-pendiente');
-            document.getElementById('modal_observaciones').value = '';
-            var modal = new bootstrap.Modal(document.getElementById('modalProcesarPago'));
-            modal.show();
+<script>
+    // Enhanced form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // Initialize tooltips and setup
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+        
+        // Inicializar la vista por defecto
+        cambiarVista('pagos');
+        
+        // Inicializar búsqueda de pagos
+        inicializarBusquedaPagos();
+        
+        // Inicializar event listeners para los botones
+        inicializarEventListeners();
     });
 
-    // Ver más pagos (abre modal con historial de pagos parciales, muestra monto inicial y monto restante)
-    document.querySelectorAll('.btn-ver-mas-pago').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            const pagoId = btn.getAttribute('data-pago-id');
-            let pagosParciales = {};
-            try {
-                const jsonText = document.getElementById('pagos-parciales-json').textContent;
-                pagosParciales = JSON.parse(jsonText);
-            } catch (e) {
-                pagosParciales = {};
+    // Función para cambiar entre vistas del navbar
+    function cambiarVista(vistaId) {
+        // Ocultar todas las vistas
+        document.querySelectorAll('.vista-contenido').forEach(vista => {
+            vista.classList.remove('active');
+        });
+        
+        // Remover clase activa de todos los botones
+        document.querySelectorAll('.nav-link.btn').forEach(btn => {
+            btn.classList.remove('active-nav');
+            btn.classList.remove('btn-primary', 'btn-success');
+            if (btn.id === 'pagos-nav') {
+                btn.classList.add('btn-outline-primary');
+            } else if (btn.id === 'reportes-nav') {
+                btn.classList.add('btn-outline-success');
             }
-            // Obtener monto inicial y monto restante del pago principal
-            let pagosHistorial = {};
-            try {
-                const jsonText2 = document.getElementById('pagos-historial-json').textContent;
-                pagosHistorial = JSON.parse(jsonText2);
-            } catch (e) {
-                pagosHistorial = {};
+        });
+        
+        // Mostrar la vista seleccionada
+        const vistaActiva = document.getElementById(vistaId);
+        if (vistaActiva) {
+            vistaActiva.classList.add('active');
+        }
+        
+        // Activar el botón correspondiente
+        const botonActivo = document.getElementById(vistaId + '-nav');
+        if (botonActivo) {
+            botonActivo.classList.add('active-nav');
+            botonActivo.classList.remove('btn-outline-primary', 'btn-outline-success');
+            if (vistaId === 'pagos') {
+                botonActivo.classList.add('btn-primary');
+            } else if (vistaId === 'reportes') {
+                botonActivo.classList.add('btn-success');
             }
-            let montoInicial = '';
-            let montoRestante = '';
-            for (const matriculaId in pagosHistorial) {
-                const pagos = pagosHistorial[matriculaId];
-                const pagoPorId = pagos.find(p => p.monto && btn.getAttribute('data-pago-id') == pagoId);
-                if (pagoPorId) {
-                    montoInicial = pagoPorId.monto;
-                    // Buscar el pago principal en la tabla para obtener el monto restante
+        }
+        
+        // Colapsar el navbar en móviles
+        const navbarCollapse = document.getElementById('navbarPago');
+        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+            const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+            bsCollapse.hide();
+        }
+    }
+
+    // Función para inicializar event listeners de botones
+    function inicializarEventListeners() {
+        // Procesar pago desde la tabla (abre modal)
+        document.querySelectorAll('.btn-procesar-pago').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.getElementById('modal_pago_id').value = btn.getAttribute('data-pago-id');
+                document.getElementById('modal_matricula_id').value = btn.getAttribute('data-matricula-id');
+                document.getElementById('modal_estudiante').textContent = btn.getAttribute('data-estudiante');
+                document.getElementById('modal_cedula').textContent = btn.getAttribute('data-cedula');
+                document.getElementById('modal_curso').textContent = btn.getAttribute('data-curso');
+                document.getElementById('modal_monto').value = btn.getAttribute('data-monto-pendiente');
+                document.getElementById('modal_monto_pendiente').textContent = btn.getAttribute('data-monto-pendiente');
+                document.getElementById('modal_monto_pendiente_text').textContent = btn.getAttribute('data-monto-pendiente');
+                document.getElementById('modal_observaciones').value = '';
+                var modal = new bootstrap.Modal(document.getElementById('modalProcesarPago'));
+                modal.show();
+            });
+        });
+
+        // Ver más pagos (abre modal con historial de pagos parciales)
+        document.querySelectorAll('.btn-ver-mas-pago').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const pagoId = btn.getAttribute('data-pago-id');
+                let pagosParciales = {};
+                try {
+                    const jsonText = document.getElementById('pagos-parciales-json').textContent;
+                    pagosParciales = JSON.parse(jsonText);
+                } catch (e) {
+                    pagosParciales = {};
+                }
+                // Obtener monto inicial y monto restante del pago principal
+                let pagosHistorial = {};
+                try {
+                    const jsonText2 = document.getElementById('pagos-historial-json').textContent;
+                    pagosHistorial = JSON.parse(jsonText2);
+                } catch (e) {
+                    pagosHistorial = {};
+                }
+                let montoInicial = '';
+                let montoRestante = '';
+                for (const matriculaId in pagosHistorial) {
+                    const pagos = pagosHistorial[matriculaId];
+                    const pagoPorId = pagos.find(p => p.monto && btn.getAttribute('data-pago-id') == pagoId);
+                    if (pagoPorId) {
+                        montoInicial = pagoPorId.monto;
+                        // Buscar el pago principal en la tabla para obtener el monto restante
+                        const pagoRow = btn.closest('tr');
+                        if (pagoRow) {
+                            montoRestante = pagoRow.querySelector('td:nth-child(6)').textContent.replace('$', '').trim();
+                        }
+                        break;
+                    }
+                }
+                // Si no se encontró, usar el monto del pago principal en la tabla
+                if (!montoInicial) {
                     const pagoRow = btn.closest('tr');
                     if (pagoRow) {
+                        montoInicial = pagoRow.querySelector('td:nth-child(5)').textContent.replace('$', '').trim();
                         montoRestante = pagoRow.querySelector('td:nth-child(6)').textContent.replace('$', '').trim();
                     }
-                    break;
                 }
-            }
-            // Si no se encontró, usar el monto del pago principal en la tabla
-            if (!montoInicial) {
-                const pagoRow = btn.closest('tr');
-                if (pagoRow) {
-                    montoInicial = pagoRow.querySelector('td:nth-child(5)').textContent.replace('$', '').trim();
-                    montoRestante = pagoRow.querySelector('td:nth-child(6)').textContent.replace('$', '').trim();
-                }
-            }
 
-            const data = pagosParciales[pagoId] || [];
-            let html = '';
-            html += `<div class="mb-2">
-                        <strong>Monto inicial:</strong> $${montoInicial}
-                        <span class="ms-3"><strong>Monto restante:</strong> $${montoRestante}</span>
-                    </div>`;
-            if (data.length === 0) {
-                html += '<div class="text-center text-muted">No hay pagos parciales registrados para este pago.</div>';
-            } else {
-                html += `<table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Monto abonado</th>
-                            <th>Fecha</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-                data.forEach(function(parcial) {
-                    html += `<tr>
-                        <td>$${parcial.monto}</td>
-                        <td>${parcial.fecha}</td>
-                    </tr>`;
-                });
-                html += '</tbody></table>';
-            }
-            document.getElementById('historial-pagos-content').innerHTML = html;
-            // Actualizar el enlace del botón de factura PDF
-            document.getElementById('btnFacturaPDF').href = `/reportes/factura_pago/${pagoId}/`;
-            var modal = new bootstrap.Modal(document.getElementById('modalVerMasPago'));
-            modal.show();
+                const data = pagosParciales[pagoId] || [];
+                let html = '';
+                html += `<div class="mb-2">
+                            <strong>Monto inicial:</strong> $${montoInicial}
+                            <span class="ms-3"><strong>Monto restante:</strong> $${montoRestante}</span>
+                        </div>`;
+                if (data.length === 0) {
+                    html += '<div class="text-center text-muted">No hay pagos parciales registrados para este pago.</div>';
+                } else {
+                    html += `<table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Monto abonado</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                    data.forEach(function(parcial) {
+                        html += `<tr>
+                            <td>$${parcial.monto}</td>
+                            <td>${parcial.fecha}</td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                }
+                document.getElementById('historial-pagos-content').innerHTML = html;
+                // Actualizar el enlace del botón de factura PDF
+                document.getElementById('btnFacturaPDF').href = `/reportes/factura_pago/${pagoId}/`;
+                var modal = new bootstrap.Modal(document.getElementById('modalVerMasPago'));
+                modal.show();
+            });
         });
-    });
+    }
+
+    // Función para inicializar la búsqueda de pagos
+    function inicializarBusquedaPagos() {
+        const buscarCedula = document.getElementById('buscarCedulaPago');
+        const limpiarBtn = document.getElementById('limpiarBusquedaPagos');
+        const pagoRows = document.querySelectorAll('.pago-row');
+        const resultadosSpan = document.getElementById('resultadosBusquedaPagos');
+        const totalPagos = pagoRows.length;
+
+        // Actualizar contador inicial
+        actualizarContadorPagos(totalPagos, totalPagos);
+
+        function filtrarPagos() {
+            const termino = buscarCedula.value.trim();
+            let visibles = 0;
+            
+            pagoRows.forEach(row => {
+                const cedula = row.getAttribute('data-cedula') || '';
+                const cedulaCell = row.querySelector('.cedula-cell');
+                
+                if (!termino || cedula.includes(termino)) {
+                    row.style.display = '';
+                    visibles++;
+                    
+                    // Resaltar coincidencias
+                    if (termino !== '') {
+                        const cedulaOriginal = row.getAttribute('data-cedula');
+                        const regex = new RegExp(`(${termino})`, 'gi');
+                        const cedulaResaltada = cedulaOriginal.replace(regex, '<mark class="bg-warning">$1</mark>');
+                        cedulaCell.innerHTML = cedulaResaltada;
+                    } else {
+                        cedulaCell.innerHTML = row.getAttribute('data-cedula');
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Mostrar mensaje si no hay resultados
+            const sinResultadosDiv = document.getElementById('sin-resultados-pagos');
+            if (visibles === 0 && termino !== '') {
+                sinResultadosDiv.classList.remove('d-none');
+            } else {
+                sinResultadosDiv.classList.add('d-none');
+            }
+            
+            actualizarContadorPagos(visibles, totalPagos);
+        }
+
+        function actualizarContadorPagos(visibles, total) {
+            if (visibles === total) {
+                resultadosSpan.textContent = `Mostrando ${total} pago${total !== 1 ? 's' : ''}`;
+            } else {
+                resultadosSpan.textContent = `Mostrando ${visibles} de ${total} pago${total !== 1 ? 's' : ''}`;
+            }
+        }
+
+        function limpiarBusquedaPagos() {
+            buscarCedula.value = '';
+            filtrarPagos();
+            buscarCedula.focus();
+        }
+
+        // Event listeners
+        if (buscarCedula) buscarCedula.addEventListener('input', filtrarPagos);
+        if (limpiarBtn) limpiarBtn.addEventListener('click', limpiarBusquedaPagos);
+        
+        if (buscarCedula) {
+            buscarCedula.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    limpiarBusquedaPagos();
+                }
+            });
+        }
+    }
 </script>
 
 {% endblock %}

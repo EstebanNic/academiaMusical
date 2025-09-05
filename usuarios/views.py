@@ -332,7 +332,8 @@ def admin_estudiantes(request):
                 cedula = request.POST.get('cedula', '')
                 email = request.POST.get('email', '')
                 telefono = request.POST.get('telefono', '')
-                
+                password = request.POST.get('password', '')
+                confirm_password = request.POST.get('confirm_password', '')
                 # Validar duplicados en edición (excluyendo el estudiante actual)
                 duplicados_edicion = []
                 
@@ -355,9 +356,15 @@ def admin_estudiantes(request):
                     estudiante.last_name = request.POST.get('last_name', '')
                     estudiante.email = email
                     estudiante.username = email
-                    # No actualizar instrumento para estudiantes
                     estudiante.telefono = telefono
                     estudiante.direccion = request.POST.get('direccion', '')
+                    # CAMBIO: Actualizar contraseña si se envía y coincide
+                    if password:
+                        if password == confirm_password:
+                            estudiante.set_password(password)
+                        else:
+                            messages.error(request, 'Las contraseñas no coinciden.')
+                            return redirect('admin_estudiantes')
                     estudiante.save()
                     messages.success(request, 'Estudiante actualizado exitosamente.')
                     return redirect('admin_estudiantes')

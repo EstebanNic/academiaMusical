@@ -286,6 +286,8 @@
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <button class="btn btn-outline-warning btn-sm btn-editar-profesor"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEditarProfesor"
                                                 data-profesor-id="{{ profesor.id }}"
                                                 data-profesor-cedula="{{ profesor.cedula }}"
                                                 data-profesor-nombre="{{ profesor.first_name }}"
@@ -523,12 +525,35 @@
                         </label>
                         <input type="text" class="form-control form-control-lg" id="edit_direccion" name="direccion">
                     </div>
-                    <div class="col-md-6 mb-3 d-none">
-                        <!-- Instrumento oculto -->
-                        <label for="edit_instrumento" class="form-label">Instrumento</label>
-                        <select class="form-select" id="edit_instrumento" name="instrumento">
-                            <option value="" disabled>Seleccione un instrumento</option>
-                        </select>
+                    <div class="col-md-6 mb-3">
+                        <label for="edit_password" class="form-label fw-bold">
+                            <i class="fas fa-key me-2 text-secondary"></i>Nueva Contraseña
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control form-control-lg" id="edit_password" name="password" placeholder="Nueva contraseña (opcional)">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleEditPassword">
+                                <i class="fas fa-eye" id="iconEditPassword"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Si no desea cambiar la contraseña, deje este campo vacío.
+                        </small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="edit_confirm_password" class="form-label fw-bold">
+                            <i class="fas fa-check-circle me-2 text-secondary"></i>Confirmar Nueva Contraseña
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control form-control-lg" id="edit_confirm_password" name="confirm_password" placeholder="Repita la nueva contraseña">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleEditConfirmPassword">
+                                <i class="fas fa-eye" id="iconEditConfirmPassword"></i>
+                            </button>
+                        </div>
+                        <div id="editPasswordHelp" class="text-danger small mt-1 d-none">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Las contraseñas no coinciden
+                        </div>
                     </div>
                 </div>
                 <input type="hidden" name="profesor_id" id="edit_profesor_id">
@@ -541,11 +566,6 @@
                         <i class="fas fa-save me-2"></i>Guardar Cambios
                     </button>
                 </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
             </form>
           </div>
         </div>
@@ -982,11 +1002,13 @@
                 document.getElementById('edit_first_name').value = btn.getAttribute('data-profesor-nombre') || '';
                 document.getElementById('edit_last_name').value = btn.getAttribute('data-profesor-apellido') || '';
                 document.getElementById('edit_email').value = btn.getAttribute('data-profesor-email') || '';
-                document.getElementById('edit_instrumento').value = btn.getAttribute('data-profesor-instrumento') || '';
                 document.getElementById('edit_telefono').value = btn.getAttribute('data-profesor-telefono') || '';
                 document.getElementById('edit_direccion').value = btn.getAttribute('data-profesor-direccion') || '';
-                var modal = new bootstrap.Modal(document.getElementById('modalEditarProfesor'));
-                modal.show();
+                // Limpia los campos de contraseña al abrir el modal
+                if (document.getElementById('edit_password')) document.getElementById('edit_password').value = '';
+                if (document.getElementById('edit_confirm_password')) document.getElementById('edit_confirm_password').value = '';
+                if (document.getElementById('editPasswordHelp')) document.getElementById('editPasswordHelp').classList.add('d-none');
+                // El modal se abre automáticamente por data-bs-toggle/data-bs-target
             });
         });
 
@@ -1019,6 +1041,58 @@
             });
         });
 
+        // Mostrar/ocultar contraseña en edición
+        document.getElementById('toggleEditPassword').addEventListener('click', function() {
+            const input = document.getElementById('edit_password');
+            const icon = document.getElementById('iconEditPassword');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+        document.getElementById('toggleEditConfirmPassword').addEventListener('click', function() {
+            const input = document.getElementById('edit_confirm_password');
+            const icon = document.getElementById('iconEditConfirmPassword');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // Validación de contraseñas en edición
+        const editForm = document.getElementById('form-editar-profesor');
+        const editPassword = document.getElementById('edit_password');
+        const editConfirmPassword = document.getElementById('edit_confirm_password');
+        const editPasswordHelp = document.getElementById('editPasswordHelp');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                if (editPassword.value || editConfirmPassword.value) {
+                    if (editPassword.value !== editConfirmPassword.value) {
+                        e.preventDefault();
+                        editPasswordHelp.classList.remove('d-none');
+                    } else {
+                        editPasswordHelp.classList.add('d-none');
+                    }
+                }
+            });
+            editConfirmPassword.addEventListener('input', function() {
+                if (editPassword.value !== editConfirmPassword.value) {
+                    editPasswordHelp.classList.remove('d-none');
+                } else {
+                    editPasswordHelp.classList.add('d-none');
+                }
+            });
+        }
     </script>
 
 {% endblock %}

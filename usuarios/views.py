@@ -106,7 +106,8 @@ def admin_profesores(request):
                 cedula = request.POST.get('cedula', '')
                 email = request.POST.get('email', '')
                 telefono = request.POST.get('telefono', '')
-                
+                password = request.POST.get('password', '')
+                confirm_password = request.POST.get('confirm_password', '')
                 # Validar duplicados en edición (excluyendo el profesor actual)
                 duplicados_edicion = []
                 
@@ -132,6 +133,13 @@ def admin_profesores(request):
                     profesor.instrumento = request.POST.get('instrumento', '')
                     profesor.telefono = telefono
                     profesor.direccion = request.POST.get('direccion', '')
+                    # CAMBIO: Actualizar contraseña si se envía y coincide
+                    if password:
+                        if password == confirm_password:
+                            profesor.set_password(password)
+                        else:
+                            messages.error(request, 'Las contraseñas no coinciden.')
+                            return redirect('admin_profesores')
                     profesor.save()
                     messages.success(request, 'Profesor actualizado exitosamente.')
                     return redirect('admin_profesores')

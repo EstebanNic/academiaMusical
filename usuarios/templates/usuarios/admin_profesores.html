@@ -365,7 +365,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control form-control-lg" id="first_name" name="first_name" required 
-                                       >
+                                       oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="last_name" class="form-label fw-bold">
@@ -373,15 +373,14 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control form-control-lg" id="last_name" name="last_name" required 
-                                       >
+                                       oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="email" class="form-label fw-bold">
                                     <i class="fas fa-envelope me-2 text-warning"></i>Email 
                                     <span class="text-danger">*</span>
                                 </label>
-                                <input type="email" class="form-control form-control-lg" id="email" name="email" required 
-                                       >
+                                <input type="email" class="form-control form-control-lg" id="email" name="email" required>
                                 <div class="invalid-feedback">
                                     El email es requerido y debe ser único.
                                 </div>
@@ -503,13 +502,15 @@
                         <label for="edit_first_name" class="form-label fw-bold">
                             <i class="fas fa-user me-2 text-info"></i>Nombre
                         </label>
-                        <input type="text" class="form-control form-control-lg" id="edit_first_name" name="first_name" required>
+                        <input type="text" class="form-control form-control-lg" id="edit_first_name" name="first_name" required
+                               oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="edit_last_name" class="form-label fw-bold">
                             <i class="fas fa-user me-2 text-info"></i>Apellido
                         </label>
-                        <input type="text" class="form-control form-control-lg" id="edit_last_name" name="last_name" required>
+                        <input type="text" class="form-control form-control-lg" id="edit_last_name" name="last_name" required
+                               oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="edit_email" class="form-label fw-bold">

@@ -66,7 +66,7 @@
                         </div>
                         <div>
                             <h6 class="text-muted text-uppercase mb-1 fw-normal small">Pagos Pendientes</h6>
-                            <h2 class="mb-0 fw-bold">{{ pagos_pendientes|default:0 }}</h2>
+                            <h2 class="mb-0 fw-bold">{{ pagos_pendientes|length|default:0 }}</h2>
                         </div>
                     </div>
                 </div>

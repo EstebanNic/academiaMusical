@@ -259,7 +259,9 @@
                                     </td>
                                     <td class="px-4 py-3 text-center">
                                         <div class="btn-group" role="group">
-                                            <button class="btn btn-outline-info btn-sm btn-ver-mas-estudiante" 
+                                            <button class="btn btn-outline-info btn-sm btn-ver-mas-estudiante"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalVerMasEstudiante"
                                                 data-estudiante-estado="{% if estudiante.is_active %}Activo{% else %}Inactivo{% endif %}"
                                                 data-estudiante-nombre="{{ estudiante.first_name }} {{ estudiante.last_name }}"
                                                 data-estudiante-cedula="{{ estudiante.cedula }}"
@@ -279,6 +281,8 @@
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             <button class="btn btn-outline-danger btn-sm btn-eliminar-estudiante"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalConfirmarEliminar"
                                                 data-estudiante-id="{{ estudiante.id }}"
                                                 data-estudiante-nombre="{{ estudiante.first_name }} {{ estudiante.last_name }}">
                                                 <i class="fas fa-trash"></i>
@@ -334,7 +338,8 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control form-control-lg" id="cedula" name="cedula" required 
-                                       placeholder="Ej: 1234567890">
+                                        inputmode="numeric" pattern="[0-9]*"
+                                       oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                                 <div class="invalid-feedback">
                                     La cédula es requerida y debe ser única.
                                 </div>
@@ -345,7 +350,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control form-control-lg" id="first_name" name="first_name" required 
-                                       placeholder="Ej: María José">
+                                       >
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="last_name" class="form-label fw-bold">
@@ -353,7 +358,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control form-control-lg" id="last_name" name="last_name" required 
-                                       placeholder="Ej: González López">
+                                       >
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="email" class="form-label fw-bold">
@@ -361,7 +366,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="email" class="form-control form-control-lg" id="email" name="email" required 
-                                       placeholder="Ej: estudiante@academia.com">
+                                       >
                                 <div class="invalid-feedback">
                                     El email es requerido y debe ser único.
                                 </div>
@@ -376,7 +381,8 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control form-control-lg" id="telefono" name="telefono" required 
-                                       placeholder="Ej: 0999123456">
+                                        inputmode="numeric" pattern="[0-9]*"
+                                       oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                                 <div class="invalid-feedback">
                                     El teléfono es requerido y debe ser único.
                                 </div>
@@ -386,7 +392,7 @@
                                     <i class="fas fa-map-marker-alt me-2 text-danger"></i>Dirección
                                 </label>
                                 <input type="text" class="form-control form-control-lg" id="direccion" name="direccion" 
-                                       placeholder="Ej: Av. Principal 123, Quito">
+                                       >
                             </div>
                         </div>
 
@@ -398,7 +404,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="password" class="form-control form-control-lg" id="password" name="password" required 
-                                       placeholder="Mínimo 8 caracteres">
+                                       >
                                 <small class="text-muted">
                                     <i class="fas fa-info-circle me-1"></i>
                                     Debe contener al menos 8 caracteres
@@ -410,7 +416,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="password" class="form-control form-control-lg" id="confirm_password" name="confirm_password" required 
-                                       placeholder="Repita la contraseña">
+                                       >
                                 <div id="passwordHelp" class="text-danger small mt-1 d-none">
                                     <i class="fas fa-exclamation-triangle me-1"></i>
                                     Las contraseñas no coinciden
@@ -534,7 +540,9 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="edit_cedula" class="form-label">Cédula</label>
-                        <input type="text" class="form-control" id="edit_cedula" name="cedula">
+                        <input type="text" class="form-control" id="edit_cedula" name="cedula"
+                               inputmode="numeric" pattern="[0-9]*"
+                               oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="edit_first_name" class="form-label">Nombre</label>
@@ -550,11 +558,43 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="edit_telefono" class="form-label">Teléfono</label>
-                        <input type="text" class="form-control" id="edit_telefono" name="telefono">
+                        <input type="text" class="form-control" id="edit_telefono" name="telefono"
+                               inputmode="numeric" pattern="[0-9]*"
+                               oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="edit_direccion" class="form-label">Dirección</label>
                         <input type="text" class="form-control" id="edit_direccion" name="direccion">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="edit_password" class="form-label">
+                            <i class="fas fa-key me-2 text-secondary"></i>Nueva Contraseña
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="edit_password" name="password" placeholder="Nueva contraseña (opcional)">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleEditPassword">
+                                <i class="fas fa-eye" id="iconEditPassword"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Si no desea cambiar la contraseña, deje este campo vacío.
+                        </small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="edit_confirm_password" class="form-label">
+                            <i class="fas fa-check-circle me-2 text-secondary"></i>Confirmar Nueva Contraseña
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="edit_confirm_password" name="confirm_password" placeholder="Repita la nueva contraseña">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleEditConfirmPassword">
+                                <i class="fas fa-eye" id="iconEditConfirmPassword"></i>
+                            </button>
+                        </div>
+                        <div id="editPasswordHelp" class="text-danger small mt-1 d-none">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Las contraseñas no coinciden
+                        </div>
                     </div>
                 </div>
                 <input type="hidden" name="estudiante_id" id="edit_estudiante_id">
@@ -682,9 +722,6 @@
           </div>
         </div>
       </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -904,36 +941,88 @@
                 document.getElementById('edit_email').value = btn.getAttribute('data-estudiante-email') || '';
                 document.getElementById('edit_telefono').value = btn.getAttribute('data-estudiante-telefono') || '';
                 document.getElementById('edit_direccion').value = btn.getAttribute('data-estudiante-direccion') || '';
+                // Limpia los campos de contraseña al abrir el modal
+                if (document.getElementById('edit_password')) document.getElementById('edit_password').value = '';
+                if (document.getElementById('edit_confirm_password')) document.getElementById('edit_confirm_password').value = '';
+                if (document.getElementById('editPasswordHelp')) document.getElementById('editPasswordHelp').classList.add('d-none');
                 var modal = new bootstrap.Modal(document.getElementById('modalEditarEstudiante'));
                 modal.show();
             });
         });
 
+        // Mostrar/ocultar contraseña en edición
+        document.getElementById('toggleEditPassword').addEventListener('click', function() {
+            const input = document.getElementById('edit_password');
+            const icon = document.getElementById('iconEditPassword');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+        document.getElementById('toggleEditConfirmPassword').addEventListener('click', function() {
+            const input = document.getElementById('edit_confirm_password');
+            const icon = document.getElementById('iconEditConfirmPassword');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // Validación de contraseñas en edición
+        const editForm = document.getElementById('form-editar-estudiante');
+        const editPassword = document.getElementById('edit_password');
+        const editConfirmPassword = document.getElementById('edit_confirm_password');
+        const editPasswordHelp = document.getElementById('editPasswordHelp');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                if (editPassword.value || editConfirmPassword.value) {
+                    if (editPassword.value !== editConfirmPassword.value) {
+                        e.preventDefault();
+                        editPasswordHelp.classList.remove('d-none');
+                    } else {
+                        editPasswordHelp.classList.add('d-none');
+                    }
+                }
+            });
+            editConfirmPassword.addEventListener('input', function() {
+                if (editPassword.value !== editConfirmPassword.value) {
+                    editPasswordHelp.classList.remove('d-none');
+                } else {
+                    editPasswordHelp.classList.add('d-none');
+                }
+            });
+        }
+
         // Modal Ver Más Estudiante
         document.querySelectorAll('.btn-ver-mas-estudiante').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                document.getElementById('vermas-nombre').textContent = btn.getAttribute('data-estudiante-nombre') || '';
-                document.getElementById('vermas-cedula').textContent = btn.getAttribute('data-estudiante-cedula') || '';
-                document.getElementById('vermas-email').textContent = btn.getAttribute('data-estudiante-email') || '';
-                document.getElementById('vermas-telefono').textContent = btn.getAttribute('data-estudiante-telefono') || '';
-                document.getElementById('vermas-direccion').textContent = btn.getAttribute('data-estudiante-direccion') || '';
-                var modal = new bootstrap.Modal(document.getElementById('modalVerMasEstudiante'));
-                modal.show();
+                if (document.getElementById('vermas-nombre')) document.getElementById('vermas-nombre').textContent = btn.getAttribute('data-estudiante-nombre') || '';
+                if (document.getElementById('vermas-cedula')) document.getElementById('vermas-cedula').textContent = btn.getAttribute('data-estudiante-cedula') || '';
+                if (document.getElementById('vermas-email')) document.getElementById('vermas-email').textContent = btn.getAttribute('data-estudiante-email') || '';
+                if (document.getElementById('vermas-telefono')) document.getElementById('vermas-telefono').textContent = btn.getAttribute('data-estudiante-telefono') || '';
+                if (document.getElementById('vermas-direccion')) document.getElementById('vermas-direccion').textContent = btn.getAttribute('data-estudiante-direccion') || '';
+                // El modal se abre automáticamente por data-bs-toggle/data-bs-target
             });
         });
 
         // Modal Confirmar Eliminación
         document.querySelectorAll('.btn-eliminar-estudiante').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Corrige el id del elemento
-                document.getElementById('eliminar-nombre-estudiante').textContent = btn.getAttribute('data-estudiante-nombre') || '';
-                document.getElementById('eliminar_estudiante_id').value = btn.getAttribute('data-estudiante-id') || '';
-                var modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminar'));
-                modal.show();
+                if (document.getElementById('eliminar-nombre-estudiante')) document.getElementById('eliminar-nombre-estudiante').textContent = btn.getAttribute('data-estudiante-nombre') || '';
+                if (document.getElementById('eliminar_estudiante_id')) document.getElementById('eliminar_estudiante_id').value = btn.getAttribute('data-estudiante-id') || '';
+                // El modal se abre automáticamente por data-bs-toggle/data-bs-target
             });
         });
-
     </script>
 
 {% endblock %}

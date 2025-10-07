@@ -350,7 +350,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control form-control-lg" id="first_name" name="first_name" required 
-                                       >
+                                       oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="last_name" class="form-label fw-bold">
@@ -358,7 +358,7 @@
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control form-control-lg" id="last_name" name="last_name" required 
-                                       >
+                                       oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="email" class="form-label fw-bold">
@@ -546,11 +546,13 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="edit_first_name" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="edit_first_name" name="first_name" required>
+                        <input type="text" class="form-control" id="edit_first_name" name="first_name" required
+                               oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="edit_last_name" class="form-label">Apellido</label>
-                        <input type="text" class="form-control" id="edit_last_name" name="last_name" required>
+                        <input type="text" class="form-control" id="edit_last_name" name="last_name" required
+                               oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="edit_email" class="form-label">Email</label>

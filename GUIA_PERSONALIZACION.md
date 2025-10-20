@@ -1,6 +1,6 @@
 # 🎨 Academia Musical - Guía de Personalización del Diseño
 
-## 📁 Estructura de Archivos de Diseño
+## 📁 Estructura de Archivos de Diseño CAMBIO ACTUAL
 
 ```
 academiaMusical/

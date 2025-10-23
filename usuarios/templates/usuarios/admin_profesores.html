@@ -11,29 +11,20 @@
     <!-- Navbar de navegación -->
     <div class="row mb-4">
         <div class="col-12">
-            <nav class="navbar navbar-expand-lg navbar-light bg-white border-0 shadow-lg rounded-4 p-0">
-                <div class="container-fluid px-4 py-2">
+            <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+                <div class="container-fluid px-0">
                     <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarProfesor" aria-controls="navbarProfesor" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
+                        <i class="fas fa-bars"></i>
                     </button>
-                    
                     <div class="collapse navbar-collapse" id="navbarProfesor">
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item me-2">
-                                <button class="nav-link btn btn-outline-primary rounded-pill px-4 py-2 fw-bold active-nav" id="profesores-nav" onclick="cambiarVista('profesores')" type="button">
-                                    <i class="fas fa-users me-2"></i>
-                                    <span class="d-none d-lg-inline">Lista de Profesores</span>
-                                    <span class="d-lg-none">Lista</span>
-                                </button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link btn btn-outline-success rounded-pill px-4 py-2 fw-bold" id="add-profesor-nav" onclick="cambiarVista('add-profesor')" type="button">
-                                    <i class="fas fa-user-plus me-2"></i>
-                                    <span class="d-none d-lg-inline">Nuevo Profesor</span>
-                                    <span class="d-lg-none">Nuevo</span>
-                                </button>
-                            </li>
-                        </ul>
+                        <div class="navbar-nav w-100 d-flex flex-row justify-content-center">
+                            <button type="button" class="nav-link btn btn-outline-primary mx-2 px-4 py-2 fw-bold" id="profesores-nav" onclick="cambiarVista('profesores')">
+                                <i class="fas fa-list me-2"></i>Lista de Profesores
+                            </button>
+                            <button type="button" class="nav-link btn btn-outline-success mx-2 px-4 py-2 fw-bold" id="add-profesor-nav" onclick="cambiarVista('add-profesor')">
+                                <i class="fas fa-plus me-2"></i>Nuevo Profesor
+                            </button>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -41,84 +32,72 @@
     </div>
 
     <style>
-        /* Estilos modernos para el navbar */
+        /* Copiado/adaptado del estilo del navbar moderno del panel de aulas */
         .navbar {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)) !important;
             backdrop-filter: blur(10px);
-            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,249,250,0.95)) !important;
-            border: 1px solid rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            animation: slideInFromTop 0.8s ease-out;
+            margin-bottom: 2rem;
+            padding: 0.75rem 1.5rem;
         }
         
         .navbar:hover {
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
-            transform: translateY(-1px);
-        }
-        
-        .navbar-brand {
-            background: linear-gradient(135deg, #0d6efd, #6610f2);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 1.3rem;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
             transition: all 0.3s ease;
         }
         
-        .navbar-brand:hover {
-            transform: scale(1.05);
-        }
-        
-        /* Estilos para los botones de navegación */
         .nav-link.btn {
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
+            border-radius: 10px !important;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-width: 150px;
         }
         
         .nav-link.btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            z-index: 10;
         }
         
         .nav-link.btn.active-nav {
-            background: linear-gradient(135deg, #0d6efd, #6610f2) !important;
+            background: linear-gradient(135deg, #007bff, #0056b3) !important;
             color: white !important;
-            border-color: rgba(255,255,255,0.3);
-            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
-            transform: translateY(-2px);
+            border: none !important;
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
         }
         
         .nav-link.btn.active-nav:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.5);
+            background: linear-gradient(135deg, #0056b3, #004085) !important;
+            box-shadow: 0 8px 25px rgba(0,123,255,0.5);
         }
         
-        /* Animaciones para iconos */
         .nav-link.btn i {
             transition: all 0.3s ease;
-            position: relative;
-            z-index: 2;
         }
         
         .nav-link.btn:hover i {
-            transform: scale(1.1);
+            transform: rotate(360deg) scale(1.2);
         }
         
         .nav-link.btn.active-nav i {
-            transform: scale(1.1);
+            animation: pulse 2s infinite;
         }
         
-        /* Efectos de entrada */
         .navbar {
-            animation: slideInFromTop 0.6s ease-out;
+            animation: slideInFromTop 0.8s ease-out;
         }
         
         @keyframes slideInFromTop {
             0% {
                 opacity: 0;
-                transform: translateY(-30px);
+                transform: translateY(-50px);
             }
             100% {
                 opacity: 1;
@@ -126,28 +105,29 @@
             }
         }
         
-        /* Navbar toggler personalizado */
         .navbar-toggler {
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            padding: 0.5rem 0.75rem;
         }
         
         .navbar-toggler:hover {
-            background-color: rgba(13, 110, 253, 0.1);
+            background: linear-gradient(135deg, #0056b3, #004085);
             transform: scale(1.1);
         }
         
         .navbar-toggler:focus {
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
         }
         
-        /* Efectos hover para botones de acción en general */
         .btn-group .btn:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         
-        /* Transiciones suaves para las tarjetas */
         .card {
             transition: all 0.3s ease;
         }
@@ -157,7 +137,6 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
         }
         
-        /* Efectos de contenido */
         .vista-contenido {
             display: none;
             animation: fadeInUp 0.5s ease-out;
@@ -170,7 +149,7 @@
         @keyframes fadeInUp {
             0% {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             100% {
                 opacity: 1;
@@ -178,14 +157,9 @@
             }
         }
         
-        /* Responsive adjustments */
         @media (max-width: 768px) {
-            .navbar-brand {
-                font-size: 1.1rem;
-            }
-            
             .nav-link.btn {
-                margin-bottom: 0.5rem;
+                margin: 0.25rem 0 !important;
                 width: 100%;
             }
         }
@@ -457,14 +431,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="mt-4 p-3 bg-light rounded">
-                            <small class="text-muted d-block">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Nota:</strong> Los campos marcados con (*) son obligatorios. 
-                                Asegúrese de que la cédula, email y teléfono sean únicos en el sistema.
-                            </small>
-                        </div>
                     </form>
                 </div>
             </div>
@@ -473,102 +439,76 @@
 </div>
     </div>
 
-    <!-- Modal Editar Profesor -->
+    <!-- Modal Editar Profesor (simple, ahora en dos columnas) -->
     <div class="modal fade" id="modalEditarProfesor" tabindex="-1" aria-labelledby="modalEditarProfesorLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-warning text-white">
-            <h5 class="modal-title fw-bold" id="modalEditarProfesorLabel">
-                <i class="fas fa-edit me-2"></i>Editar Profesor
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalEditarProfesorLabel">Editar Profesor</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
-          <div class="modal-body p-4">
+          <div class="modal-body">
             <form id="form-editar-profesor" method="POST" action="#">
                 {% csrf_token %}
-                <div class="row">
+                <div class="row gx-3">
                     <div class="col-md-6 mb-3">
-                        <label for="edit_cedula" class="form-label fw-bold">
-                            <i class="fas fa-id-card me-2 text-primary"></i>Cédula
-                        </label>
-                        <input type="text" class="form-control form-control-lg" id="edit_cedula" name="cedula"
+                        <label for="edit_cedula" class="form-label">Cédula</label>
+                        <input type="text" class="form-control" id="edit_cedula" name="cedula"
                                inputmode="numeric" pattern="[0-9]*"
                                oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="edit_first_name" class="form-label fw-bold">
-                            <i class="fas fa-user me-2 text-info"></i>Nombre
-                        </label>
-                        <input type="text" class="form-control form-control-lg" id="edit_first_name" name="first_name" required
+                        <label for="edit_first_name" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="edit_first_name" name="first_name" required
+                               oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="edit_last_name" class="form-label">Apellido</label>
+                        <input type="text" class="form-control" id="edit_last_name" name="last_name" required
                                oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="edit_last_name" class="form-label fw-bold">
-                            <i class="fas fa-user me-2 text-info"></i>Apellido
-                        </label>
-                        <input type="text" class="form-control form-control-lg" id="edit_last_name" name="last_name" required
-                               oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'');">
+                        <label for="edit_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="edit_email" name="email" required>
                     </div>
+
                     <div class="col-md-6 mb-3">
-                        <label for="edit_email" class="form-label fw-bold">
-                            <i class="fas fa-envelope me-2 text-warning"></i>Email
-                        </label>
-                        <input type="email" class="form-control form-control-lg" id="edit_email" name="email" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="edit_telefono" class="form-label fw-bold">
-                            <i class="fas fa-phone me-2 text-success"></i>Teléfono
-                        </label>
-                        <input type="text" class="form-control form-control-lg" id="edit_telefono" name="telefono"
+                        <label for="edit_telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="edit_telefono" name="telefono"
                                inputmode="numeric" pattern="[0-9]*"
                                oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="edit_direccion" class="form-label fw-bold">
-                            <i class="fas fa-map-marker-alt me-2 text-danger"></i>Dirección
-                        </label>
-                        <input type="text" class="form-control form-control-lg" id="edit_direccion" name="direccion">
+                        <label for="edit_direccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="edit_direccion" name="direccion">
                     </div>
+
                     <div class="col-md-6 mb-3">
-                        <label for="edit_password" class="form-label fw-bold">
-                            <i class="fas fa-key me-2 text-secondary"></i>Nueva Contraseña
-                        </label>
+                        <label for="edit_password" class="form-label">Nueva Contraseña (opcional)</label>
                         <div class="input-group">
-                            <input type="password" class="form-control form-control-lg" id="edit_password" name="password" placeholder="Nueva contraseña (opcional)">
+                            <input type="password" class="form-control" id="edit_password" name="password" placeholder="Nueva contraseña (opcional)">
                             <button class="btn btn-outline-secondary" type="button" id="toggleEditPassword">
                                 <i class="fas fa-eye" id="iconEditPassword"></i>
                             </button>
                         </div>
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Si no desea cambiar la contraseña, deje este campo vacío.
-                        </small>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="edit_confirm_password" class="form-label fw-bold">
-                            <i class="fas fa-check-circle me-2 text-secondary"></i>Confirmar Nueva Contraseña
-                        </label>
+                        <label for="edit_confirm_password" class="form-label">Confirmar Nueva Contraseña</label>
                         <div class="input-group">
-                            <input type="password" class="form-control form-control-lg" id="edit_confirm_password" name="confirm_password" placeholder="Repita la nueva contraseña">
+                            <input type="password" class="form-control" id="edit_confirm_password" name="confirm_password" placeholder="Repita la nueva contraseña">
                             <button class="btn btn-outline-secondary" type="button" id="toggleEditConfirmPassword">
                                 <i class="fas fa-eye" id="iconEditConfirmPassword"></i>
                             </button>
                         </div>
-                        <div id="editPasswordHelp" class="text-danger small mt-1 d-none">
-                            <i class="fas fa-exclamation-triangle me-1"></i>
-                            Las contraseñas no coinciden
-                        </div>
+                        <div id="editPasswordHelp" class="text-danger small mt-1 d-none">Las contraseñas no coinciden</div>
                     </div>
                 </div>
+
                 <input type="hidden" name="profesor_id" id="edit_profesor_id">
-                
-                <div class="d-flex gap-3 justify-content-end mt-4">
-                    <button type="button" class="btn btn-outline-secondary btn-lg px-4" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-warning btn-lg px-4">
-                        <i class="fas fa-save me-2"></i>Guardar Cambios
-                    </button>
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
                 </div>
             </form>
           </div>
@@ -576,215 +516,107 @@
       </div>
     </div>
 
-    <!-- Modal Ver Más Profesor -->
+    <!-- Modal Ver Más Profesor (simple) -->
     <div class="modal fade" id="modalVerMasProfesor" tabindex="-1" aria-labelledby="modalVerMasProfesorLabel" aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-info text-white">
-            <h5 class="modal-title fw-bold" id="modalVerMasProfesorLabel">
-                <i class="fas fa-user-circle me-2"></i>Detalles del Profesor
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalVerMasProfesorLabel">Detalles del Profesor</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
-          <div class="modal-body p-4">
-            <div class="row g-3">
-              <div class="col-12">
-                <div class="card border-start border-4 border-primary bg-light">
-                  <div class="card-body">
-                    <h6 class="text-primary mb-3">
-                        <i class="fas fa-user me-2"></i>Información Personal
-                    </h6>
-                    <div class="row">
-                      <div class="col-sm-6 mb-2">
-                        <strong class="text-muted">Nombre:</strong>
-                        <div class="fs-5 fw-bold" id="vermas-nombre"></div>
-                      </div>
-                      <div class="col-sm-6 mb-2">
-                        <strong class="text-muted">Cédula:</strong>
-                        <div class="fs-5" id="vermas-cedula"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="col-12">
-                <div class="card border-start border-4 border-success bg-light">
-                  <div class="card-body">
-                    <h6 class="text-success mb-3">
-                        <i class="fas fa-envelope me-2"></i>Información de Contacto
-                    </h6>
-                    <div class="row">
-                      <div class="col-sm-6 mb-2">
-                        <strong class="text-muted">Email:</strong>
-                        <div class="fs-6" id="vermas-email"></div>
-                      </div>
-                      <div class="col-sm-6 mb-2">
-                        <strong class="text-muted">Teléfono:</strong>
-                        <div class="fs-6" id="vermas-telefono"></div>
-                      </div>
-                    </div>
-                    <div class="mt-2">
-                      <strong class="text-muted">Dirección:</strong>
-                      <div class="fs-6" id="vermas-direccion"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="col-12 d-none">
-                <div class="card border-start border-4 border-warning bg-light">
-                  <div class="card-body">
-                    <h6 class="text-warning mb-3">
-                        <i class="fas fa-music me-2"></i>Información Académica
-                    </h6>
-                    <strong class="text-muted">Instrumento:</strong>
-                    <div class="fs-6" id="vermas-instrumento"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="modal-body">
+            <ul class="list-group">
+              <li class="list-group-item"><strong>Nombre:</strong> <span id="vermas-nombre"></span></li>
+              <li class="list-group-item"><strong>Cédula:</strong> <span id="vermas-cedula"></span></li>
+              <li class="list-group-item"><strong>Email:</strong> <span id="vermas-email"></span></li>
+              <li class="list-group-item"><strong>Teléfono:</strong> <span id="vermas-telefono"></span></li>
+              <li class="list-group-item"><strong>Dirección:</strong> <span id="vermas-direccion"></span></li>
+            </ul>
           </div>
-          <div class="modal-footer bg-light">
-            <button type="button" class="btn btn-info btn-lg px-4" data-bs-dismiss="modal">
-                <i class="fas fa-check me-2"></i>Entendido
-            </button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal Confirmar Eliminación -->
+    <!-- Modal Confirmar Eliminación (simple) -->
     <div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-labelledby="modalConfirmarEliminarLabel" aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title fw-bold" id="modalConfirmarEliminarLabel">
-                <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalConfirmarEliminarLabel">Confirmar eliminación</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
-          <div class="modal-body p-4 text-center">
-            <div class="mb-3">
-                <i class="fas fa-user-times fa-4x text-danger mb-3"></i>
-            </div>
-            <h5 class="mb-3">¿Está seguro de eliminar este profesor?</h5>
-            <p class="text-muted">
-                Esta acción eliminará permanentemente al profesor: 
-                <strong class="text-dark" id="eliminar-nombre-profesor"></strong>
-            </p>
-            <div class="alert alert-warning border-0">
-                <i class="fas fa-info-circle me-2"></i>
-                <strong>Advertencia:</strong> Esta acción no se puede deshacer.
-            </div>
+          <div class="modal-body">
+            <p>¿Está seguro de que desea eliminar al profesor <strong id="eliminar-nombre-profesor"></strong>?</p>
           </div>
-          <div class="modal-footer bg-light justify-content-center">
-            <form id="form-eliminar-profesor" method="POST" action="{% url 'admin_profesores' %}" class="d-flex gap-3">
+          <div class="modal-footer">
+            <form id="form-eliminar-profesor" method="POST" action="{% url 'admin_profesores' %}">
                 {% csrf_token %}
                 <input type="hidden" name="profesor_id" id="eliminar_profesor_id">
                 <input type="hidden" name="eliminar_profesor" value="1">
-                <button type="button" class="btn btn-outline-secondary btn-lg px-4" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Cancelar
-                </button>
-                <button type="submit" class="btn btn-danger btn-lg px-4">
-                    <i class="fas fa-trash me-2"></i>Eliminar Profesor
-                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-danger">Eliminar</button>
             </form>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal Profesor Duplicado -->
+    <!-- Modal Profesor Duplicado (simple) -->
     <div class="modal fade" id="modalProfesorDuplicado" tabindex="-1" aria-labelledby="modalProfesorDuplicadoLabel" aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-warning text-white">
-            <h5 class="modal-title fw-bold" id="modalProfesorDuplicadoLabel">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Profesor Ya Registrado
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalProfesorDuplicadoLabel">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                Profesor ya registrado
             </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
-          <div class="modal-body p-4">
-            <div class="text-center mb-3">
-                <i class="fas fa-user-times fa-4x text-warning mb-3"></i>
-            </div>
-            <div class="alert alert-warning border-0 bg-light">
+          <div class="modal-body">
+            <div class="alert alert-warning mb-0">
                 <i class="fas fa-info-circle me-2"></i>
                 <strong>Los datos ingresados ya pertenecen a un profesor registrado.</strong>
+                <ul class="mt-2 mb-0">
+                    <li>La <strong>cédula</strong> debe ser única</li>
+                    <li>El <strong>email</strong> debe ser único</li>
+                    <li>El <strong>teléfono</strong> debe ser único</li>
+                </ul>
             </div>
-            <p class="mb-3">Por favor, verifique la información antes de continuar:</p>
-            <ul class="list-unstyled">
-                <li class="mb-2">
-                    <i class="fas fa-id-card text-primary me-2"></i>
-                    La <strong>cédula</strong> debe ser única para cada profesor
-                </li>
-                <li class="mb-2">
-                    <i class="fas fa-envelope text-warning me-2"></i>
-                    El <strong>email</strong> debe ser único para cada profesor
-                </li>
-                <li class="mb-2">
-                    <i class="fas fa-phone text-success me-2"></i>
-                    El <strong>teléfono</strong> debe ser único para cada profesor
-                </li>
-            </ul>
           </div>
-          <div class="modal-footer bg-light justify-content-center">
-            <button type="button" class="btn btn-warning btn-lg px-4" data-bs-dismiss="modal">
-                <i class="fas fa-check me-2"></i>
-                Entendido
-            </button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal Profesor Duplicado (para edición) -->
+    <!-- Modal Profesor Duplicado (edición) (simple) -->
     <div class="modal fade" id="modalProfesorDuplicadoEdicion" tabindex="-1" aria-labelledby="modalProfesorDuplicadoEdicionLabel" aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title fw-bold" id="modalProfesorDuplicadoEdicionLabel">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Error al Editar Profesor
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalProfesorDuplicadoEdicionLabel">
+                <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                Error al editar profesor
             </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
-          <div class="modal-body p-4">
-            <div class="text-center mb-3">
-                <i class="fas fa-edit fa-4x text-danger mb-3"></i>
-            </div>
-            <div class="alert alert-danger border-0 bg-light">
+          <div class="modal-body">
+            <div class="alert alert-danger mb-0">
                 <i class="fas fa-times-circle me-2"></i>
                 <strong>No se puede actualizar el profesor con los datos proporcionados.</strong>
-            </div>
-            <p class="mb-3">Los siguientes datos ya están siendo utilizados por otro usuario:</p>
-            <ul class="list-unstyled">
-                <li class="mb-2">
-                    <i class="fas fa-id-card text-primary me-2"></i>
-                    Verifique que la <strong>cédula</strong> no esté duplicada
-                </li>
-                <li class="mb-2">
-                    <i class="fas fa-envelope text-warning me-2"></i>
-                    Verifique que el <strong>email</strong> no esté duplicado
-                </li>
-                <li class="mb-2">
-                    <i class="fas fa-phone text-success me-2"></i>
-                    Verifique que el <strong>teléfono</strong> no esté duplicado
-                </li>
-            </ul>
-            <div class="alert alert-info border-0 mt-3">
-                <small class="text-muted">
-                    <strong>Nota:</strong> Cada profesor debe tener datos únicos en el sistema.
-                </small>
+                <ul class="mt-2 mb-0">
+                    <li>Verifique que la <strong>cédula</strong> no esté duplicada</li>
+                    <li>Verifique que el <strong>email</strong> no esté duplicado</li>
+                    <li>Verifique que el <strong>teléfono</strong> no esté duplicado</li>
+                </ul>
             </div>
           </div>
-          <div class="modal-footer bg-light justify-content-center">
-            <button type="button" class="btn btn-danger btn-lg px-4" data-bs-dismiss="modal">
-                <i class="fas fa-edit me-2"></i>
-                Corregir Datos
-            </button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Corregir datos</button>
           </div>
         </div>
       </div>
@@ -1016,21 +848,18 @@
             });
         });
 
-        // Modal Ver Más Profesor
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.btn-ver-mas-profesor').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    document.getElementById('vermas-nombre').textContent = btn.getAttribute('data-profesor-nombre') || '';
-                    document.getElementById('vermas-cedula').textContent = btn.getAttribute('data-profesor-cedula') || '';
-                    document.getElementById('vermas-email').textContent = btn.getAttribute('data-profesor-email') || '';
-                    document.getElementById('vermas-telefono').textContent = btn.getAttribute('data-profesor-telefono') || '';
-                    document.getElementById('vermas-instrumento').textContent = btn.getAttribute('data-profesor-instrumento') || '';
-                    document.getElementById('vermas-direccion').textContent = btn.getAttribute('data-profesor-direccion') || '';
-                    // Estado oculto, pero si lo quieres mostrar, descomenta la siguiente línea
-                    // document.getElementById('vermas-estado').textContent = btn.getAttribute('data-profesor-estado') || '';
-                    var modal = new bootstrap.Modal(document.getElementById('modalVerMasProfesor'));
-                    modal.show();
-                });
+        // Modal Ver Más Profesor (seguro: comprueba elementos antes de asignar)
+        document.querySelectorAll('.btn-ver-mas-profesor').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                if (document.getElementById('vermas-nombre')) document.getElementById('vermas-nombre').textContent = btn.getAttribute('data-profesor-nombre') || '';
+                if (document.getElementById('vermas-cedula')) document.getElementById('vermas-cedula').textContent = btn.getAttribute('data-profesor-cedula') || '';
+                if (document.getElementById('vermas-email')) document.getElementById('vermas-email').textContent = btn.getAttribute('data-profesor-email') || '';
+                if (document.getElementById('vermas-telefono')) document.getElementById('vermas-telefono').textContent = btn.getAttribute('data-profesor-telefono') || '';
+                if (document.getElementById('vermas-direccion')) document.getElementById('vermas-direccion').textContent = btn.getAttribute('data-profesor-direccion') || '';
+                // Si en el futuro se añade vermas-instrumento, la comprobación evitará errores:
+                if (document.getElementById('vermas-instrumento')) document.getElementById('vermas-instrumento').textContent = btn.getAttribute('data-profesor-instrumento') || '';
+                var modal = new bootstrap.Modal(document.getElementById('modalVerMasProfesor'));
+                modal.show();
             });
         });
 

@@ -94,6 +94,17 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'adcaecab_academiaMusical',
+#         'USER': 'adcaecab_mateo',
+#         'PASSWORD': 'mateo1357',
+#         'HOST': '69.6.213.228',
+#         'PORT': '3306',
+#     }
+# }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

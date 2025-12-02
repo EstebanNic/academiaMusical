@@ -3,150 +3,141 @@
 <head>
     <meta charset="utf-8">
     <title>Reporte de Pagos - Academia Musical</title>
+    {% load humanize %}
     <style>
-        @page {
-            size: A4;
-            margin: 1.5cm;
-        }
-        
+        @page { size: A4; margin: 1.5cm; }
+
+        /* Estilo sobrio para impresión */
         body {
             font-family: Arial, sans-serif;
             font-size: 11px;
-            line-height: 1.3;
-            color: #333;
+            color: #000;
             margin: 0;
             padding: 0;
         }
-        
+
+        /* Encabezado minimalista */
         .header {
             text-align: center;
-            border-bottom: 2px solid #0d6efd;
-            padding-bottom: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
-        
         .header h1 {
-            color: #0d6efd;
-            font-size: 20px;
-            margin: 0 0 3px 0;
-        }
-        
-        .header h2 {
-            color: #666;
-            font-size: 14px;
+            font-size: 18px;
             margin: 0;
         }
-        
-        .info-summary {
-            background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            font-size: 10px;
+        .header h2 {
+            font-size: 13px;
+            margin: 2px 0 0 0;
+            font-weight: normal;
         }
-        
-        .info-grid {
-            display: table;
-            width: 100%;
+        .separator {
+            border-top: 1px solid #000;
+            margin: 8px 0 12px 0;
         }
-        
-        .info-row {
-            display: table-row;
-        }
-        
-        .info-cell {
-            display: table-cell;
-            padding: 2px 5px;
-            vertical-align: top;
-        }
-        
-        .info-label {
-            font-weight: bold;
-            width: 25%;
-        }
-        
-        .info-value {
-            width: 25%;
-        }
-        
-        .summary-totals {
+
+        /* Bloque de metadatos */
+        .meta {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
-        
-        .summary-totals td {
-            padding: 8px;
-            border: 1px solid #ddd;
+        .meta td {
+            padding: 4px 0;
+            vertical-align: top;
+            font-size: 10px;
+        }
+        .meta .label { font-weight: bold; width: 18%; }
+        .meta .value { width: 32%; }
+
+        /* Totales (sin colores llamativos) */
+        .totales {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 6px 0 10px 0;
+        }
+        .totales td {
+            border: 1px solid #000;
+            padding: 6px;
             text-align: center;
             font-weight: bold;
             font-size: 11px;
         }
-        
-        .summary-totals .total { background-color: #e3f2fd; }
-        .summary-totals .pendiente { background-color: #fff3cd; }
-        .summary-totals .pagado { background-color: #d4edda; }
-        
-        .data-table {
+
+        /* Repetir encabezados y controlar saltos de página */
+        thead { display: table-header-group; }
+        tfoot { display: table-footer-group; }
+        table { page-break-inside: auto; }
+        tr { page-break-inside: avoid; page-break-after: auto; }
+
+        /* Tabla: anchos consistentes y mejor ajuste */
+        table.data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            table-layout: fixed;
         }
-        
-        .data-table th,
-        .data-table td {
+        .data-table th, .data-table td {
+            border: 1px solid #000;
             padding: 6px;
-            border: 1px solid #ddd;
             text-align: left;
-            font-size: 9px;
+            vertical-align: middle;
+            font-size: 10px;
+            line-height: 1.3;
         }
-        
         .data-table th {
-            background-color: #0d6efd;
-            color: white;
-            font-weight: bold;
-            font-size: 9px;
-        }
-        
-        .data-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        
-        .estado-badge {
-            padding: 2px 6px;
-            border-radius: 3px;
-            color: white;
-            font-size: 8px;
+            background: #f5f5f5;
             font-weight: bold;
         }
-        
-        .estado-pendiente { background-color: #ffc107; color: #000; }
-        .estado-pagado { background-color: #28a745; }
-        .estado-cancelado { background-color: #dc3545; }
-        
-        .footer-info {
-            text-align: center;
-            font-size: 8px;
-            color: #666;
-            margin-top: 15px;
-            border-top: 1px solid #ddd;
-            padding-top: 8px;
-        }
-        
+
+        /* Clases por tipo de dato para legibilidad */
+        .wrap { word-break: break-word; hyphens: auto; }
+        .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .date { text-align: center; white-space: nowrap; }
+        .state { text-align: center; white-space: nowrap; }
+        .row-number { text-align: center; white-space: nowrap; }
+
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .muted { color: #555; }
+
         .no-data {
             text-align: center;
-            padding: 30px;
-            color: #666;
+            padding: 16px;
             font-style: italic;
         }
-        
-        .text-right {
-            text-align: right;
-        }
-        
-        .text-center {
+
+        .footer-info {
             text-align: center;
+            font-size: 9px;
+            margin-top: 12px;
+            border-top: 1px solid #000;
+            padding-top: 8px;
         }
+
+        /* Ajustes para impresión */
+        @media print {
+            .data-table th, .data-table td { padding: 5px; font-size: 9px; }
+            .totales td { padding: 5px; font-size: 10px; }
+            .meta td { font-size: 9px; }
+        }
+
+        /* Añadir control de ancho consistente por columna */
+        table.data-table colgroup col.col-n          { width: 5%; }
+        table.data-table colgroup col.col-estudiante { width: 27%; }
+        table.data-table colgroup col.col-cedula     { width: 12%; }
+        table.data-table colgroup col.col-curso      { width: 26%; }
+        table.data-table colgroup col.col-fecha      { width: 12%; }
+        table.data-table colgroup col.col-monto      { width: 12%; }
+        table.data-table colgroup col.col-estado     { width: 6%; }
+
+        /* Ajuste fino de tipografías para impresión */
+        .data-table th, .data-table td { font-size: 10px; }
+        .num  { text-align: right;  font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .date { text-align: center; white-space: nowrap; }
+        .state{ text-align: center; white-space: nowrap; }
+
+        /* Zebra para mejorar lectura (usando clases por compatibilidad de PDF) */
+        .row-even { background: #fafafa; }
+        .row-odd  { background: #fff; }
     </style>
 </head>
 <body>
@@ -154,94 +145,125 @@
         <h1>Academia Musical</h1>
         <h2>Reporte de Pagos</h2>
     </div>
+    <div class="separator"></div>
 
-    <div class="info-summary">
-        <div class="info-grid">
-            <div class="info-row">
-                <div class="info-cell info-label">Generado:</div>
-                <div class="info-cell info-value">{{ fecha_generacion|date:"d/m/Y H:i" }}</div>
-                <div class="info-cell info-label">Usuario:</div>
-                <div class="info-cell info-value">{{ usuario_generador.get_full_name|default:usuario_generador.username }}</div>
-            </div>
-            {% if fecha_inicio or fecha_fin %}
-            <div class="info-row">
-                <div class="info-cell info-label">Período:</div>
-                <div class="info-cell info-value">
-                    {% if fecha_inicio %}{{ fecha_inicio|date:"d/m/Y" }}{% endif %}
-                    {% if fecha_fin %} - {{ fecha_fin|date:"d/m/Y" }}{% endif %}
-                </div>
-                {% if estado_filtro %}
-                <div class="info-cell info-label">Estado:</div>
-                <div class="info-cell info-value">{{ estado_filtro }}</div>
-                {% else %}
-                <div class="info-cell info-label"></div>
-                <div class="info-cell info-value"></div>
-                {% endif %}
-            </div>
-            {% endif %}
-            <div class="info-row">
-                <div class="info-cell info-label">Registros:</div>
-                <div class="info-cell info-value">{{ count_pagos }}</div>
-                <div class="info-cell info-label"></div>
-                <div class="info-cell info-value"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Resumen de Totales -->
-    <table class="summary-totals">
+    <!-- Información esencial -->
+    <table class="meta">
         <tr>
-            <td class="total">
-                <strong>Total General</strong><br>
-                ${{ total_pagos|floatformat:2 }}
+            <td class="label">Generado:</td>
+            <td class="value">{{ fecha_generacion|date:"d/m/Y H:i" }}</td>
+            <td class="label">Usuario:</td>
+            <td class="value">{{ usuario_generador.get_full_name|default:usuario_generador.username }}</td>
+        </tr>
+        <tr>
+            <td class="label">Período:</td>
+            <td class="value">
+                {% if periodo_inicio and periodo_fin %}
+                    {{ periodo_inicio|date:"d/m/Y" }} - {{ periodo_fin|date:"d/m/Y" }}
+                {% elif periodo_inicio %}
+                    Desde {{ periodo_inicio|date:"d/m/Y" }}
+                {% elif periodo_fin %}
+                    Hasta {{ periodo_fin|date:"d/m/Y" }}
+                {% else %}-{% endif %}
             </td>
-            <td class="pagado">
-                <strong>Total Pagado</strong><br>
-                ${{ total_pagados|floatformat:2 }}
+            <td class="label">Registros:</td>
+            <td class="value">{{ count_pagos }}</td>
+        </tr>
+        <tr>
+            <td class="label">Estado:</td>
+            <td class="value" colspan="3">
+                {% if estado_filtro %}
+                    {% if estado_filtro == 'PAGADO' %}Pagados{% elif estado_filtro == 'PENDIENTE' %}Pendientes{% elif estado_filtro == 'CANCELADO' %}Cancelados{% else %}{{ estado_filtro }}{% endif %}
+                {% else %}Todos{% endif %}
             </td>
-            <td class="pendiente">
-                <strong>Total Pendiente</strong><br>
-                ${{ total_pendientes|floatformat:2 }}
-            </td>
+        </tr>
+        {% if curso_sel %}
+        <tr>
+            <td class="label">Curso:</td>
+            <td class="value" colspan="3">{{ curso_sel.nombre }}</td>
+        </tr>
+        {% endif %}
+        {% if clase_sel %}
+        <tr>
+            <td class="label">Clase:</td>
+            <td class="value" colspan="3">{{ clase_sel.curso.nombre }} - {{ clase_sel.aula }} ({{ clase_sel.hora_inicio }})</td>
+        </tr>
+        {% endif %}
+        {% if profesor_sel %}
+        <tr>
+            <td class="label">Profesor:</td>
+            <td class="value" colspan="3">{{ profesor_sel.last_name }}, {{ profesor_sel.first_name }}</td>
+        </tr>
+        {% endif %}
+        {% if query_estudiante %}
+        <tr>
+            <td class="label">Estudiante:</td>
+            <td class="value" colspan="3">{{ query_estudiante }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    <!-- Totales sin decoración -->
+    <table class="totales">
+        <tr>
+            <td>Total General<br>$ {{ total_pagos|floatformat:2|intcomma }}</td>
+            <td>Total Pagado<br>$ {{ total_pagados|floatformat:2|intcomma }}</td>
+            <td>Total Pendiente<br>$ {{ total_pendientes|floatformat:2|intcomma }}</td>
         </tr>
     </table>
 
-    <!-- Tabla de Datos -->
+    <!-- Tabla con columnas clave, ordenada y legible -->
     {% if pagos %}
-    <table class="data-table">
+    <table class="data-table" role="table" aria-label="Lista de pagos">
+        <colgroup>
+            <col class="col-n">
+            <col class="col-estudiante">
+            <col class="col-cedula">
+            <col class="col-curso">
+            <col class="col-fecha">
+            <col class="col-monto">
+            <col class="col-estado">
+        </colgroup>
         <thead>
             <tr>
-                <th style="width: 18%;">Estudiante</th>
-                <th style="width: 15%;">Curso</th>
-                <th style="width: 12%;">F. Matrícula</th>
-                <th style="width: 10%;">Monto</th>
-                <th style="width: 12%;">F. Pago</th>
-                <th style="width: 13%;">Estado</th>
-                <th style="width: 20%;">Observaciones</th>
+                <th>N°</th>
+                <th>Estudiante</th>
+                <th>Cédula</th>
+                <th>Curso</th>
+                <th>Fecha de pago</th>
+                <th>Monto</th>
+                <th>Estado</th>
             </tr>
         </thead>
         <tbody>
             {% for pago in pagos %}
-            <tr>
-                <td>{{ pago.matricula.estudiante.get_full_name }}</td>
-                <td>{{ pago.matricula.clase.curso.nombre }}</td>
-                <td class="text-center">{{ pago.matricula.fecha_matricula|date:"d/m/y" }}</td>
-                <td class="text-right">${{ pago.monto|floatformat:2 }}</td>
-                <td class="text-center">{{ pago.fecha_pago|date:"d/m/y" }}</td>
-                <td class="text-center">
-                    <span class="estado-badge {% if pago.estado == 'PAGADO' %}estado-pagado{% elif pago.estado == 'CANCELADO' %}estado-cancelado{% else %}estado-pendiente{% endif %}">
-                        {{ pago.get_estado_display }}
-                    </span>
+            <tr class="{% cycle 'row-odd' 'row-even' %}">
+                <td class="row-number">{{ forloop.counter }}</td>
+                <td class="wrap">
+                    {{ pago.matricula.estudiante.last_name }}, {{ pago.matricula.estudiante.first_name }}
                 </td>
-                <td>{{ pago.observaciones|truncatechars:35|default:"-" }}</td>
+                <td class="text-center">
+                    {{ pago.matricula.estudiante.cedula|default:"-" }}
+                </td>
+                <td class="wrap">
+                    {{ pago.matricula.clase.curso.nombre }}
+                </td>
+                <td class="date">
+                    {{ pago.fecha_pago|date:"d/m/Y" }}
+                </td>
+                <td class="num">
+                    $ {{ pago.monto|floatformat:2|intcomma }}
+                </td>
+                <td class="state">
+                    {{ pago.get_estado_display }}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% else %}
     <div class="no-data">
-        <h3>No se encontraron registros</h3>
-        <p>No hay pagos que coincidan con los filtros seleccionados.</p>
+        No se encontraron registros para los filtros seleccionados.
     </div>
     {% endif %}
 

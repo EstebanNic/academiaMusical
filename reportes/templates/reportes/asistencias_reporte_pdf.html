@@ -5,228 +5,111 @@
     <meta charset="utf-8">
     <title>Reporte de Asistencias - Academia Musical</title>
     <style>
-        @page {
-            size: A4 landscape;
-            margin: 1cm;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 9px;
-            line-height: 1.2;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .header {
-            text-align: center;
-            border-bottom: 2px solid #28a745;
-            padding-bottom: 6px;
-            margin-bottom: 12px;
-        }
-        
-        .header h1 {
-            color: #28a745;
-            font-size: 18px;
-            margin: 0 0 2px 0;
-        }
-        
-        .header h2 {
-            color: #666;
-            font-size: 12px;
-            margin: 0;
-        }
-        
-        .info-summary {
-            background-color: #f8f9fa;
-            padding: 8px;
-            border-radius: 3px;
-            margin-bottom: 12px;
-            font-size: 8px;
-        }
-        
-        .info-grid {
-            display: table;
-            width: 100%;
-        }
-        
-        .info-row {
-            display: table-row;
-        }
-        
-        .info-cell {
-            display: table-cell;
-            padding: 1px 4px;
-            vertical-align: top;
-        }
-        
-        .info-label {
-            font-weight: bold;
-            width: 20%;
-        }
-        
-        .info-value {
-            width: 20%;
-        }
-        
-        .summary-stats {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 12px;
-        }
-        
-        .summary-stats td {
-            padding: 6px;
-            border: 1px solid #ddd;
-            text-align: center;
-            font-weight: bold;
-            font-size: 9px;
-        }
-        
-        .summary-stats .presente { background-color: #d4edda; }
-        .summary-stats .tarde { background-color: #fff3cd; }
-        .summary-stats .ausente { background-color: #f8d7da; }
-        .summary-stats .justificado { background-color: #d1ecf1; }
-        
-        .attendance-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 8px;
-            font-size: 7px;
-        }
-        
-        .attendance-table th,
-        .attendance-table td {
-            padding: 3px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        
-        .attendance-table th {
-            background-color: #28a745;
-            color: white;
-            font-weight: bold;
-            font-size: 7px;
-        }
-        
-        .attendance-table .student-info {
-            text-align: left;
-            font-size: 7px;
-            max-width: 120px;
-        }
-        
-        .attendance-table .date-header {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            width: 25px;
-            font-size: 6px;
-        }
-        
-        .attendance-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        
-        .estado-cell {
-            font-size: 6px;
-            font-weight: bold;
-        }
-        
-        .estado-presente { background-color: #d4edda; color: #155724; }
-        .estado-tarde { background-color: #fff3cd; color: #856404; }
-        .estado-ausente { background-color: #f8d7da; color: #721c24; }
-        .estado-justificado { background-color: #d1ecf1; color: #0c5460; }
-        
-        .footer-info {
-            text-align: center;
-            font-size: 7px;
-            color: #666;
-            margin-top: 12px;
-            border-top: 1px solid #ddd;
-            padding-top: 6px;
-        }
-        
-        .no-data {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-            font-style: italic;
-        }
-        
-        .legend {
-            font-size: 6px;
-            margin-top: 8px;
-        }
-        
-        .legend-item {
-            display: inline-block;
-            margin-right: 15px;
-        }
-        
-        .legend-box {
-            display: inline-block;
-            width: 12px;
-            height: 8px;
-            margin-right: 3px;
-            vertical-align: middle;
+        @page { size: A4 landscape; margin: 1.2cm; }
+
+        body { font-family: Arial, sans-serif; font-size: 10px; color: #000; margin: 0; padding: 0; }
+
+        /* Encabezado sobrio */
+        .header { text-align: center; margin-bottom: 10px; }
+        .header h1 { font-size: 18px; margin: 0; }
+        .header h2 { font-size: 12px; margin: 2px 0 0 0; font-weight: normal; }
+        .separator { border-top: 1px solid #000; margin: 6px 0 10px 0; }
+
+        /* Bloque de metadatos simple */
+        .meta { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+        .meta td { padding: 3px 0; vertical-align: top; font-size: 9px; }
+        .meta .label { font-weight: bold; width: 18%; }
+        .meta .value { width: 32%; }
+
+        /* Resumen simple en gris */
+        .summary-stats { width: 100%; border-collapse: collapse; margin: 6px 0 10px 0; }
+        .summary-stats td { border: 1px solid #000; padding: 5px; text-align: center; font-weight: bold; font-size: 9px; }
+
+        /* Tabla de asistencias */
+        thead { display: table-header-group; }
+        tfoot { display: table-footer-group; }
+        table { page-break-inside: auto; }
+        tr { page-break-inside: avoid; page-break-after: auto; }
+
+        .attendance-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .attendance-table th, .attendance-table td { border: 1px solid #000; padding: 4px; text-align: center; font-size: 8px; }
+        .attendance-table th { background: #f5f5f5; font-weight: bold; }
+        .attendance-table .student-info { text-align: left; font-size: 8px; }
+        .row-even { background: #fafafa; }
+        .row-odd  { background: #fff; }
+
+        /* Estados: sin colores llamativos, solo letra */
+        .estado-cell { font-size: 8px; font-weight: bold; }
+
+        /* Leyenda minimalista */
+        .legend { font-size: 7px; margin-top: 6px; }
+        .legend-item { display: inline-block; margin-right: 12px; }
+
+        .footer-info { text-align: center; font-size: 8px; margin-top: 10px; border-top: 1px solid #000; padding-top: 6px; }
+
+        @media print {
+            .meta td { font-size: 8px; }
+            .summary-stats td { font-size: 8px; padding: 4px; }
+            .attendance-table th, .attendance-table td { font-size: 7px; padding: 3px; }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Academia Musical</h1>
-        <h2>Reporte de Asistencias por Período</h2>
+        <h2>Reporte de Asistencias</h2>
     </div>
-
-    <div class="info-summary">
-        <div class="info-grid">
-            <div class="info-row">
-                <div class="info-cell info-label">Generado:</div>
-                <div class="info-cell info-value">{{ fecha_generacion|date:"d/m/Y H:i" }}</div>
-                <div class="info-cell info-label">Usuario:</div>
-                <div class="info-cell info-value">{{ usuario_generador.get_full_name|default:usuario_generador.username }}</div>
-                <div class="info-cell info-label">Estudiantes:</div>
-                <div class="info-cell info-value">{{ total_estudiantes }}</div>
-            </div>
-            {% if fecha_inicio or fecha_fin %}
-            <div class="info-row">
-                <div class="info-cell info-label">Período:</div>
-                <div class="info-cell info-value">
-                    {% if fecha_inicio %}{{ fecha_inicio|date:"d/m/Y" }}{% endif %}
-                    {% if fecha_fin %} - {{ fecha_fin|date:"d/m/Y" }}{% endif %}
-                </div>
-                {% if clase_seleccionada %}
-                <div class="info-cell info-label">Clase:</div>
-                <div class="info-cell info-value">{{ clase_seleccionada.curso.nombre }} - {{ clase_seleccionada.aula }}</div>
-                {% else %}
-                <div class="info-cell info-label">Clase:</div>
-                <div class="info-cell info-value">Todas las clases</div>
-                {% endif %}
-                <div class="info-cell info-label">Total Días:</div>
-                <div class="info-cell info-value">{{ total_dias }}</div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
+    <div class="separator"></div>
+    <table class="meta">
+        <tr>
+            <td class="label">Generado:</td>
+            <td class="value">{{ fecha_generacion|date:"d/m/Y H:i" }}</td>
+            <td class="label">Usuario:</td>
+            <td class="value">{{ usuario_generador.get_full_name|default:usuario_generador.username }}</td>
+        </tr>
+        <tr>
+            <td class="label">Período:</td>
+            <td class="value">
+                {% if periodo_inicio %}{{ periodo_inicio|date:"d/m/Y" }}{% endif %}
+                {% if periodo_fin %} - {{ periodo_fin|date:"d/m/Y" }}{% endif %}
+            </td>
+            <td class="label">Estudiantes:</td>
+            <td class="value">{{ total_estudiantes }}</td>
+        </tr>
+        <tr>
+            <td class="label">Clase:</td>
+            <td class="value">{% if clase_seleccionada %}{{ clase_seleccionada.curso.nombre }} - {{ clase_seleccionada.aula }}{% else %}Todas{% endif %}</td>
+            <td class="label">Total Días:</td>
+            <td class="value">{{ total_dias }}</td>
+        </tr>
+        <tr>
+            <td class="label">Estado:</td>
+            <td class="value">{% if estado_filtro %}{{ estado_filtro|title }}{% else %}Todos{% endif %}</td>
+            <td class="label">Curso:</td>
+            <td class="value">{% if curso_sel %}{{ curso_sel.nombre }}{% else %}Todos{% endif %}</td>
+        </tr>
+        <tr>
+            <td class="label">Profesor:</td>
+            <td class="value">{% if profesor_sel %}{{ profesor_sel.last_name }}, {{ profesor_sel.first_name }}{% else %}Todos{% endif %}</td>
+            <td class="label">Estudiante:</td>
+            <td class="value">{% if query_estudiante %}{{ query_estudiante }}{% else %}-{% endif %}</td>
+        </tr>
+    </table>
 
     <!-- Resumen de Estadísticas -->
     <table class="summary-stats">
         <tr>
-            <td class="presente">
-                <strong>Presentes</strong><br>
-                {{ total_presentes }} ({{ porcentaje_presentes }}%)
+            <td>
+                Presentes<br>{{ total_presentes }} ({{ porcentaje_presentes }}%)
             </td>
-            <td class="tarde">
-                <strong>Tardanzas</strong><br>
-                {{ total_tardanzas }}
+            <td>
+                Tardanzas<br>{{ total_tardanzas }}
             </td>
-            <td class="ausente">
-                <strong>Ausentes</strong><br>
-                {{ total_ausentes }}
+            <td>
+                Ausentes<br>{{ total_ausentes }}
             </td>
-            <td class="justificado">
-                <strong>Justificados</strong><br>
-                {{ total_justificados }}
+            <td>
+                Justificados<br>{{ total_justificados }}
             </td>
         </tr>
     </table>
@@ -236,28 +119,26 @@
     <table class="attendance-table">
         <thead>
             <tr>
+                <th>N°</th>
                 <th class="student-info">Estudiante</th>
                 <th class="student-info">Curso</th>
                 {% for fecha in fechas_periodo %}
                 <th class="date-header">{{ fecha|date:"d/m" }}</th>
                 {% endfor %}
-                <th>% Asist.</th>
+                <th>Asist. (P+T)</th>
             </tr>
         </thead>
         <tbody>
             {% for estudiante_id, data in estudiantes_data.items %}
-            <tr>
+            <tr class="{% cycle 'row-odd' 'row-even' %}">
+                <td>{{ forloop.counter }}</td>
                 <td class="student-info">
-                    <strong>{{ data.estudiante.get_full_name }}</strong><br>
-                    <small>{{ data.estudiante.cedula }}</small>
+                    <strong>{{ data.estudiante.last_name }}, {{ data.estudiante.first_name }}</strong><br>
+                    <small>{{ data.estudiante.cedula|default:"-" }}</small>
                 </td>
                 <td class="student-info">{{ data.curso }}</td>
                 {% for fecha in fechas_periodo %}
-                <td class="estado-cell 
-                    {% if data.asistencias_por_fecha|get_item:fecha.estado == 'PRESENTE' %}estado-presente
-                    {% elif data.asistencias_por_fecha|get_item:fecha.estado == 'TARDE' %}estado-tarde
-                    {% elif data.asistencias_por_fecha|get_item:fecha.estado == 'JUSTIFICADO' %}estado-justificado
-                    {% else %}estado-ausente{% endif %}">
+                <td class="estado-cell {% with asistencia=data.asistencias_por_fecha|get_item:fecha %}{% if asistencia %}{% if asistencia.estado == 'PRESENTE' %}estado-presente{% elif asistencia.estado == 'TARDE' %}estado-tarde{% elif asistencia.estado == 'JUSTIFICADO' %}estado-justificado{% else %}estado-ausente{% endif %}{% else %}estado-ausente{% endif %}{% endwith %}">
                     {% with asistencia=data.asistencias_por_fecha|get_item:fecha %}
                         {% if asistencia %}
                             {% if asistencia.estado == 'PRESENTE' %}P
@@ -270,26 +151,7 @@
                     {% endwith %}
                 </td>
                 {% endfor %}
-                <td>
-                    {% with presentes=0 total=0 %}
-                        {% for fecha in fechas_periodo %}
-                            {% with asistencia=data.asistencias_por_fecha|get_item:fecha %}
-                                {% if asistencia %}
-                                    {% if asistencia.estado == 'PRESENTE' %}
-                                        {% with presentes=presentes|add:1 total=total|add:1 %}{% endwith %}
-                                    {% else %}
-                                        {% with total=total|add:1 %}{% endwith %}
-                                    {% endif %}
-                                {% endif %}
-                            {% endwith %}
-                        {% endfor %}
-                        {% if total > 0 %}
-                            {{ presentes|floatformat:0 }}/{{ total|floatformat:0 }}
-                        {% else %}
-                            0/0
-                        {% endif %}
-                    {% endwith %}
-                </td>
+                <td>{{ data.asistio_count }}/{{ total_dias }}</td>
             </tr>
             {% endfor %}
         </tbody>

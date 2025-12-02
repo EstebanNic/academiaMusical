@@ -21,9 +21,6 @@
                             <button type="button" class="nav-link btn btn-outline-primary mx-2 px-4 py-2 fw-bold" id="pagos-nav" onclick="cambiarVista('pagos')">
                                 <i class="fas fa-list me-2"></i>Lista de Pagos
                             </button>
-                            <button type="button" class="nav-link btn btn-outline-success mx-2 px-4 py-2 fw-bold" id="reportes-nav" onclick="cambiarVista('reportes')">
-                                <i class="fas fa-chart-bar me-2"></i>Reportes
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -207,58 +204,6 @@
                     <!-- Paginación generada por JS -->
                 </ul>
             </nav>
-        </div>
-        
-        <!-- VISTA: Reportes -->
-        <div class="vista-contenido" id="reportes">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-chart-bar me-2 text-success"></i>Reportes de Pagos</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-dollar-sign fa-2x mb-2"></i>
-                                    <h5>Total Recaudado</h5>
-                                    <h3>${{ total_recaudado|floatformat:2 }}</h3>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card bg-warning text-dark">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-clock fa-2x mb-2"></i>
-                                    <h5>Pagos Pendientes</h5>
-                                    <h3>{{ pagos_pendientes }}</h3>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card bg-info text-white">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
-                                    <h5>Pagos Completados</h5>
-                                    <h3>{{ pagos_completados }}</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4 p-3 bg-light rounded">
-                        <small class="text-muted d-block">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Información de reportes:</strong> 
-                            <ul class="mb-0 mt-2">
-                                <li>Los reportes se actualizan en tiempo real</li>
-                                <li>Puede generar facturas individuales desde la lista de pagos</li>
-                                <li>Los pagos pendientes requieren procesamiento manual</li>
-                            </ul>
-                        </small>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -604,9 +549,8 @@
             btn.classList.remove('btn-primary', 'btn-success');
             if (btn.id === 'pagos-nav') {
                 btn.classList.add('btn-outline-primary');
-            } else if (btn.id === 'reportes-nav') {
-                btn.classList.add('btn-outline-success');
             }
+            // Nota: ya no existe el botón 'reportes-nav' en este template
         });
         
         // Mostrar la vista seleccionada
@@ -622,8 +566,6 @@
             botonActivo.classList.remove('btn-outline-primary', 'btn-outline-success');
             if (vistaId === 'pagos') {
                 botonActivo.classList.add('btn-primary');
-            } else if (vistaId === 'reportes') {
-                botonActivo.classList.add('btn-success');
             }
         }
         

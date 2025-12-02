@@ -215,6 +215,14 @@
                             </h5>
                         </div>
                         <div class="card-body">
+                            <!-- NUEVO: Selector de fecha para la toma de asistencias -->
+                            <div class="mb-3">
+                                <label for="fecha_clase" class="form-label fw-semibold">
+                                    <i class="fas fa-calendar-alt me-2"></i>Fecha de asistencia
+                                </label>
+                                <input type="date" id="fecha_clase" class="form-control" value="{{ fecha_hoy }}">
+                            </div>
+
                             <!-- Filtro por código de clase -->
                             <div class="mb-3">
                                 <label for="filtroCodigoClase" class="form-label fw-semibold">
@@ -682,7 +690,7 @@ document.getElementById('modalDetalleAsistencias').addEventListener('show.bs.mod
         return;
     }
     
-    // Renderizar tabla de estudiantes y asistencias
+    // Renderizar tabla de estudiantes y asistencias (SIN columna de Observaciones)
     let html = `
         <h6>Curso: ${claseInfo.curso.nombre}</h6>
         <h6>Clase: ${claseInfo.clase.aula}</h6>
@@ -695,7 +703,6 @@ document.getElementById('modalDetalleAsistencias').addEventListener('show.bs.mod
                     <tr>
                         <th>Estudiante</th>
                         <th>Estado</th>
-                        <th>Observaciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -718,7 +725,6 @@ document.getElementById('modalDetalleAsistencias').addEventListener('show.bs.mod
                         ${asistencia.estado}
                     </span>
                 </td>
-                <td>${asistencia.observaciones}</td>
             </tr>
         `;
     });

@@ -13,6 +13,7 @@ from asistencias.models import Asistencia, EstadoAsistencia
 from datetime import datetime, date
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.cache import never_cache
 from django.db import models
 import json
 from aulas.models import Aula, Sede, Edificio, Piso
@@ -21,7 +22,17 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 
 
+@never_cache
 def login_view(request):
+    # Si ya está autenticado, redirigir según su rol y evitar volver al login
+    if request.user.is_authenticated:
+        if request.user.rol == Usuario.Rol.ADMIN:
+            return redirect('admin_dashboard')
+        elif request.user.rol == Usuario.Rol.PROFESOR:
+            return redirect('admin_profesores_dashboard')
+        elif request.user.rol == Usuario.Rol.ESTUDIANTE:
+            return redirect('estudiante_clases')
+
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -39,7 +50,11 @@ def login_view(request):
         else:
             messages.error(request, 'Usuario o contraseña incorrectos')
 
-    return render(request, 'usuarios/login.html')
+    response = render(request, 'usuarios/login.html')
+    # Instrucciones de no-cache para que el back del navegador no muestre login cacheado
+    response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response['Pragma'] = 'no-cache'
+    return response
 
 def logout_view(request):
     list(messages.get_messages(request))  # Esto borra los mensajes pendientes

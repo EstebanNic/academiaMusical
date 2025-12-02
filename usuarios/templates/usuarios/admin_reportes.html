@@ -76,6 +76,45 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
+                                <label for="curso_pagos" class="form-label fw-semibold">
+                                    <i class="fas fa-music me-2 text-primary"></i>Curso
+                                </label>
+                                <select class="form-select" id="curso_pagos" name="curso">
+                                    <option value="">Todos los cursos</option>
+                                    {% for curso in cursos %}
+                                        <option value="{{ curso.id }}">{{ curso.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="clase_pagos" class="form-label fw-semibold">
+                                    <i class="fas fa-chalkboard-teacher me-2 text-primary"></i>Clase
+                                </label>
+                                <select class="form-select" id="clase_pagos" name="clase">
+                                    <option value="">Todas las clases</option>
+                                    {% for clase in clases %}
+                                        <option value="{{ clase.id }}">{{ clase.curso.nombre }} - {{ clase.aula }} ({{ clase.hora_inicio }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="profesor_pagos" class="form-label fw-semibold">
+                                    <i class="fas fa-user-tie me-2 text-primary"></i>Profesor
+                                </label>
+                                <select class="form-select" id="profesor_pagos" name="profesor">
+                                    <option value="">Todos</option>
+                                    {% for prof in profesores %}
+                                        <option value="{{ prof.id }}">{{ prof.last_name }}, {{ prof.first_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="q_estudiante" class="form-label fw-semibold">
+                                    <i class="fas fa-user me-2 text-primary"></i>Estudiante (nombre o cédula)
+                                </label>
+                                <input type="text" class="form-control" id="q_estudiante" name="q" placeholder="Ej. Pérez o 0102030405">
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold text-muted">Vista previa del reporte</label>
                                 <div class="p-3 bg-light rounded border">
                                     <small class="text-muted">
@@ -136,6 +175,17 @@
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
+                                <label for="curso_asistencias" class="form-label fw-semibold">
+                                    <i class="fas fa-music me-2 text-success"></i>Curso
+                                </label>
+                                <select class="form-select" id="curso_asistencias" name="curso">
+                                    <option value="">Todos los cursos</option>
+                                    {% for curso in cursos %}
+                                        <option value="{{ curso.id }}">{{ curso.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <label for="clase_asistencias" class="form-label fw-semibold">
                                     <i class="fas fa-chalkboard me-2 text-success"></i>Clase Específica
                                 </label>
@@ -145,6 +195,17 @@
                                         <option value="{{ clase.id }}">
                                             {{ clase.curso.nombre }} - {{ clase.aula }} ({{ clase.hora_inicio }})
                                         </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="profesor_asistencias" class="form-label fw-semibold">
+                                    <i class="fas fa-user-tie me-2 text-success"></i>Profesor
+                                </label>
+                                <select class="form-select" id="profesor_asistencias" name="profesor">
+                                    <option value="">Todos</option>
+                                    {% for prof in profesores %}
+                                        <option value="{{ prof.id }}">{{ prof.last_name }}, {{ prof.first_name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -159,6 +220,12 @@
                                     <option value="AUSENTE">Ausentes</option>
                                     <option value="JUSTIFICADO">Justificados</option>
                                 </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="q_asistencias" class="form-label fw-semibold">
+                                    <i class="fas fa-user me-2 text-success"></i>Estudiante (nombre o cédula)
+                                </label>
+                                <input type="text" class="form-control" id="q_asistencias" name="q" placeholder="Ej. Pérez o 0102030405">
                             </div>
                         </div>
                         
@@ -180,45 +247,7 @@
         </div>
     </div>
 
-    <!-- Información adicional -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body bg-light">
-                    <h6 class="fw-bold mb-3">
-                        <i class="fas fa-info-circle me-2 text-info"></i>
-                        Información sobre los Reportes
-                    </h6>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <ul class="list-unstyled mb-0">
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    Los reportes se generan en formato PDF para fácil distribución e impresión
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    Puede aplicar filtros por fechas, estados y clases según el tipo de reporte
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <ul class="list-unstyled mb-0">
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    Los archivos PDF se abren automáticamente en una nueva pestaña
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    Todos los reportes incluyen estadísticas resumidas y la fecha de generación
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 </div>
 
 <style>

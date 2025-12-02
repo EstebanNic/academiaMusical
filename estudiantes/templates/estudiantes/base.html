@@ -413,6 +413,12 @@
                 aria-labelledby="navbarDropdownEstudiante"
               >
                 <li>
+                  <a class="dropdown-item" href="{% url 'estudiante_cambiar_password' %}">
+                    <i class="fas fa-key me-2"></i>
+                    Cambiar contraseña
+                  </a>
+                </li>
+                <li>
                   <form method="POST" action="{% url 'logout' %}" style="margin: 0">
                     {% csrf_token %}
                     <button type="submit" class="dropdown-item">

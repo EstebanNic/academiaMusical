@@ -4,19 +4,23 @@
     <meta charset="utf-8">
     <title>Reporte de Asistencias - Profesor</title>
     <style>
-        body { font-family: Arial, sans-serif; font-size: 9px; color: #333; margin: 0; padding: 0; }
-        .header {
-            background: #0d6efd;
-            color: #fff;
-            padding: 10px 0 6px 0;
-            text-align: center;
-            border-bottom: 2px solid #0b5ed7;
+        @page {
+            size: A4 landscape;
+            margin: 12mm;
         }
-        .header h2 { margin: 0; font-size: 16px; }
-        .header h4 { margin: 0; font-size: 10px; font-weight: normal; }
+        body { font-family: Arial, sans-serif; font-size: 9px; color: #222; margin: 0; padding: 0; }
+        .header {
+            background: #f2f2f2;
+            color: #222;
+            padding: 8px 0 6px 0;
+            text-align: center;
+            border-bottom: 1px solid #ccc;
+        }
+        .header h2 { margin: 0; font-size: 15px; }
+        .header h4 { margin: 0; font-size: 9px; font-weight: normal; color: #555; }
         .info-table {
             width: 100%;
-            margin: 8px 0 12px 0;
+            margin: 8px 0 10px 0;
             border-collapse: collapse;
         }
         .info-table td {
@@ -24,82 +28,50 @@
             font-size: 9px;
             border: none;
         }
+        .chunk-title { font-size: 9px; color: #444; margin: 6px 0 4px 0; }
         .main-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 10px;
             table-layout: fixed;
+            page-break-inside: avoid;
         }
         .main-table th, .main-table td {
             border: 1px solid #bbb;
             padding: 3px 2px;
             text-align: center;
-            font-size: 8px;
+            font-size: 7.5px;
             vertical-align: middle;
             word-break: break-word;
             overflow-wrap: break-word;
         }
-        .main-table th {
-            background: #e3f0ff;
-            color: #0d6efd;
-            font-weight: bold;
-        }
-        .main-table .estudiante-cell {
-            text-align: left;
-            font-weight: bold;
-            background: #f8f9fa;
-            max-width: 90px;
-        }
-        .main-table .cedula-cell {
-            max-width: 60px;
-            font-size: 8px;
-        }
-        .main-table .horario-cell {
-            max-width: 60px;
-            font-size: 8px;
-        }
-        .main-table .clase-cell {
-            max-width: 70px;
-            font-size: 8px;
-        }
-        .main-table .codigo-cell {
-            font-size: 8px;
-            background: #f0f0f0;
-            max-width: 40px;
-        }
-        .main-table .fecha-cell {
-            max-width: 28px;
-            font-size: 7px;
-        }
-        .estado-P { background: #d4edda; color: #155724; }
-        .estado-A { background: #f8d7da; color: #721c24; }
-        .estado-T { background: #fff3cd; color: #856404; }
-        .estado-J { background: #d1ecf1; color: #0c5460; }
-        .estado-Q { background: #f0f0f0; color: #888; }
+        .main-table thead th { background: #efefef; color: #222; font-weight: bold; }
+        .estudiante-cell { text-align: left; font-weight: bold; background: #fafafa; width: 22%; }
+        .cedula-cell { width: 10%; }
+        .horario-cell { width: 12%; }
+        .clase-cell { width: 20%; }
+        .codigo-cell { width: 9%; background: #f7f7f7; }
+        .fecha-cell { width: 26px; font-size: 7px; }
+        .estado-P { background: #e8f5e9; color: #1b5e20; }
+        .estado-A { background: #fdecea; color: #7f1d1d; }
+        .estado-T { background: #fff8e1; color: #7c6f00; }
+        .estado-J { background: #e8f4f8; color: #0a4b5f; }
+        .estado-Q { background: #f5f5f5; color: #888; }
         .footer {
             text-align: center;
             font-size: 8px;
             color: #666;
             border-top: 1px solid #bbb;
             padding-top: 6px;
-            margin-top: 10px;
+            margin-top: 6px;
         }
-        .legend {
-            font-size: 8px;
-            margin-top: 8px;
-        }
-        .legend span {
-            display: inline-block;
-            width: 12px;
-            height: 8px;
-            margin-right: 3px;
-            vertical-align: middle;
-        }
-        .legend .P { background: #d4edda; border: 1px solid #155724;}
-        .legend .A { background: #f8d7da; border: 1px solid #721c24;}
-        .legend .T { background: #fff3cd; border: 1px solid #856404;}
-        .legend .J { background: #d1ecf1; border: 1px solid #0c5460;}
-        .legend .Q { background: #f0f0f0; border: 1px solid #888;}
+        .legend { font-size: 8px; margin-top: 6px; }
+        .legend span { display: inline-block; width: 12px; height: 8px; margin-right: 3px; vertical-align: middle; }
+        .legend .P { background: #e8f5e9; border: 1px solid #1b5e20;}
+        .legend .A { background: #fdecea; border: 1px solid #7f1d1d;}
+        .legend .T { background: #fff8e1; border: 1px solid #7c6f00;}
+        .legend .J { background: #e8f4f8; border: 1px solid #0a4b5f;}
+        .legend .Q { background: #f5f5f5; border: 1px solid #888;}
     </style>
 </head>
 <body>
@@ -107,70 +79,75 @@
         <h2>Academia Musical</h2>
         <h4>Reporte de Asistencias por Profesor</h4>
     </div>
-    <table class="info-table">
+    <table class="info-table" style="width: 100%;">
         <tr>
-            <td><strong>Profesor:</strong></td>
-            <td>{{ profesor.get_full_name }}</td>
-            <td><strong>Fecha:</strong></td>
-            <td>{{ fecha_generacion|date:"d/m/Y" }}</td>
+            <td style="white-space: nowrap;">
+                <strong>Profesor:</strong> {{ profesor.get_full_name }}
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <strong>Fecha:</strong> {{ fecha_generacion|date:"d/m/Y" }}
+            </td>
         </tr>
         <tr>
-            <td><strong>Clase:</strong></td>
-            <td>{% if tabla_asistencias.0.clase %}{{ tabla_asistencias.0.clase.curso.nombre }}{% else %}-{% endif %}</td>
-            <td><strong>Período:</strong></td>
-            <td>{{ fecha_inicio }} - {{ fecha_fin }}</td>
-        </tr>
-        <tr>
-            <td><strong>Código:</strong></td>
-            <td>{% if tabla_asistencias.0.clase %}{{ tabla_asistencias.0.clase.codigo }}{% else %}-{% endif %}</td>
-            <td></td>
-            <td></td>
+            <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <strong>Clase:</strong> {% if tabla_asistencias.0.clase %}{{ tabla_asistencias.0.clase.curso.nombre }}{% else %}-{% endif %}
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <strong>Período:</strong> {{ fecha_inicio }} - {{ fecha_fin }}
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <strong>Código:</strong> {% if tabla_asistencias.0.clase %}{{ tabla_asistencias.0.clase.codigo }}{% else %}-{% endif %}
+            </td>
         </tr>
     </table>
-    <table class="main-table">
-        <thead>
-            <tr>
-                <th class="estudiante-cell">Estudiante</th>
-                <th class="cedula-cell">Cédula</th>
-                <th class="horario-cell">Horario</th>
-                <th class="clase-cell">Clase</th>
-                <th class="codigo-cell">Código</th>
-                {% for fecha in fechas_rango %}
-                    <th class="fecha-cell">{{ fecha|date:"d-m" }}</th>
+        {% if tablas_por_chunk %}
+                {% for tabla in tablas_por_chunk %}
+                        <div class="chunk-title">
+                                Rango {{ forloop.counter }}: {{ tabla.fechas.0|date:"d/m" }} - {{ tabla.fechas|last|date:"d/m" }}
+                        </div>
+                        <table class="main-table">
+                                <thead>
+                                        <tr>
+                                                <th class="estudiante-cell">Estudiante</th>
+                                                <th class="cedula-cell">Cédula</th>
+                                                <th class="horario-cell">Horario</th>
+                                                <th class="clase-cell">Clase</th>
+                                                <th class="codigo-cell">Código</th>
+                                                {% for fecha in tabla.fechas %}
+                                                        <th class="fecha-cell">{{ fecha|date:"d-m" }}</th>
+                                                {% endfor %}
+                                        </tr>
+                                </thead>
+                                <tbody>
+                                        {% for fila in tabla.filas %}
+                                        <tr>
+                                                <td class="estudiante-cell">{{ fila.estudiante.get_full_name }}</td>
+                                                <td class="cedula-cell">{{ fila.estudiante.cedula }}</td>
+                                                <td class="horario-cell">{{ fila.clase.hora_inicio|time:"H:i" }}-{{ fila.clase.hora_fin|time:"H:i" }}</td>
+                                                <td class="clase-cell">{{ fila.clase.curso.nombre }}</td>
+                                                <td class="codigo-cell">{{ fila.clase.codigo }}</td>
+                                                {% for asistencia in fila.asistencias %}
+                                                    {% if asistencia %}
+                                                        {% if asistencia.estado == 'PRESENTE' %}
+                                                            <td class="estado-P fecha-cell">P</td>
+                                                        {% elif asistencia.estado == 'AUSENTE' %}
+                                                            <td class="estado-A fecha-cell">A</td>
+                                                        {% elif asistencia.estado == 'TARDE' %}
+                                                            <td class="estado-T fecha-cell">T</td>
+                                                        {% elif asistencia.estado == 'JUSTIFICADO' %}
+                                                            <td class="estado-J fecha-cell">J</td>
+                                                        {% else %}
+                                                            <td class="estado-Q fecha-cell">?</td>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <td class="estado-Q fecha-cell">-</td>
+                                                    {% endif %}
+                                                {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                                </tbody>
+                        </table>
                 {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for fila in tabla_asistencias %}
-            <tr>
-                <td class="estudiante-cell">{{ fila.estudiante.get_full_name }}</td>
-                <td class="cedula-cell">{{ fila.estudiante.cedula }}</td>
-                <td class="horario-cell">
-                  {{ fila.clase.hora_inicio|time:"H:i" }}-{{ fila.clase.hora_fin|time:"H:i" }}
-                </td>
-                <td class="clase-cell">{{ fila.clase.curso.nombre }}</td>
-                <td class="codigo-cell">{{ fila.clase.codigo }}</td>
-                {% for asistencia in fila.asistencias %}
-                  {% if asistencia %}
-                    {% if asistencia.estado == 'PRESENTE' %}
-                      <td class="estado-P fecha-cell">P</td>
-                    {% elif asistencia.estado == 'AUSENTE' %}
-                      <td class="estado-A fecha-cell">A</td>
-                    {% elif asistencia.estado == 'TARDE' %}
-                      <td class="estado-T fecha-cell">T</td>
-                    {% elif asistencia.estado == 'JUSTIFICADO' %}
-                      <td class="estado-J fecha-cell">J</td>
-                    {% else %}
-                      <td class="estado-Q fecha-cell">?</td>
-                    {% endif %}
-                  {% else %}
-                    <td class="estado-Q fecha-cell">-</td>
-                  {% endif %}
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        {% else %}
+                <p style="font-size:9px; color:#666;">No hay datos para mostrar en el período seleccionado.</p>
+        {% endif %}
     <div class="legend">
         <strong>Leyenda:</strong>
         <span class="P"></span> P = Presente

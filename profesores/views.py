@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from horarios.models import Horario
 from matriculas.models import Matricula
 from pagos.models import Pago, EstadoPago
@@ -12,6 +14,41 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 import io
+
+@login_required
+def profesor_perfil(request):
+    # Solo permite acceso a usuarios con rol PROFESOR
+    if not hasattr(request.user, 'rol') or request.user.rol != 'PROFESOR':
+        return render(request, 'profesores/acceso_denegado.html', status=403)
+    total_clases = Horario.objects.filter(profesor=request.user).count()
+    total_asistencias = Asistencia.objects.filter(clase__profesor=request.user).count()
+    return render(request, 'profesores/profesor_perfil.html', {
+        'active_tab': 'perfil',
+        'total_clases': total_clases,
+        'total_asistencias': total_asistencias,
+    })
+
+@login_required
+def profesor_cambiar_password(request):
+    # Solo permite acceso a usuarios con rol PROFESOR
+    if not hasattr(request.user, 'rol') or request.user.rol != 'PROFESOR':
+        return render(request, 'profesores/acceso_denegado.html', status=403)
+    if request.method == 'POST':
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            return render(request, 'profesores/cambiar_password.html', {
+                'form': PasswordChangeForm(user=request.user),
+                'success': True,
+                'active_tab': 'perfil'
+            })
+    else:
+        form = PasswordChangeForm(user=request.user)
+    return render(request, 'profesores/cambiar_password.html', {
+        'form': form,
+        'active_tab': 'perfil'
+    })
 
 @login_required
 def admin_profesores_dashboard(request):
@@ -186,8 +223,13 @@ def profe_reportes_pdf(request):
             asistencias_por_estudiante[est_id] = {}
         asistencias_por_estudiante[est_id][asistencia.fecha] = asistencia
 
+    # Ordenamiento consistente por nombre
+    estudiantes_ordenados = sorted(list(estudiantes_dict.values()), key=lambda u: (u.last_name or "", u.first_name or ""))
+
+    # Estructura clásica (no usada por la plantilla nueva, pero mantenida por compatibilidad)
     tabla_asistencias = []
-    for est_id, estudiante in estudiantes_dict.items():
+    for estudiante in estudiantes_ordenados:
+        est_id = estudiante.id
         fila = {
             'estudiante': estudiante,
             'asistencias': []
@@ -198,8 +240,32 @@ def profe_reportes_pdf(request):
         fila['clase'] = asistencias[0].clase if asistencias else None
         tabla_asistencias.append(fila)
 
+    # Partir en bloques de fechas para evitar tablas demasiado anchas
+    chunk_size = 14
+    fechas_chunks = [fechas_rango[i:i + chunk_size] for i in range(0, len(fechas_rango), chunk_size)] if fechas_rango else []
+    tablas_por_chunk = []
+    for fc in fechas_chunks:
+        filas_chunk = []
+        for estudiante in estudiantes_ordenados:
+            est_id = estudiante.id
+            asist_list = []
+            for f in fc:
+                asist_list.append(asistencias_por_estudiante.get(est_id, {}).get(f))
+            filas_chunk.append({
+                'estudiante': estudiante,
+                'clase': asistencias[0].clase if asistencias else None,
+                'asistencias': asist_list,
+            })
+        tablas_por_chunk.append({
+            'fechas': fc,
+            'filas': filas_chunk,
+        })
+
     context = {
         'tabla_asistencias': tabla_asistencias,
+        'tablas_por_chunk': tablas_por_chunk,
+        'fechas_chunks': fechas_chunks,
+        'chunk_size': chunk_size,
         'fechas_rango': fechas_rango,
         'fecha_inicio': fecha_inicio,
         'fecha_fin': fecha_fin,
@@ -215,6 +281,7 @@ def profe_reportes_pdf(request):
     if not pdf.err:
         response = HttpResponse(result.getvalue(), content_type='application/pdf')
         filename = f"reporte_asistencias_profesor_{date.today().strftime('%Y%m%d')}.pdf"
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        # Mostrar en el navegador (vista previa) y no descargar automáticamente
+        response['Content-Disposition'] = f'inline; filename="{filename}"'
         return response
     return HttpResponse('Error al generar el PDF')

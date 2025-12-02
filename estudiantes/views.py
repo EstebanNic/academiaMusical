@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from asistencias.models import Asistencia
 from datetime import date, timedelta
 
@@ -56,5 +58,24 @@ def estudiante_clases(request):
 @login_required
 def estudiante_perfil(request):
     return render(request, 'estudiantes/estudiante_perfil.html', {
+        'active_tab': 'perfil'
+    })
+
+@login_required
+def estudiante_cambiar_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            return render(request, 'estudiantes/cambiar_password.html', {
+                'form': PasswordChangeForm(user=request.user),
+                'success': True,
+                'active_tab': 'perfil'
+            })
+    else:
+        form = PasswordChangeForm(user=request.user)
+    return render(request, 'estudiantes/cambiar_password.html', {
+        'form': form,
         'active_tab': 'perfil'
     })

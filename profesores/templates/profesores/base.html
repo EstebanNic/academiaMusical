@@ -386,6 +386,14 @@
                 <i class="fas fa-clipboard-check me-2"></i>Asistencias
               </a>
             </li>
+            <li class="nav-item">
+              <a
+                class="nav-link {% if active_tab == 'perfil' %}active{% endif %}"
+                href="{% url 'profesor_perfil' %}"
+              >
+                <i class="fas fa-user me-2"></i>Perfil
+              </a>
+            </li>
           </ul>
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             <li class="nav-item dropdown">
@@ -404,6 +412,12 @@
                 class="dropdown-menu dropdown-menu-end"
                 aria-labelledby="navbarDropdownProfesor"
               >
+                <li>
+                  <a class="dropdown-item" href="{% url 'profesor_cambiar_password' %}">
+                    <i class="fas fa-key me-2"></i>
+                    Cambiar contraseña
+                  </a>
+                </li>
                 <li>
                   <form method="POST" action="{% url 'logout' %}" style="margin: 0">
                     {% csrf_token %}
